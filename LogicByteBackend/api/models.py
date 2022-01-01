@@ -16,10 +16,12 @@ class UserProfile(models.Model):
 
 
 class Question(models.Model):
-    pass
-    #
-    # Define Question model here
-    #
+    question_title = models.CharField(max_length = 100)
+    question_description = models.TextField()
+    question_tags = models.TextField()
+
+    def __str__(self):
+        return self.question_title
 
 
 class Solution(models.Model):
