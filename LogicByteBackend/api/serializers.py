@@ -10,12 +10,14 @@ class UserProfileSerializer(ModelSerializer):
         model = UserProfile
         fields = ['id', 'user', 'num_points', 'year_group', 'class_name', 'created_questions', 'saved_questions']
 
+
 class QuestionSerializer(ModelSerializer):
     class Meta:
         model = Question
-        fields = ['id','question_title', 'question_description', 'question_tags']
+        fields = ['id', 'question_title', 'question_description', 'question_tags']
+
 
 class SolutionSerializer(ModelSerializer):
     class Meta:
         model = Solution
-        fields = ['id', 'user_profile', 'solution', 'date_modified']
+        fields = ['id', 'user_profile', 'solution', 'date_modified', 'question']

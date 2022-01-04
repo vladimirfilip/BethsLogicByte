@@ -16,7 +16,7 @@ class UserProfile(models.Model):
 
 
 class Question(models.Model):
-    question_title = models.CharField(max_length = 100)
+    question_title = models.CharField(max_length=100)
     question_description = models.TextField()
     question_tags = models.TextField()
     
@@ -25,10 +25,10 @@ class Question(models.Model):
 
 
 class Solution(models.Model):
-    user_profile = models.OneToOneField(UserProfile, on_delete = models.SET_NULL, null = True)
-    question = models.ForeignKey(Question, on_delete = models.CASCADE, null = True)
-    solution = models.TextField(null = True)
-    date_modified = models.DateTimeField(auto_now_add = True)
+    user_profile = models.OneToOneField(UserProfile, on_delete=models.SET_NULL, null=True)
+    question = models.OneToOneField(Question, on_delete=models.CASCADE, null=True)
+    solution = models.TextField(null=True)
+    date_modified = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"[SOL] {self.user_profile}/{self.question}/{self.date_modified.strftime('%Y/%m/%d %H:%M:%S')}"
