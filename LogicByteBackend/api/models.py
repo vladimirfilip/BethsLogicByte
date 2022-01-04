@@ -10,6 +10,7 @@ class UserProfile(models.Model):
     num_points = models.IntegerField(default=0)
     year_group = models.CharField(max_length=10)
     class_name = models.CharField(max_length=100)
+    email_address = models.EmailField(max_length=50, null=True)
 
     def __str__(self):
         return self.user.username
