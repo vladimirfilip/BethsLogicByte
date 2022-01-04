@@ -8,4 +8,6 @@ urlpatterns = [
     path("api_profiles/<str:field_name>=<str:field_value>", UserProfileByField.as_view()),
     path("api_questions/", QuestionList.as_view()),
     path("api_questions/<int:id>/", QuestionDetails.as_view()),
+    path("api_questions/<int:question_id>/solutions/", SolutionList.as_view()),
+    path("api_questions/<int:question_id>/solutions/<int:solution_id>/", SolutionDetails.as_view()),
 ]

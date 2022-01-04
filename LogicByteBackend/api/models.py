@@ -19,16 +19,19 @@ class Question(models.Model):
     question_title = models.CharField(max_length = 100)
     question_description = models.TextField()
     question_tags = models.TextField()
-
+    
     def __str__(self):
         return self.question_title
 
 
 class Solution(models.Model):
-    pass
-    #
-    # Define Solution model here
-    #
+    user_profile = models.OneToOneField(UserProfile, on_delete = models.SET_NULL, null = True)
+    question = models.ForeignKey(Question, on_delete = models.CASCADE, null = True)
+    solution = models.TextField(null = True)
+    date_modified = models.DateTimeField(auto_now_add = True)
+
+    def __str__(self):
+        return f"[SOL] {self.user_profile}/{self.question}/{self.date_modified.strftime('%Y/%m/%d %H:%M:%S')}"
 
 
 #
