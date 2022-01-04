@@ -1,7 +1,7 @@
 from .models import UserProfile, Solution, Question
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
-from .serializers import *
+from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSerializer
 from django.contrib.auth.models import User
 
 
@@ -12,7 +12,7 @@ class UserProfileList(generics.GenericAPIView, mixins.ListModelMixin, mixins.Cre
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
-    def get(self, request, field_name=None, field_value=None):
+    def get(self, request):
         return self.list(request)
 
     def post(self, request):
