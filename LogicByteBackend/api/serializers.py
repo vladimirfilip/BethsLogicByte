@@ -8,7 +8,8 @@ class UserProfileSerializer(ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'user', 'num_points', 'year_group', 'class_name', 'created_questions', 'saved_questions']
+        fields = ['id', 'user', 'num_points', 'year_group', 'class_name', 'created_questions', 'saved_questions',
+                  'email_address']
 
 
 class QuestionSerializer(ModelSerializer):
