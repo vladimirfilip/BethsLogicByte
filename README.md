@@ -1,6 +1,6 @@
-# Welcome to _Beths LogicByte Backend_!
-
-### To run the server
+# Welcome to _Beths LogicByte_!
+## Backend ##
+### To run Django server
 Run the following commands in cmd:
 
 `cd LogicByteBackend`
