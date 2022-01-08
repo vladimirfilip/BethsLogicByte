@@ -1,3 +1,5 @@
 
+.idea
+.vscode
 *.pyc
 *.sqlite3

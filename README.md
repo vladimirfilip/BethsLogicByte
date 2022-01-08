@@ -1,27 +1,14 @@
-# Welcome to _Beths LogicByte_!
-## Backend ##
-### To run Django server
-Run the following commands in cmd:
+<div align="center">
 
-`cd LogicByteBackend`
+# Beths _LogicByte_
 
-`python manage.py runserver`
+<strong>Olympiad preparation made easy</strong>
 
+</div>
 
-### When pulling the repo
+## Structure
 
-Remember to run the following command afterwards:
-
-`pip install -r requirements.txt`
-
-which will make sure that you have all the dependencies necessary.
-
-### If making any changes to models
-
-Go to terminal and run the following commands:
-
-`cd LogicByteBackend`
-
-`python manage.py makemigrations`
-
-`python manage.py migrate`
+| Codebase                      |  Description   |
+| :---------------------------- | :------------: |
+| [frontend](LogicByteFrontend) | React Frontend |
+| [backend](LogicByteBackend)   | Django Backend |
