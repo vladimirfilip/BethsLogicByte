@@ -1,14 +1,13 @@
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
-from .models import UserProfile, Solution, Question
+from .models import UserProfile, Solution, Question, SavedQuestion
 
 
 class UserProfileSerializer(ModelSerializer):
-    created_questions = PrimaryKeyRelatedField(many=True, read_only=True)
     saved_questions = PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'user', 'num_points', 'year_group', 'class_name', 'created_questions', 'saved_questions',
+        fields = ['id', 'user', 'num_points', 'year_group', 'class_name', 'saved_questions',
                   'email_address']
 
 
@@ -22,3 +21,9 @@ class SolutionSerializer(ModelSerializer):
     class Meta:
         model = Solution
         fields = ['id', 'user_profile', 'solution', 'date_modified', 'question']
+
+
+class SavedQuestionSerializer(ModelSerializer):
+    class Meta:
+        model = SavedQuestion
+        fields = ['question', 'user']

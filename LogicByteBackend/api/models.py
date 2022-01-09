@@ -36,14 +36,9 @@ class Solution(models.Model):
 
 
 #
-# These are needed to allow the api to distinguish between created questions and saved questions
+# These are needed to allow the api to distinguish between questions and saved questions
 # that are stored in the UserProfile model
 #
-class CreatedQuestion(models.Model):
-    creator = models.ForeignKey(UserProfile, related_name="created_questions", on_delete=models.CASCADE)
-    question = models.OneToOneField(Question, on_delete=models.CASCADE)
-
-
 class SavedQuestion(models.Model):
     user = models.ForeignKey(UserProfile, related_name="saved_questions", on_delete=models.CASCADE)
     question = models.OneToOneField(Question, on_delete=models.CASCADE)
