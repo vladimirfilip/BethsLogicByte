@@ -1,7 +1,7 @@
-from .models import UserProfile, Solution, Question
+from .models import UserProfile, Solution, Question, SavedQuestion
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
-from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSerializer
+from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSerializer, SavedQuestionSerializer
 from django.contrib.auth.models import User
 
 
@@ -19,7 +19,7 @@ class UserProfileList(generics.GenericAPIView, mixins.ListModelMixin, mixins.Cre
         return self.create(request)
 
 
-class UserProfileByField(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+class UserProfileDetails(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                          mixins.DestroyModelMixin):
     #
     # Used for accessing, editing or deleting a UserProfileModel based on the value of one of its fields,
@@ -166,3 +166,40 @@ class SolutionDetails(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins
             solution.delete()
             return Response(status=status.HTTP_204_NO_CONTENT, data=None)
         return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SavedQuestionList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
+    queryset = SavedQuestion.objects.all()
+    serializer_class = SavedQuestionSerializer
+
+    def get(self, request):
+        return self.list(request)
+
+    def post(self, request):
+        return self.create(request)
+
+
+class SavedQuestionDetails(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                           mixins.DestroyModelMixin):
+    queryset = SavedQuestion.objects.all()
+    serializer_class = SavedQuestionSerializer
+
+    @staticmethod
+    def get_saved_question(id):
+        return SavedQuestion.objects.filter(id=id).first()
+
+    def get(self, request, id):
+        return Response(self.get_serializer(self.get_saved_question(id)).data)
+
+    def put(self, request, id):
+        saved_question = self.get_saved_question(id)
+        serializer = SavedQuestionSerializer(saved_question, request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id):
+        saved_question = self.get_saved_question(id)
+        saved_question.delete()
+        return Response(data=None, status=HTTP_204_NO_CONTENT)
