@@ -5,12 +5,10 @@ from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSeri
 from django.contrib.auth.models import User
 
 
-class UserProfileList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
-    #
-    # Used for accessing all user profiles and adding one
-    #
-    queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+class GenericListView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
+    def __init__(self, queryset, serializer_class):
+        self.queryset = queryset
+        self.serializer_class = serializer_class
 
     def get(self, request):
         return self.list(request)
@@ -19,187 +17,93 @@ class UserProfileList(generics.GenericAPIView, mixins.ListModelMixin, mixins.Cre
         return self.create(request)
 
 
-class UserProfileDetails(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+class GenericDetailsView(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                          mixins.DestroyModelMixin):
-    #
-    # Used for accessing, editing or deleting a UserProfileModel based on the value of one of its fields,
-    # allowing the client to access user profiles based on class name, year group, username etc.
-    #
-    queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+    def __init__(self, queryset, serializer_class):
+        self.queryset = queryset
+        self.serializer_class = serializer_class
+
+    def access(self, **kwargs):
+        field_name, field_value = tuple(kwargs.values())
+        return self.queryset.filter(**{field_name: field_value})
+
+    def get(self, request, **kwargs):
+        model_instances = self.access(**kwargs)
+        if model_instances.count() <= 1:
+            serialized_data = self.get_serializer(model_instances.first()).data
+        else:
+            serialized_data = self.get_serializer(model_instances, many=True).data
+        return Response(serialized_data)
+
+    def put(self, request, **kwargs):
+        model_instances = self.access(**kwargs)
+        if model_instances.count() <= 1:
+            serializer = self.get_serializer(model_instances.first(), request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, *args, **kwargs):
+        model_instances = self.access(**kwargs)
+        if model_instances.count() <= 1:
+            model_instances.first().delete()
+            return Response(status=status.HTTP_204_NO_CONTENT, data=None)
+        return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileList(GenericListView):
+    def __init__(self):
+        super().__init__(UserProfile.objects.all(), UserProfileSerializer)
+
+
+class UserProfileDetails(GenericDetailsView):
+    def __init__(self):
+        super().__init__(UserProfile.objects.all(), UserProfileSerializer)
 
     @staticmethod
-    def get_user_profile(**kwargs):
+    def access(**kwargs):
         field_name, field_value = tuple(kwargs.values())
         if field_name in ["username"]:
             user = User.objects.filter(**{field_name: field_value}).first()
             field_name, field_value = "user", user
         return UserProfile.objects.filter(**{field_name: field_value})
 
-    def get(self, request, **kwargs):
-        user_profile = self.get_user_profile(**kwargs)
-        if user_profile.count() <= 1:
-            user_profile = user_profile.first()
-            serialized_data = self.get_serializer(user_profile).data
-        else:
-            serialized_data = self.get_serializer(user_profile, many=True).data
-        return Response(serialized_data)
 
-    def put(self, request, **kwargs):
-        user_profile = self.get_user_profile(**kwargs)
-        if user_profile.count() <= 1:
-            user_profile = user_profile.first()
-            serializer = UserProfileSerializer(user_profile, request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, **kwargs):
-        user_profile = self.get_user_profile(**kwargs)
-        if user_profile.count() <= 1:
-            user_profile = user_profile.first()
-            user_profile.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT, data=None)
-        return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+class QuestionList(GenericListView):
+    def __init__(self):
+        super().__init__(Question.objects.all(), QuestionSerializer)
 
 
-class QuestionList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
-    # Used to access all questions and adding one
-    queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
-
-    def get(self, request):
-        return self.list(request)
-
-    def post(self, request):
-        return self.create(request)
+class QuestionDetails(GenericDetailsView):
+    def __init__(self):
+        super().__init__(Question.objects.all(), QuestionSerializer)
 
 
-class QuestionDetails(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                      mixins.DestroyModelMixin):
-    queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
+class SolutionList(GenericListView):
+    def __init__(self):
+        super().__init__(Solution.objects.all(), SolutionSerializer)
+
+
+class SolutionDetails(GenericDetailsView):
+    def __init__(self):
+        super().__init__(Solution.objects.all(), SolutionSerializer)
 
     @staticmethod
-    def get_questions(**kwargs):
-        field_name, field_value = tuple(kwargs.values())
-        return Question.objects.filter(**{field_name: field_value})
-
-    def get(self, request, **kwargs):
-        question = self.get_questions(**kwargs).first()
-        serialized_data = self.get_serializer(question).data
-        return Response(serialized_data)
-
-    def put(self, request, **kwargs):
-        questions = self.get_questions(**kwargs)
-        if questions.count() <= 1:
-            question = questions.first()
-            serializer = QuestionSerializer(question, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, **kwargs):
-        questions = self.get_questions(**kwargs)
-        if questions.count() <= 1:
-            question = questions.first()
-            question.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT, data=None)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class SolutionList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
-    # Not yet working properly. Shows solutions for all questions rather than the particular question and you can only
-    # post to a specific question from the admin page
-
-    queryset = Solution.objects.all()
-    serializer_class = SolutionSerializer
-
-    def get(self, request):
-        return self.list(request)
-
-    def post(self, request):
-        return self.create(request)
-
-
-class SolutionDetails(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                      mixins.DestroyModelMixin):
-    queryset = Solution.objects.all()
-    serializer_class = SolutionSerializer
-
-    @staticmethod
-    def get_solutions(**kwargs):
+    def access(**kwargs):
         field_name, field_value = tuple(kwargs.values())
         if field_name == "question_id":
             question = Question.objects.filter(id=field_value).first()
             field_name, field_value = 'question', question
         return Solution.objects.filter(**{field_name: field_value})
 
-    def get(self, request, **kwargs):
-        solutions = self.get_solutions(**kwargs)
-        if solutions.count() <= 1:
-            solution = solutions.first()
-            serialized_data = self.get_serializer(solution).data
-        else:
-            serialized_data = self.get_serializer(solutions, many=True).data
-        return Response(serialized_data)
 
-    def put(self, request, **kwargs):
-        solution = self.get_solutions(**kwargs)
-        if solution.count() <= 1:
-            solution = solution.first()
-            serializer = SolutionSerializer(solution, request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, **kwargs):
-        solution = self.get_solutions(**kwargs)
-        if solution.count() <= 1:
-            solution = solution.first()
-            solution.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT, data=None)
-        return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+class SavedQuestionList(GenericListView):
+    def __init__(self):
+        super().__init__(SavedQuestion.objects.all(), SavedQuestionSerializer)
 
 
-class SavedQuestionList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
-    queryset = SavedQuestion.objects.all()
-    serializer_class = SavedQuestionSerializer
-
-    def get(self, request):
-        return self.list(request)
-
-    def post(self, request):
-        return self.create(request)
-
-
-class SavedQuestionDetails(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                           mixins.DestroyModelMixin):
-    queryset = SavedQuestion.objects.all()
-    serializer_class = SavedQuestionSerializer
-
-    @staticmethod
-    def get_saved_question(id):
-        return SavedQuestion.objects.filter(id=id).first()
-
-    def get(self, request, id):
-        return Response(self.get_serializer(self.get_saved_question(id)).data)
-
-    def put(self, request, id):
-        saved_question = self.get_saved_question(id)
-        serializer = SavedQuestionSerializer(saved_question, request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, id):
-        saved_question = self.get_saved_question(id)
-        saved_question.delete()
-        return Response(data=None, status=HTTP_204_NO_CONTENT)
+class SavedQuestionDetails(GenericDetailsView):
+    def __init__(self):
+        super().__init__(SavedQuestion.objects.all(), SavedQuestionSerializer)
