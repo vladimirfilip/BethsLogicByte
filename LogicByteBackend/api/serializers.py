@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
-from .models import UserProfile, Solution, Question, SavedQuestion
+from .models import UserProfile, Solution, Question, SavedQuestion, QuestionTag
 
 
 class UserProfileSerializer(ModelSerializer):
@@ -14,7 +14,7 @@ class UserProfileSerializer(ModelSerializer):
 class QuestionSerializer(ModelSerializer):
     class Meta:
         model = Question
-        fields = ['id', 'question_title', 'question_description', 'question_tags']
+        fields = ['id', 'question_title', 'question_description', 'tag_names', 'tags']
 
 
 class SolutionSerializer(ModelSerializer):
@@ -27,3 +27,9 @@ class SavedQuestionSerializer(ModelSerializer):
     class Meta:
         model = SavedQuestion
         fields = ['id', 'question', 'user']
+
+
+class QuestionTagSerializer(ModelSerializer):
+    class Meta:
+        model = QuestionTag
+        fields = ['id', 'name']

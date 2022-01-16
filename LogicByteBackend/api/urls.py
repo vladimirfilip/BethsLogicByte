@@ -11,5 +11,5 @@ urlpatterns = [
     path("api_solutions/", SolutionList.as_view()),
     path("api_solutions/<str:field_name>=<str:field_value>", SolutionDetails.as_view()),
     path("api_saved_questions/", SavedQuestionList.as_view()),
-    path("api_saved_questions/<int:id>", SavedQuestionDetails.as_view())
+    path("api_saved_questions/<str:field_name>=<str:field_value>", SavedQuestionDetails.as_view())
 ]
