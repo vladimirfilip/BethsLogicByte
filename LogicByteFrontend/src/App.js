@@ -1,8 +1,14 @@
 import "./App.css";
-import MainNavBar from "./Components/MainNavBar";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
-    return <div className="App"></div>;
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/"></Route>
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default App;
