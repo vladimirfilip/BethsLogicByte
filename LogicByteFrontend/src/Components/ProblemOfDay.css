@@ -1,0 +1,176 @@
+.light_blue {
+  background-color: #b9d6f2;
+}
+.dark_blue {
+  background-color: #8dbdea;
+}
+
+.center {
+  text-align: center;
+}
+
+.next-button {
+  color: black;
+  height: 50%;
+  background: white;
+  font-size: x-large;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.vertical-center {
+  display: flex;
+  align-items: center;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-clip: border-box;
+  border: 0px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.25rem;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.padding {
+  padding-left: 0;
+}
+
+.no-select {
+  user-select: none; /* Standard */
+}
+
+.button-cursor {
+  cursor: pointer;
+  opacity: 1;
+  transition: 0.3s;
+}
+
+.darken {
+  background-color: white;
+}
+
+.darken:hover {
+  background-color: rgb(200, 200, 200);
+}
+
+.disabled {
+  background-color: rgb(200, 200, 200);
+}
+
+.truncated {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+*,
+::after,
+::before {
+  box-sizing: border-box;
+}
+
+.pt-3 {
+  padding-top: 1rem !important;
+}
+
+.container,
+.container-md,
+.container-sm {
+  max-width: 720px;
+}
+
+.container,
+.container-sm {
+  max-width: 540px;
+}
+
+.container,
+.container-fluid,
+.container-lg,
+.container-md,
+.container-sm,
+.container-xl,
+.container-xxl {
+  width: 100%;
+  padding-right: var(--bs-gutter-x, 0.75rem);
+  padding-left: var(--bs-gutter-x, 0.75rem);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.text-white {
+  color: white;
+}
+
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+
+.row {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: calc(-1 * var(--bs-gutter-y));
+  margin-right: calc(-0.5 * var(--bs-gutter-x));
+  margin-left: calc(-0.5 * var(--bs-gutter-x));
+}
+
+.col-1 {
+  flex: 0 0 auto;
+  width: 8.33333333%;
+}
+
+.col-10 {
+  flex: 0 0 auto;
+  width: 83.33333333%;
+}
+
+div {
+  display: block;
+}
+
+.row > * {
+  /* flex-shrink: 0; */
+  /* width: 100%; */
+  max-width: 100%;
+  padding-right: calc(var(--bs-gutter-x) * 0.5);
+  padding-left: calc(var(--bs-gutter-x) * 0.5);
+  margin-top: var(--bs-gutter-y);
+}
+
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
