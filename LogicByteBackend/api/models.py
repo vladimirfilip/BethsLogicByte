@@ -13,18 +13,10 @@ class UserProfile(models.Model):
         return self.user.username
 
 
-class QuestionTag(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
-
 class Question(models.Model):
     question_title = models.CharField(max_length=100, unique=True)
     question_description = models.TextField()
-    tags = models.ManyToManyField(QuestionTag, blank=True)
-    tag_names = models.CharField(max_length=100, blank=True)
+    tag_names = models.CharField(max_length=150, blank=True)
 
     def __str__(self):
         return self.question_title
