@@ -4,38 +4,75 @@ from .models import Question
 from django.contrib.auth.models import User
 
 
+class GenericTestSuite(TestCase):
+    def setUp(self, *args, **kwargs):
+        print(args)
+        required_objects, skeleton_data = kwargs['required_objects'], kwargs['skeleton_data']
+        kwargs.pop('required_objects')
+        kwargs.pop('skeleton_data')
+        required_model_type = required_objects[0]
+        del required_objects[0]
+        for data in required_objects:
+            required_model_type.objects.create(**data)
+        self.test_client = Client()
+        self.skeleton_data = skeleton_data
+
+    def assert_response_and_status(self, response, expected):
+        self.assertEqual(response.json(), expected[0])
+        self.assertEqual(response.status_code, expected[1])
+
+    def get(self, test_args=None):
+        for url, expected_data, expected_status_code in test_args:
+            self.assert_response_and_status(self.client.get(url), [expected_data, expected_status_code])
+
+    def post(self, test_args=None):
+        for url, input_data, expected_data, expected_status_code in test_args:
+            self.assert_response_and_status(self.client.post(url, input_data), [expected_data, expected_status_code])
+
+    def put(self, test_args=None):
+        for url, input_data, expected_data, expected_status_code in test_args:
+            self.assert_response_and_status(self.client.put(url,
+                                                            data=input_data,
+                                                            content_type="application/json"),
+                                            [expected_data, expected_status_code])
+
+    def delete(self, test_args=None):
+        for url, expected_data, expected_status_code in test_args:
+            self.assert_response_and_status(self.client.delete(url), [expected_data, expected_status_code])
+
+    def test(self):
+        self.post()
+        self.get()
+        self.put()
+        self.delete()
+
+
 #
 # Each test class will test a single model, simulating CRUD requests to the views class of that model
 #
-class QuestionTestSuite(TestCase):
-    def setUp(self):
-        Question.objects.create(question_title="This is a test question",
-                                question_description="This is a question description")
-        self.test_client = Client()
-        self.skeleton_data = {
+class QuestionTestSuite(GenericTestSuite):
+    def setUp(self, *args):
+        required_objects = [Question,
+                            {'question_title': 'This is a test question',
+                             'question_description': 'This is a question description'}]
+        skeleton_data = {
             "question_title": '',
             "question_description": '',
-            "tag_names": '',
+            "tag_names": ''
         }
+        super().setUp(required_objects=required_objects, skeleton_data=skeleton_data)
 
-    def get(self):
+    def get(self, **kwargs):
         expected_data = {
             "question_title": "This is a test question",
             "question_description": "This is a question description",
             "tag_names": "",
             "id": 1
         }
-        expected_status_code = 200
-        response = self.test_client.get("/api_questions/question_title=This is a test question")
-        self.assertEqual(response.json(), expected_data)
-        self.assertEqual(response.status_code, expected_status_code)
+        super().get([("/api_questions/question_title=This is a test question", expected_data, 200),
+                     ("/api_questions/question_title= ", self.skeleton_data, 400)])
 
-        expected_data, expected_status_code = self.skeleton_data, 400
-        response = self.test_client.get("/api_questions/question_title= ")
-        self.assertEqual(response.json(), expected_data)
-        self.assertEqual(response.status_code, expected_status_code)
-
-    def post(self):
+    def post(self, **kwargs):
         input_data = {
             "question_title": "This is a posted maths question",
             "question_description": "This is a posted maths question description",
@@ -46,7 +83,7 @@ class QuestionTestSuite(TestCase):
         self.assertEqual(response.json(), expected_data)
         self.assertEqual(response.status_code, 201)
 
-    def put(self):
+    def put(self, **kwargs):
         updated_question_data = {
             "id": 2,
             "question_title": "This is an updated posted maths question",
@@ -76,7 +113,7 @@ class QuestionTestSuite(TestCase):
         self.assertEqual(response.json(), expected_data)
         self.assertEqual(response.status_code, 400)
 
-    def delete(self):
+    def delete(self, **kwargs):
         response = self.test_client.delete("/api_questions/tag_names=maths")
         self.assertEqual(response.status_code, 204)
         response = self.test_client.get("/api_questions/id=2")
