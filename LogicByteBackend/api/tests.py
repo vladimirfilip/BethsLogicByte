@@ -6,38 +6,46 @@ from django.contrib.auth.models import User
 
 class GenericTestSuite(TestCase):
     def setUp(self, *args, **kwargs):
-        print(args)
-        required_objects, skeleton_data = kwargs['required_objects'], kwargs['skeleton_data']
-        kwargs.pop('required_objects')
-        kwargs.pop('skeleton_data')
-        required_model_type = required_objects[0]
-        del required_objects[0]
-        for data in required_objects:
-            required_model_type.objects.create(**data)
-        self.test_client = Client()
-        self.skeleton_data = skeleton_data
+        if 'required_objects' in kwargs.keys():
+            required_objects, skeleton_data = kwargs.pop('required_objects'), kwargs.pop('skeleton_data')
+            required_model_type = required_objects[0]
+            del required_objects[0]
+            for data in required_objects:
+                required_model_type.objects.create(**data)
+            self.test_client = Client()
+            self.skeleton_data = skeleton_data
 
     def assert_response_and_status(self, response, expected):
-        self.assertEqual(response.json(), expected[0])
+        response_data = response.json() if response.data else None
+        self.assertEqual(response_data, expected[0])
         self.assertEqual(response.status_code, expected[1])
 
+    @staticmethod
+    def eval_test_args(test_args):
+        if not test_args:
+            return []
+        return test_args
+
     def get(self, test_args=None):
-        for url, expected_data, expected_status_code in test_args:
+        for url, expected_data, expected_status_code in self.eval_test_args(test_args):
             self.assert_response_and_status(self.client.get(url), [expected_data, expected_status_code])
 
     def post(self, test_args=None):
-        for url, input_data, expected_data, expected_status_code in test_args:
-            self.assert_response_and_status(self.client.post(url, input_data), [expected_data, expected_status_code])
+        for url, input_data, expected_data, expected_status_code in self.eval_test_args(test_args):
+            self.assert_response_and_status(self.client.post(url,
+                                                             data=input_data,
+                                                             content_type="application/json"),
+                                            [expected_data, expected_status_code])
 
     def put(self, test_args=None):
-        for url, input_data, expected_data, expected_status_code in test_args:
+        for url, input_data, expected_data, expected_status_code in self.eval_test_args(test_args):
             self.assert_response_and_status(self.client.put(url,
                                                             data=input_data,
                                                             content_type="application/json"),
                                             [expected_data, expected_status_code])
 
     def delete(self, test_args=None):
-        for url, expected_data, expected_status_code in test_args:
+        for url, expected_data, expected_status_code in self.eval_test_args(test_args):
             self.assert_response_and_status(self.client.delete(url), [expected_data, expected_status_code])
 
     def test(self):
@@ -79,9 +87,7 @@ class QuestionTestSuite(GenericTestSuite):
             "tag_names": "maths,challenge"
         }
         expected_data = dict(input_data, **{"id": 2})
-        response = self.test_client.post("/api_questions/", input_data)
-        self.assertEqual(response.json(), expected_data)
-        self.assertEqual(response.status_code, 201)
+        super().post([("/api_questions/", input_data, expected_data, 201)])
 
     def put(self, **kwargs):
         updated_question_data = {
@@ -90,12 +96,7 @@ class QuestionTestSuite(GenericTestSuite):
             "question_description": "This is a posted maths question description",
             "tag_names": "maths"
         }
-        response = self.test_client.put("/api_questions/id=2",
-                                        data=updated_question_data,
-                                        content_type="application/json")
-        self.assertEqual(response.json(), updated_question_data)
-        self.assertEqual(response.status_code, 200)
-
+        super().put([("/api_questions/id=2", updated_question_data, updated_question_data, 200)])
         updated_question_data['question_title'] = ""
         updated_question_data['question_description'] = ""
         updated_question_data['tag_names'] = ""
@@ -107,40 +108,29 @@ class QuestionTestSuite(GenericTestSuite):
                 "This field may not be blank."
             ]
         }
-        response = self.test_client.put("/api_questions/id=2",
-                                        data=updated_question_data,
-                                        content_type="application/json")
-        self.assertEqual(response.json(), expected_data)
-        self.assertEqual(response.status_code, 400)
+        super().put([("/api_questions/question_title=This is an updated posted maths question",
+                      updated_question_data,
+                      expected_data,
+                      400)])
 
     def delete(self, **kwargs):
-        response = self.test_client.delete("/api_questions/tag_names=maths")
-        self.assertEqual(response.status_code, 204)
-        response = self.test_client.get("/api_questions/id=2")
-        self.assertEqual(response.json(), self.skeleton_data)
-        self.assertEqual(response.status_code, 400)
-
-    def test(self):
-        self.post()
-        self.get()
-        self.put()
-        self.delete()
+        super().delete([("/api_questions/tag_names=maths", None, 204)])
+        super().get([("/api_questions/id=2", self.skeleton_data, 400)])
 
 
-class UserProfileTestSuite(TestCase):
+class UserProfileTestSuite(GenericTestSuite):
     def setUp(self):
-        self.user1 = User.objects.create(username="user1")
-        self.user2 = User.objects.create(username="user2")
-        self.test_client = Client()
-        self.skeleton_data = {
+        required_objects = [User, {"username": "user1"}, {"username": "user2"}]
+        skeleton_data = {
             "num_points": None,
             "year_group": "",
             "class_name": "",
             "email_address": "",
             "user": None
         }
+        super().setUp(required_objects=required_objects, skeleton_data=skeleton_data)
 
-    def post(self):
+    def post(self, **kwargs):
         input_data = {
             "user": 1,
             "num_points": 1,
@@ -149,9 +139,7 @@ class UserProfileTestSuite(TestCase):
             "email_address": "this.is.a.valid.email.address@gmail.com"
         }
         expected_data = dict(input_data, **{"id": 1, "saved_questions": []})
-        response = self.test_client.post("/api_profiles/", input_data)
-        self.assertEqual(response.json(), expected_data)
-        self.assertEqual(response.status_code, 201)
+        super().post([("/api_profiles/", input_data, expected_data, 201)])
         input_data['email_address'] = "this_is_not_a_valid_email"
         expected_output = {
             "email_address": [
@@ -161,11 +149,9 @@ class UserProfileTestSuite(TestCase):
                 "This field must be unique."
             ]
         }
-        response = self.test_client.post("/api_profiles/", input_data)
-        self.assertEqual(response.json(), expected_output)
-        self.assertEqual(response.status_code, 400)
+        super().post([("/api_profiles/", input_data, expected_output, 400)])
 
-    def get(self):
+    def get(self, **kwargs):
         expected_data = {
             "id": 1,
             "saved_questions": [],
@@ -175,17 +161,11 @@ class UserProfileTestSuite(TestCase):
             "class_name": "MathsClass",
             "email_address": "this.is.a.valid.email.address@gmail.com"
         }
-        response = self.client.get("/api_profiles/username=user1")
-        self.assertEqual(response.json(), expected_data)
-        self.assertEqual(response.status_code, 200)
-        response = self.client.get("/api_profiles/id=1")
-        self.assertEqual(response.json(), expected_data)
-        self.assertEqual(response.status_code, 200)
-        response = self.client.get("/api_profiles/username=user2")
-        self.assertEqual(response.json(), self.skeleton_data)
-        self.assertEqual(response.status_code, 400)
+        super().get([("/api_profiles/username=user1", expected_data, 200),
+                     ("/api_profiles/id=1", expected_data, 200),
+                     ("/api_profiles/username=user2", self.skeleton_data, 400)])
 
-    def put(self):
+    def put(self, **kwargs):
         updated_data = {
             "id": 1,
             "saved_questions": [],
@@ -195,12 +175,7 @@ class UserProfileTestSuite(TestCase):
             "class_name": "EnglishClass",
             "email_address": "this.is.a.valid.email.address@gmail.com"
         }
-        response = self.test_client.put("/api_profiles/id=1",
-                                        data=updated_data,
-                                        content_type="application/json")
-        self.assertEqual(response.json(), updated_data)
-        self.assertEqual(response.status_code, 200)
-
+        super().put([("/api_profiles/id=1", updated_data, updated_data, 200)])
         updated_data['year_group'] = ""
         updated_data['email_address'] = ""
         updated_data['class_name'] = ""
@@ -215,21 +190,8 @@ class UserProfileTestSuite(TestCase):
                 "This field may not be blank."
             ]
         }
-        response = self.test_client.put("/api_profiles/username=user1",
-                                        data=updated_data,
-                                        content_type="application/json")
-        self.assertEqual(response.json(), expected_data)
-        self.assertEqual(response.status_code, 400)
+        super().put([("/api_profiles/username=user1", updated_data, expected_data, 400)])
 
-    def delete(self):
-        response = self.test_client.delete("/api_profiles/username=user1")
-        self.assertEqual(response.status_code, 204)
-        response = self.test_client.get("/api_profiles/id=1")
-        self.assertEqual(response.json(), self.skeleton_data)
-        self.assertEqual(response.status_code, 400)
-
-    def test(self):
-        self.post()
-        self.get()
-        self.put()
-        self.delete()
+    def delete(self, **kwargs):
+        super().delete([("/api_profiles/username=user1", None, 204)])
+        super().get([("/api_profiles/id=1", self.skeleton_data, 400)])
