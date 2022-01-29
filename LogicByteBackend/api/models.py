@@ -23,9 +23,9 @@ class Question(models.Model):
 
 
 class Solution(models.Model):
-    user_profile = models.OneToOneField(UserProfile, on_delete=models.SET_NULL, null=True)
-    question = models.OneToOneField(Question, on_delete=models.CASCADE, null=True)
-    solution = models.TextField(null=True)
+    user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
+    question = models.OneToOneField(Question, on_delete=models.CASCADE)
+    solution = models.TextField()
     date_modified = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
