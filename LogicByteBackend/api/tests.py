@@ -23,7 +23,6 @@ class GenericTestSuite(TestCase):
             assert expected[0].items() <= response_data.items()
         self.assertEqual(response.status_code, expected[1])
 
-
     @staticmethod
     def eval_test_args(test_args):
         if not test_args:
@@ -284,6 +283,78 @@ class SolutionTestSuite(GenericTestSuite):
     def delete(self, **kwargs):
         super().delete([("/api_solutions/id=1", None, 204)])
         super().get([("/api_solutions/id=1", self.skeleton_data, 400)])
+
+    def test(self):
+        self.post()
+        self.get()
+        self.put()
+        self.delete()
+
+
+class SavedQuestionTestSuite(GenericTestSuite):
+    def setUp(self):
+        user = User.objects.create(username="user")
+        UserProfile.objects.create(user=user)
+        Question.objects.create(question_title="question", question_description="question_description")
+        self.skeleton_data = {
+            "user_profile": None,
+            "question": None,
+        }
+
+    def post(self, **kwargs):
+        valid_data = {
+            "user_profile": 1,
+            "question": 1
+        }
+        output_from_valid_data = dict(valid_data, **{"id": 1})
+        erroneous_data = {
+            "user_profile": "",
+            "question": ""
+        }
+        output_from_erroneous_data = {
+            "user_profile": [
+                "This field may not be null."
+            ],
+            "question": [
+                "This field may not be null."
+            ]
+        }
+        super().post([("/api_saved_questions/", valid_data, output_from_valid_data, 201),
+                      ("/api_saved_questions/", erroneous_data, output_from_erroneous_data, 400)])
+
+    def get(self, **kwargs):
+        expected_data = {
+            "id": 1,
+            "user_profile": 1,
+            "question": 1,
+        }
+        super().get([("/api_saved_questions/user_profile=1", expected_data, 200),
+                     ("/api_saved_questions/id=1", expected_data, 200),
+                     ("/api_saved_questions/user_profile=2", self.skeleton_data, 400)])
+
+    def put(self, **kwargs):
+        updated_data = {
+            "id": 1,
+            "user_profile": 1,
+            "question": 1,
+        }
+        super().put([("/api_saved_questions/id=1", updated_data, updated_data, 200)])
+        super().get([("/api_saved_questions/id=1", updated_data, 200)])
+        updated_data['user_profile'] = ""
+        updated_data['question'] = ""
+        expected_data = {
+            "user_profile": [
+                "This field may not be null."
+            ],
+            "question": [
+                "This field may not be null."
+            ],
+        }
+        super().put([("/api_saved_questions/question=1", updated_data, expected_data, 400)])
+
+    def delete(self, **kwargs):
+        super().delete([("/api_saved_questions/id=1", None, 204)])
+        super().get([("/api_saved_questions/id=1", self.skeleton_data, 400)])
 
     def test(self):
         self.post()

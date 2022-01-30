@@ -33,5 +33,5 @@ class Solution(models.Model):
 
 
 class SavedQuestion(models.Model):
-    user = models.ForeignKey(UserProfile, related_name="saved_questions", on_delete=models.CASCADE)
+    user_profile = models.ForeignKey(UserProfile, related_name="saved_questions", on_delete=models.CASCADE)
     question = models.OneToOneField(Question, on_delete=models.CASCADE)
