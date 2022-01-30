@@ -1,5 +1,4 @@
 from django.test import TestCase
-import datetime
 from django.test import Client
 from .models import Question, UserProfile
 from django.contrib.auth.models import User
@@ -260,34 +259,34 @@ class SolutionTestSuite(GenericTestSuite):
     def put(self, **kwargs):
         updated_data = {
             "id": 1,
-            "saved_questions": [],
-            "user": 1,
-            "num_points": 1,
-            "year_group": "10",
-            "class_name": "EnglishClass",
-            "email_address": "this.is.a.valid.email.address@gmail.com"
+            "user_profile": 1,
+            "question": 1,
+            "solution": "This is an updated solution"
         }
-        super().put([("/api_profiles/id=1", updated_data, updated_data, 200)])
-        updated_data['year_group'] = ""
-        updated_data['email_address'] = ""
-        updated_data['class_name'] = ""
+        super().put([("/api_solutions/id=1", updated_data, updated_data, 200)], assert_contains=True)
+        super().get([("/api_solutions/id=1", updated_data, 200)], assert_contains=True)
+        updated_data['user_profile'] = ""
+        updated_data['question'] = ""
+        updated_data['solution'] = ""
         expected_data = {
-            "year_group": [
-                "This field may not be blank."
+            "user_profile": [
+                "This field may not be null."
             ],
-            "email_address": [
-                "This field may not be blank."
+            "question": [
+                "This field may not be null."
             ],
-            "class_name": [
+            "solution": [
                 "This field may not be blank."
             ]
         }
-        super().put([("/api_profiles/username=user1", updated_data, expected_data, 400)])
+        super().put([("/api_solutions/question=1", updated_data, expected_data, 400)])
 
     def delete(self, **kwargs):
-        super().delete([("/api_profiles/username=user1", None, 204)])
-        super().get([("/api_profiles/id=1", self.skeleton_data, 400)])
+        super().delete([("/api_solutions/id=1", None, 204)])
+        super().get([("/api_solutions/id=1", self.skeleton_data, 400)])
 
     def test(self):
         self.post()
         self.get()
+        self.put()
+        self.delete()
