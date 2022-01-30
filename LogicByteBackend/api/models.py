@@ -13,27 +13,19 @@ class UserProfile(models.Model):
         return self.user.username
 
 
-class QuestionTag(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
-
 class Question(models.Model):
     question_title = models.CharField(max_length=100, unique=True)
     question_description = models.TextField()
-    tags = models.ManyToManyField(QuestionTag, blank=True)
-    tag_names = models.CharField(max_length=100, blank=True)
+    tag_names = models.CharField(max_length=150, blank=True)
 
     def __str__(self):
         return self.question_title
 
 
 class Solution(models.Model):
-    user_profile = models.OneToOneField(UserProfile, on_delete=models.SET_NULL, null=True)
-    question = models.OneToOneField(Question, on_delete=models.CASCADE, null=True)
-    solution = models.TextField(null=True)
+    user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
+    question = models.OneToOneField(Question, on_delete=models.CASCADE)
+    solution = models.TextField()
     date_modified = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -41,5 +33,5 @@ class Solution(models.Model):
 
 
 class SavedQuestion(models.Model):
-    user = models.ForeignKey(UserProfile, related_name="saved_questions", on_delete=models.CASCADE)
+    user_profile = models.ForeignKey(UserProfile, related_name="saved_questions", on_delete=models.CASCADE)
     question = models.OneToOneField(Question, on_delete=models.CASCADE)

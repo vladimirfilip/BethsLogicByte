@@ -1,8 +1,7 @@
-from .models import UserProfile, Solution, Question, SavedQuestion, QuestionTag
+from .models import UserProfile, Solution, Question, SavedQuestion
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
-from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSerializer, SavedQuestionSerializer, \
-    QuestionTagSerializer
+from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSerializer, SavedQuestionSerializer
 from django.contrib.auth.models import User
 
 
@@ -34,6 +33,8 @@ class GenericDetailsView(generics.GenericAPIView, mixins.RetrieveModelMixin, mix
         model_instances = self.access(**kwargs)
         if model_instances.count() <= 1:
             serialized_data = self.get_serializer(model_instances.first()).data
+            if model_instances.count() == 0:
+                return Response(serialized_data, 400)
         else:
             serialized_data = self.get_serializer(model_instances, many=True).data
         return Response(serialized_data)
@@ -78,19 +79,6 @@ class QuestionList(GenericListView):
     def __init__(self):
         super().__init__(Question.objects.all(), QuestionSerializer)
 
-    def post(self, request, **kwargs):
-        tag_names = request.data['tag_names'].lower().split(",")
-        title = request.data['question_title']
-        request.data['tags'] = []
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            question = self.queryset.get(question_title=title)
-            for tag_name in tag_names:
-                question.tags.add(QuestionTag.objects.get(name=tag_name))
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class QuestionDetails(GenericDetailsView):
     def __init__(self):
@@ -107,26 +95,8 @@ class QuestionDetails(GenericDetailsView):
         if field_name == 'tag_names':
             tag_names = field_value.lower().split(",")
             return self.get_questions_with_tag_names(tag_names)
-        elif field_name == 'tag_ids':
-            tag_ids = field_value.split(",")
-            return self.get_questions_with_tag_names([QuestionTag.objects.get(id=tag_id).name for tag_id in tag_ids])
         else:
             return self.queryset.filter(**{field_name: field_value})
-
-    def put(self, request, **kwargs):
-        tag_names = request.data['tag_names'].lower().split(",")
-        request.data['tags'] = []
-        model_instances = self.access(**kwargs)
-        if model_instances.count() <= 1:
-            question_instance = model_instances.first()
-            serializer = self.get_serializer(question_instance, request.data)
-            if serializer.is_valid():
-                serializer.save()
-                for tag in tag_names:
-                    question_instance.tags.add(QuestionTag.objects.get(name=tag))
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SolutionList(GenericListView):
@@ -155,8 +125,3 @@ class SavedQuestionList(GenericListView):
 class SavedQuestionDetails(GenericDetailsView):
     def __init__(self):
         super().__init__(SavedQuestion.objects.all(), SavedQuestionSerializer)
-
-
-class QuestionTagsList(GenericListView):
-    def __init__(self):
-        super().__init__(QuestionTag.objects.all(), QuestionTagSerializer)
