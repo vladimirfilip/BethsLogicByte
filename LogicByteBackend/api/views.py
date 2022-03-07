@@ -1,7 +1,8 @@
-from .models import UserProfile, Solution, Question, SavedQuestion
+from .models import UserProfile, Solution, Question, SavedQuestion, AttemptedQuestion
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
-from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSerializer, SavedQuestionSerializer
+from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSerializer, SavedQuestionSerializer, \
+    AttemptedQuestionSerializer
 from django.contrib.auth.models import User
 
 
@@ -125,3 +126,13 @@ class SavedQuestionList(GenericListView):
 class SavedQuestionDetails(GenericDetailsView):
     def __init__(self):
         super().__init__(SavedQuestion.objects.all(), SavedQuestionSerializer)
+
+
+class AttemptedQuestionList(GenericListView):
+    def __init__(self):
+        super().__init__(AttemptedQuestion.objects.all(), AttemptedQuestionSerializer)
+
+
+class AttemptedQuestionDetails(GenericDetailsView):
+    def __init__(self):
+        super().__init__(AttemptedQuestion.objects.all(), AttemptedQuestionSerializer)
