@@ -35,3 +35,8 @@ class Solution(models.Model):
 class SavedQuestion(models.Model):
     user_profile = models.ForeignKey(UserProfile, related_name="saved_questions", on_delete=models.CASCADE)
     question = models.OneToOneField(Question, on_delete=models.CASCADE)
+
+
+class AttemptedQuestion(models.Model):
+    user_profile = models.ForeignKey(UserProfile, related_name="attempted_questions", on_delete=models.CASCADE)
+    question = models.OneToOneField(Question, on_delete=models.CASCADE)
