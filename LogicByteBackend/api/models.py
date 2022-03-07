@@ -40,3 +40,4 @@ class SavedQuestion(models.Model):
 class AttemptedQuestion(models.Model):
     user_profile = models.ForeignKey(UserProfile, related_name="attempted_questions", on_delete=models.CASCADE)
     question = models.OneToOneField(Question, on_delete=models.CASCADE)
+    num_times_attempted = models.IntegerField(default=1)
