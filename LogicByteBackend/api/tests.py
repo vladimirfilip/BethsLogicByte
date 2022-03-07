@@ -373,17 +373,20 @@ class AttemptedQuestionTestSuite(GenericTestSuite):
         self.skeleton_data = {
             "user_profile": None,
             "question": None,
+            "num_times_attempted": None,
         }
 
     def post(self, **kwargs):
         valid_data = {
             "user_profile": 1,
-            "question": 1
+            "question": 1,
+            'num_times_attempted': 1
         }
         output_from_valid_data = dict(valid_data, **{"id": 1})
         erroneous_data = {
             "user_profile": "",
-            "question": ""
+            "question": "",
+            'num_times_attempted': 0
         }
         output_from_erroneous_data = {
             "user_profile": [
@@ -401,6 +404,7 @@ class AttemptedQuestionTestSuite(GenericTestSuite):
             "id": 1,
             "user_profile": 1,
             "question": 1,
+            'num_times_attempted': 1
         }
         super().get([("/api_attempted_questions/user_profile=1", expected_data, 200),
                      ("/api_attempted_questions/id=1", expected_data, 200),
@@ -411,6 +415,7 @@ class AttemptedQuestionTestSuite(GenericTestSuite):
             "id": 1,
             "user_profile": 1,
             "question": 1,
+            'num_times_attempted': 1
         }
         super().put([("/api_attempted_questions/id=1", updated_data, updated_data, 200)])
         super().get([("/api_attempted_questions/id=1", updated_data, 200)])
