@@ -1,47 +1,51 @@
 import React from "react";
 import "./MainNavBar.css";
 import logo from "./beths_logo.png";
-import { Outlet, Link } from "react-router-dom";
+import PropTypes from "prop-types";
 
-function MainNavBar() {
+function MainNavBar(props) {
   return (
     <nav className="nav">
       <div className="col">
         <img alt="Beths logo" className="nav__logo" src={logo} />
       </div>
       <div className="col-lg-4"></div>
-      <div class="col">
-        <Link to="/">
-          <button className="nav__button">Home</button>
-        </Link>
+      <div className="col">
+        <button onClick={() => props.link("")} className="nav__button">
+          Home
+        </button>
       </div>
-      <div class="col">
-        <Link to="">
-          <button className="nav__button">Mathematics</button>
-        </Link>
+      <div className="col">
+        <button onClick={() => props.link("user/cool")} className="nav__button">
+          Mathematics
+        </button>
       </div>
-      <div class="col">
-        <Link to="">
-          <button className="nav__button">Physics</button>
-        </Link>
+      <div className="col">
+        <button onClick={() => props.link("bio")} className="nav__button">
+          Physics
+        </button>
       </div>
-      <div class="col">
-        <Link to="">
-          <button className="nav__button">Chemistry</button>
-        </Link>
+      <div className="col">
+        <button onClick={() => props.link("")} className="nav__button">
+          Chemistry
+        </button>
       </div>
-      <div class="col">
-        <Link to="">
-          <button className="nav__button">Biology</button>
-        </Link>
+      <div className="col">
+        <button onClick={() => props.link("")} className="nav__button">
+          Biology
+        </button>
       </div>
-      <div class="col">
-        <Link to="">
-          <button className="nav__button">Informatics</button>
-        </Link>
+      <div className="col">
+        <button onClick={() => props.link("")} className="nav__button">
+          Informatics
+        </button>
       </div>
     </nav>
   );
 }
+
+MainNavBar.propTypes = {
+  link: PropTypes.func,
+};
 
 export default MainNavBar;
