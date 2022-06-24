@@ -16,12 +16,12 @@ function MainNavBar(props) {
         </button>
       </div>
       <div className="col">
-        <button onClick={() => props.link("user/cool")} className="nav__button">
+        <button onClick={() => props.link("")} className="nav__button">
           Mathematics
         </button>
       </div>
       <div className="col">
-        <button onClick={() => props.link("bio")} className="nav__button">
+        <button onClick={() => props.link("")} className="nav__button">
           Physics
         </button>
       </div>

@@ -53,13 +53,6 @@ function Router() {
     };
   }, []);
 
-  // window.onpopstate = () =>
-  //   setTimeout(() => {
-  //     let url = getURL();
-  //     url = url.join("/");
-  //     changePage(url);
-  //   }, 0);
-
   const pages = [
     {
       "": Home,
@@ -89,7 +82,7 @@ function Router() {
       </>
     );
   } else {
-    return <h1>oops</h1>;
+    return <h1>Page cannot be found</h1>;
   }
 }
 
