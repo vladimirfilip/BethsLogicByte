@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.test import Client
 from .models import Question, UserProfile
 from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 
 
 class GenericTestSuite(TestCase):
@@ -10,7 +11,10 @@ class GenericTestSuite(TestCase):
             required_objects = kwargs.pop('required_objects')
             required_model_type = required_objects.pop()
             for data in required_objects:
-                required_model_type.objects.create(**data)
+                new_object = required_model_type.objects.create(**data)
+                if required_model_type == User:
+                    self.token = Token.objects.get(user=new_object).key
+
         if 'skeleton_data' in kwargs.keys():
             self.skeleton_data = kwargs.pop('skeleton_data')
         self.test_client = Client()
@@ -29,31 +33,39 @@ class GenericTestSuite(TestCase):
             return []
         return test_args
 
-    def get(self, test_args=None, assert_contains=False):
+    @staticmethod
+    def add_token(input_data, token):
+        if token:
+            return input_data + {"Authorization": "Token " + token}
+        return input_data
+
+    def get(self, token=None, test_args=None, assert_contains=False):
         for url, expected_data, expected_status_code in self.eval_test_args(test_args):
-            self.assert_response_and_status(self.client.get(url),
+            self.assert_response_and_status(self.client.get(url,
+                                                            data=self.add_token({}, token)),
                                             [expected_data, expected_status_code],
                                             assert_contains)
 
-    def post(self, test_args=None, assert_contains=False):
+    def post(self, token=None, test_args=None, assert_contains=False):
         for url, input_data, expected_data, expected_status_code in self.eval_test_args(test_args):
             self.assert_response_and_status(self.client.post(url,
-                                                             data=input_data,
+                                                             data=self.add_token(input_data, token),
                                                              content_type="application/json"),
                                             [expected_data, expected_status_code],
                                             assert_contains)
 
-    def put(self, test_args=None, assert_contains=False):
+    def put(self, token=None, test_args=None, assert_contains=False):
         for url, input_data, expected_data, expected_status_code in self.eval_test_args(test_args):
             self.assert_response_and_status(self.client.put(url,
-                                                            data=input_data,
+                                                            data=self.add_token(input_data, token),
                                                             content_type="application/json"),
                                             [expected_data, expected_status_code],
                                             assert_contains)
 
-    def delete(self, test_args=None, assert_contains=False):
+    def delete(self, token=None, test_args=None, assert_contains=False):
         for url, expected_data, expected_status_code in self.eval_test_args(test_args):
-            self.assert_response_and_status(self.client.delete(url),
+            self.assert_response_and_status(self.client.delete(url,
+                                                               data=self.add_token({}, token)),
                                             [expected_data, expected_status_code],
                                             assert_contains)
 
