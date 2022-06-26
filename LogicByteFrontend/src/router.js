@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import MainNavBar from "./Components/MainNavBar";
 import Home from "./Pages/home";
 import User from "./Pages/user";
+import Login from "./Pages/login";
+import { clearAuthInfo, storeAuthInfo, isLoggedIn } from "./authHelper";
 
 function getURL() {
   let url = window.location.href;
@@ -29,10 +31,23 @@ function changeURL(url) {
 
 function Router() {
   const [page, setPageState] = useState(getURL());
+  const [loggedIn, setLoggedIn] = useState(isLoggedIn());
 
   const changePage = (page) => {
     changeURL(page);
     setPageState(getURL());
+  };
+
+  const logIn = (account) => {
+    setLoggedIn(true);
+    storeAuthInfo(account);
+    changePage("");
+  };
+
+  const logOut = () => {
+    setLoggedIn(false);
+    clearAuthInfo();
+    changePage("login");
   };
 
   const onPopState = () => {
@@ -53,6 +68,16 @@ function Router() {
     };
   }, []);
 
+  if (loggedIn == false) {
+    if (page == "login") {
+      return <Login logIn={logIn} />;
+    } else {
+      return <h1>Please login to view this page</h1>;
+    }
+  } else if (page == "login") {
+    changePage("");
+  }
+
   const pages = [
     {
       "": Home,
@@ -70,7 +95,7 @@ function Router() {
     return (
       <>
         <MainNavBar link={changePage} />
-        <PageComponent />
+        <PageComponent changePage={changePage} />
       </>
     );
   } else if (pageNamesExtended.indexOf(page[0]) != -1 && page.length == 2) {
@@ -78,9 +103,11 @@ function Router() {
     return (
       <>
         <MainNavBar link={changePage} />
-        <PageComponent argument={page[1]} />
+        <PageComponent changePage={changePage} argument={page[1]} />
       </>
     );
+  } else if (page == "logout") {
+    logOut();
   } else {
     return <h1>Page cannot be found</h1>;
   }
