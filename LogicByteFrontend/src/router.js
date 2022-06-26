@@ -41,7 +41,6 @@ function Router() {
   const logIn = (account) => {
     setLoggedIn(true);
     storeAuthInfo(account);
-    changePage("");
   };
 
   const logOut = () => {
