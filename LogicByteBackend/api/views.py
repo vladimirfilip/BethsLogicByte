@@ -27,18 +27,20 @@ class GenericDetailsView(generics.GenericAPIView, mixins.RetrieveModelMixin, mix
         self.serializer_class = serializer_class
 
     def access(self, **kwargs):
-        field_name, field_value = tuple(kwargs.values())
-        return self.queryset.filter(**{field_name: field_value})
+        queryset = self.queryset
+        for criterion in kwargs['input_args'].split("&"):
+            field_name, field_value = criterion.split("=")
+            queryset = queryset.filter(**{field_name: field_value})
+        return queryset
 
     def get(self, request, **kwargs):
         model_instances = self.access(**kwargs)
-        if model_instances.count() <= 1:
-            serialized_data = self.get_serializer(model_instances.first()).data
-            if model_instances.count() == 0:
-                return Response(serialized_data, 400)
-        else:
+        serialized_data = self.get_serializer(model_instances.first()).data
+        if model_instances.count() == 0:
+            return Response(data=serialized_data, status=status.HTTP_400_BAD_REQUEST)
+        elif model_instances.count() > 1:
             serialized_data = self.get_serializer(model_instances, many=True).data
-        return Response(serialized_data)
+        return Response(data=serialized_data)
 
     def put(self, request, **kwargs):
         model_instances = self.access(**kwargs)
@@ -67,13 +69,15 @@ class UserProfileDetails(GenericDetailsView):
     def __init__(self):
         super().__init__(UserProfile.objects.all(), UserProfileSerializer)
 
-    @staticmethod
-    def access(**kwargs):
-        field_name, field_value = tuple(kwargs.values())
-        if field_name in ["username"]:
-            user = User.objects.filter(**{field_name: field_value}).first()
-            field_name, field_value = "user", user
-        return UserProfile.objects.filter(**{field_name: field_value})
+    def access(self, **kwargs):
+        queryset = self.queryset
+        for criterion in kwargs['input_args'].split("&"):
+            field_name, field_value = criterion.split("=")
+            if field_name in ["username"]:
+                user = User.objects.filter(**{field_name: field_value}).first()
+                field_name, field_value = "user", user
+            queryset = queryset.filter(**{field_name: field_value})
+        return queryset
 
 
 class QuestionList(GenericListView):
@@ -92,12 +96,15 @@ class QuestionDetails(GenericDetailsView):
         return queryset
 
     def access(self, **kwargs):
-        field_name, field_value = tuple(kwargs.values())
-        if field_name == 'tag_names':
-            tag_names = field_value.lower().split(",")
-            return self.get_questions_with_tag_names(tag_names)
-        else:
-            return self.queryset.filter(**{field_name: field_value})
+        queryset = self.queryset
+        for criterion in kwargs['input_args'].split("&"):
+            field_name, field_value = criterion.split("=")
+            if field_name == 'tag_names':
+                tag_names = field_value.lower().split(",")
+                queryset = self.get_questions_with_tag_names(tag_names)
+            else:
+                queryset = queryset.filter(**{field_name: field_value})
+        return queryset
 
 
 class SolutionList(GenericListView):
@@ -109,13 +116,15 @@ class SolutionDetails(GenericDetailsView):
     def __init__(self):
         super().__init__(Solution.objects.all(), SolutionSerializer)
 
-    @staticmethod
-    def access(**kwargs):
-        field_name, field_value = tuple(kwargs.values())
-        if field_name == "question_id":
-            question = Question.objects.filter(id=field_value).first()
-            field_name, field_value = 'question', question
-        return Solution.objects.filter(**{field_name: field_value})
+    def access(self, **kwargs):
+        queryset = self.queryset
+        for criterion in kwargs['input_args'].split("&"):
+            field_name, field_value = criterion.split("=")
+            if field_name == "question_id":
+                question = Question.objects.filter(id=field_value).first()
+                field_name, field_value = 'question', question
+            queryset = queryset.filter(**{field_name: field_value})
+        return queryset
 
 
 class SavedQuestionList(GenericListView):

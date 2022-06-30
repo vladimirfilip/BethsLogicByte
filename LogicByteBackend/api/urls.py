@@ -18,5 +18,5 @@ urlpatterns = []
 for url, views in url_views.items():
     list_view, details_view = views
     urlpatterns.append(path(url, list_view.as_view()))
-    urlpatterns.append(path(url + "<str:field_name>=<str:field_value>", details_view.as_view()))
+    urlpatterns.append(path(url + "<str:input_args>", details_view.as_view()))
 
