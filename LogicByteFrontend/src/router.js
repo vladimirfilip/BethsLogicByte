@@ -4,7 +4,7 @@ import MainNavBar from "./Components/MainNavBar";
 import Home from "./Pages/home";
 import User from "./Pages/user";
 import Login from "./Pages/login";
-import { clearAuthInfo, storeAuthInfo, isLoggedIn } from "./authHelper";
+import { clearAuthInfo, storeAuthInfo, isLoggedIn } from "./helpers/authHelper";
 
 function getURL() {
   let url = window.location.href;
