@@ -1,8 +1,8 @@
 import React from "react";
 import axios from "axios";
 import { useState } from "react";
-import useForm from "../useForm";
-import { getAuthInfo } from "../authHelper";
+import useForm from "../helpers/useForm";
+import { getAuthInfo } from "../helpers/authHelper";
 
 function Settings() {
   const [passwords, handleChange] = useForm({
