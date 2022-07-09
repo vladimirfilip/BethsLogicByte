@@ -5,6 +5,7 @@ import Home from "./Pages/home";
 import User from "./Pages/user";
 import Login from "./Pages/login";
 import { clearAuthInfo, storeAuthInfo, isLoggedIn } from "./authHelper";
+import Settings from "./Components/Settings";
 
 function getURL() {
   let url = window.location.href;
@@ -41,9 +42,10 @@ function Router() {
   const logIn = (account) => {
     setLoggedIn(true);
     storeAuthInfo(account);
+    setLoggedIn(true);
   };
 
-  const logOut = () => {
+  const logOff = () => {
     setLoggedIn(false);
     clearAuthInfo();
     changePage("login");
@@ -74,12 +76,13 @@ function Router() {
       return <h1>Please login to view this page</h1>;
     }
   } else if (page == "login") {
-    changePage("");
+    changePage("home");
   }
 
   const pages = [
     {
-      "": Home,
+      home: Home,
+      settings: Settings,
     },
     {
       user: User,
@@ -105,8 +108,8 @@ function Router() {
         <PageComponent changePage={changePage} argument={page[1]} />
       </>
     );
-  } else if (page == "logout") {
-    logOut();
+  } else if (page == "logoff") {
+    logOff();
   } else {
     return <h1>Page cannot be found</h1>;
   }

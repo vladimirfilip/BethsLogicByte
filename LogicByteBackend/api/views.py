@@ -2,7 +2,7 @@ from .models import UserProfile, Solution, Question, SavedQuestion, AttemptedQue
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSerializer, SavedQuestionSerializer, \
-    AttemptedQuestionSerializer
+    AttemptedQuestionSerializer, UserSerializer
 from django.contrib.auth.models import User
 
 
@@ -42,6 +42,7 @@ class GenericDetailsView(generics.GenericAPIView, mixins.RetrieveModelMixin, mix
 
     def put(self, request, **kwargs):
         model_instances = self.access(**kwargs)
+        print(request.data)
         if model_instances.count() <= 1:
             serializer = self.get_serializer(model_instances.first(), request.data)
             if serializer.is_valid():
@@ -136,3 +137,13 @@ class AttemptedQuestionList(GenericListView):
 class AttemptedQuestionDetails(GenericDetailsView):
     def __init__(self):
         super().__init__(AttemptedQuestion.objects.all(), AttemptedQuestionSerializer)
+
+
+class UserList(GenericListView):
+    def __init__(self):
+        super().__init__(User.objects.all(), UserSerializer)
+
+
+class UserDetails(GenericDetailsView):
+    def __init__(self):
+        super().__init__(User.objects.all(), UserSerializer)

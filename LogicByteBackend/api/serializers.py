@@ -1,5 +1,6 @@
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
 from .models import UserProfile, Solution, Question, SavedQuestion, AttemptedQuestion
+from django.contrib.auth.models import User
 
 
 class UserProfileSerializer(ModelSerializer):
@@ -32,4 +33,9 @@ class SavedQuestionSerializer(ModelSerializer):
 class AttemptedQuestionSerializer(ModelSerializer):
     class Meta:
         model = AttemptedQuestion
+        fields = "__all__"
+
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model = User
         fields = "__all__"

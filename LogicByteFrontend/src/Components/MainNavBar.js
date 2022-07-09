@@ -11,7 +11,7 @@ function MainNavBar(props) {
       </div>
       <div className="col-lg-4"></div>
       <div className="col">
-        <button onClick={() => props.link("")} className="nav__button">
+        <button onClick={() => props.link("home")} className="nav__button">
           Home
         </button>
       </div>
