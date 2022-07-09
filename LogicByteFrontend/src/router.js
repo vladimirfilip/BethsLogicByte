@@ -40,7 +40,6 @@ function Router() {
   };
 
   const logIn = (account) => {
-    setLoggedIn(true);
     storeAuthInfo(account);
     setLoggedIn(true);
   };
