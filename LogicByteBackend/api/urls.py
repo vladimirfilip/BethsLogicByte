@@ -11,6 +11,7 @@ url_views = {"api_profiles/": (UserProfileList, UserProfileDetails),
              "api_saved_questions/": (SavedQuestionList, SavedQuestionDetails),
              "api_attempted_questions/": (AttemptedQuestionList, AttemptedQuestionDetails),
              "api_token_auth/": (ObtainAuthToken, ObtainAuthToken),
+             "api_users/": (UserList, UserDetails)
              }
 
 
