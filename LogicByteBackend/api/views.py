@@ -42,7 +42,6 @@ class GenericDetailsView(generics.GenericAPIView, mixins.RetrieveModelMixin, mix
 
     def put(self, request, **kwargs):
         model_instances = self.access(**kwargs)
-        print(request.data)
         if model_instances.count() <= 1:
             serializer = self.get_serializer(model_instances.first(), request.data)
             if serializer.is_valid():

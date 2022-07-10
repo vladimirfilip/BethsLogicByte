@@ -21,10 +21,11 @@ function Settings() {
 
   let username = getAuthInfo().username;
   const verifyPassword = (password) => {
-    if (password != passwords.current_password) {
+    if (password == passwords.current_password) {
+      setCorrect(true);
+    } else {
       setCorrect(false);
     }
-    setCorrect(true);
   };
 
   const handleSubmit = (e) => {
@@ -73,14 +74,6 @@ function Settings() {
           });
       } else {
         setConfirm(false);
-        //
-        // Resets only new password fields (current_password already been checked)
-        //
-        handleChange({
-          current_password: passwords.current_password,
-          new_password: "",
-          confirm_password: "",
-        });
       }
     }
   };
