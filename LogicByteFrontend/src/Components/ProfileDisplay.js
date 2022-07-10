@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import axios from "axios";
-import { getAuthInfo } from "../authHelper";
+import { getAuthInfo } from "../helpers/authHelper";
 import { useState } from "react";
 import PropTypes from "prop-types";
 
