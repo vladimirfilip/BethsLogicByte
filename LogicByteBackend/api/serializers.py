@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 class UserProfileSerializer(ModelSerializer):
     saved_questions = PrimaryKeyRelatedField(many=True, read_only=True)
     attempted_questions = PrimaryKeyRelatedField(many=True, read_only=True)
+    solutions = PrimaryKeyRelatedField(many=True, read_only=True)
+    created_questions = PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = UserProfile
@@ -13,6 +15,8 @@ class UserProfileSerializer(ModelSerializer):
 
 
 class QuestionSerializer(ModelSerializer):
+    solutions = PrimaryKeyRelatedField(many=True, read_only=True)
+
     class Meta:
         model = Question
         fields = "__all__"
