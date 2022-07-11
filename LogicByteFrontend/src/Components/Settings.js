@@ -3,6 +3,7 @@ import axios from "axios";
 import { useState } from "react";
 import useForm from "../helpers/useForm";
 import { getAuthInfo } from "../helpers/authHelper";
+import isSecurePassword from "../helpers/passwd";
 
 function Settings() {
   const [passwords, handleChange] = useForm({
@@ -18,62 +19,73 @@ function Settings() {
   // If new password and confirmed password are the same
   //
   const [isConfirmCorrect, setConfirm] = useState(false);
-
+  const [isSecure, setSecure] = useState(true);
   let username = getAuthInfo().username;
-  const verifyPassword = (password) => {
-    if (password == passwords.current_password) {
-      setCorrect(true);
-    } else {
-      setCorrect(false);
-    }
-  };
 
   const handleSubmit = (e) => {
+    setCorrect(false);
+
     e.preventDefault();
     //
-    // Retrieves password of user
+    // Checks whether password is valid
     //
+    console.log(typeof passwords.current_password);
     axios
-      .get(`http://127.0.0.1:8000/api_users/username=${username}`, {
-        headers: {
-          Authorization: `token ${getAuthInfo().token}`,
-        },
-      })
+      .get(
+        `http://127.0.0.1:8000/api_check_password/${username}&${passwords.current_password}`,
+        {
+          headers: {
+            Authorization: `token ${getAuthInfo().token}`,
+          },
+        }
+      )
       .then((response) => {
-        verifyPassword(response.data.password);
+        // setPicRef(response.data.profile_pic);
+        if (response.data.result == "good") {
+          setCorrect(true);
+        } else {
+          setCorrect(false);
+        }
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error.response.data);
       });
 
     if (isPasswordCorrect) {
       //
-      // If new password and confirmed password are equal
+      // If the new password is secure
       //
-      if (passwords.new_password == passwords.confirm_password) {
-        setConfirm(true);
+      if (isSecurePassword(passwords.new_password)) {
+        setSecure(true);
         //
-        // Updates password
+        // If the new password is equal to confirmation
         //
-        axios
-          .put(
-            `http://127.0.0.1:8000/api_users/username=${username}`,
-
-            {
-              password: passwords.new_password,
-            },
-            {
-              headers: {
-                Authorization: `token ${getAuthInfo().token}`,
-                "Content-Type": "application/json",
+        if (passwords.new_password == passwords.confirm_password) {
+          setConfirm(true);
+          //
+          // Updates password
+          //
+          axios
+            .put(
+              `http://127.0.0.1:8000/api_users/username=${username}`,
+              {
+                password: passwords.new_password,
               },
-            }
-          )
-          .catch((error) => {
-            console.log(error.response);
-          });
+              {
+                headers: {
+                  Authorization: `token ${getAuthInfo().token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            )
+            .catch((error) => {
+              console.log(error.response);
+            });
+        } else {
+          setConfirm(false);
+        }
       } else {
-        setConfirm(false);
+        setSecure(false);
       }
     }
   };
@@ -91,6 +103,17 @@ function Settings() {
           value={passwords.current_password}
           onChange={handleChange}
         ></input>
+        {!isSecure && (
+          <div>
+            <h2>The password should contain:</h2>
+            <ul>
+              <li>Both lowercase and uppercase characters</li>
+              <li>At least one digit</li>
+              <li>At least one symbol</li>
+              <li>At least eight special characters</li>
+            </ul>
+          </div>
+        )}
         <input
           name="new_password"
           value={passwords.new_password}

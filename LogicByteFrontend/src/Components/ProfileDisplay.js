@@ -17,7 +17,6 @@ function ProfileDisplay(props) {
     //
     let current_rank = 1;
     for (let num of user_points) {
-      console.log(num);
       if (num > numPoints) {
         current_rank += 1;
       }

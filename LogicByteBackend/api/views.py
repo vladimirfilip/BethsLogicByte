@@ -4,6 +4,17 @@ from rest_framework.response import Response
 from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSerializer, SavedQuestionSerializer, \
     AttemptedQuestionSerializer, UserSerializer
 from django.contrib.auth.models import User
+from django.http import JsonResponse
+
+
+def check_password(request):
+    
+    password = request.GET.get('password', '')
+    username = request.GET.get('username', '')
+    user = User.objects.get(username=username)
+    if user.check_password(password):
+        return JsonResponse({"result": "good"})
+    return JsonResponse({"result": "bad"})
 
 
 class GenericListView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
@@ -42,11 +53,18 @@ class GenericDetailsView(generics.GenericAPIView, mixins.RetrieveModelMixin, mix
 
     def put(self, request, **kwargs):
         model_instances = self.access(**kwargs)
+        request_data = request.data
         if model_instances.count() <= 1:
-            serializer = self.get_serializer(model_instances.first(), request.data)
+            model_instance = model_instances.first()
+            new_data = self.get_serializer(model_instance).data.copy()
+            for key in request_data.keys():
+                new_data[key] = request_data[key]
+            serializer = self.get_serializer(model_instance, new_data)
             if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
+                saved_model = serializer.save()
+                if 'password' in request_data.keys() and type(saved_model) == User:
+                    saved_model.set_password(request_data['password'])
+                return Response(self.get_serializer(saved_model).data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
