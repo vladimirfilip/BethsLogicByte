@@ -5,7 +5,7 @@ from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSeri
     AttemptedQuestionSerializer, UserSerializer
 from django.contrib.auth.models import User
 from django.http import JsonResponse
-
+from django.contrib.auth.hashers import make_password
 
 def check_password(request):
     password = request.GET.get('password', '')
@@ -27,11 +27,11 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
     def get_params(request):
         return {key: value[0] for key, value in dict(request.GET).items()}
 
-    def filter(self, request, secondary=None):
+    def filter(self, request, secondary={}):
         queryset = self.queryset
         params = self.get_params(request)
         for key in params.keys():
-            if key in secondary:
+            if key in secondary.keys():
                 primary_params = secondary[key](params[key])
                 field_name, field_value = primary_params
                 queryset = queryset.filter(**{field_name: field_value})
@@ -41,7 +41,6 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
 
     def get(self, request):
         model_instances = self.filter(request)
-        print(model_instances)
         if model_instances.count() < 2:
             status_code = status.HTTP_400_BAD_REQUEST if model_instances.count() == 0 else status.HTTP_200_OK
             serialized_data = self.get_serializer(model_instances.first()).data
@@ -53,7 +52,10 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
 
     def replace_record_with_new_data(self, old_data, new_data):
         for key in new_data.keys():
-            old_data[key] = new_data[key]
+            data_point = new_data[key]
+            if key == 'password':
+                data_point = make_password(data_point)
+            old_data[key] = data_point
 
     def put(self, request):
         model_instances = self.filter(request)
@@ -64,14 +66,12 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         model_instance = model_instances.first()
         record = self.get_serializer(model_instance).data.copy()
         self.replace_record_with_new_data(record, request_data)
-        
+
         serializer = self.get_serializer(model_instance, record)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         saved_model = serializer.save()
-        if 'password' in request_data.keys() and type(saved_model) == User:
-            saved_model.set_password(request_data['password'])
 
         return Response(self.get_serializer(saved_model).data)
         
