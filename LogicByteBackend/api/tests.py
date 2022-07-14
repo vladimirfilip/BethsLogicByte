@@ -1,23 +1,21 @@
-from django.test import TestCase
-from django.test import Client
-from .models import Question, UserProfile
 from django.contrib.auth.models import User
+from .models import Question, UserProfile
 from rest_framework.authtoken.models import Token
+from django.test import Client, TestCase
+from rest_framework.test import APIClient, APITestCase
 
 
-class GenericTestSuite(TestCase):
-    def setUp(self, *args, **kwargs):
-        if 'required_objects' in kwargs.keys():
-            required_objects = kwargs.pop('required_objects')
-            required_model_type = required_objects.pop()
-            for data in required_objects:
-                new_object = required_model_type.objects.create(**data)
-                if required_model_type == User:
-                    self.token = Token.objects.get(user=new_object).key
+def create_model_instance(model_type, **kwargs):
+    return model_type.objects.create(**kwargs)
 
-        if 'skeleton_data' in kwargs.keys():
-            self.skeleton_data = kwargs.pop('skeleton_data')
-        self.test_client = Client()
+
+class TestOperator(TestCase):
+    def setUp(self):
+        self.client = Client()
+        super().setUp()
+
+    def set_token(self, token):
+        self.token = token
 
     def assert_response_and_status(self, response, expected, assert_contains: bool):
         response_data = response.json() if response.data else None
@@ -28,46 +26,53 @@ class GenericTestSuite(TestCase):
         self.assertEqual(response.status_code, expected[1])
 
     @staticmethod
-    def eval_test_args(test_args):
-        if not test_args:
-            return []
-        return test_args
+    def eval_test_args(**kwargs):
+        url, expected_data, expected_status_code = kwargs.pop('url'), kwargs.pop(
+            'expected_data'), kwargs.pop('expected_status_code')
+        input_data = kwargs.pop('input_data', {})
+        params = kwargs.pop('params', {})
+        url = url.rstrip("/") + "/"
+        if params:
+            url += "?"
+        for k, v in params.items():
+            url += f"{k}={v}"
+        assert_contains = kwargs.pop('assert_contains', False)
+        return url, expected_data, expected_status_code, input_data, assert_contains
 
-    @staticmethod
-    def add_token(input_data, token):
-        if token:
-            return input_data + {"Authorization": "Token " + token}
-        return input_data
+    def make_request(self, func, **kwargs):
+        args = list(self.eval_test_args(**kwargs))
+        self.assert_response_and_status(func(args[0],
+                                             data=dict(args[3]),
+                                             content_type="application/json",
+                                             **{"HTTP_AUTHORIZATION": "Token " + self.token.key}),
+                                        [args[1], args[2]],
+                                        args[4])
 
-    def get(self, token=None, test_args=None, assert_contains=False):
-        for url, expected_data, expected_status_code in self.eval_test_args(test_args):
-            self.assert_response_and_status(self.client.get(url,
-                                                            data=self.add_token({}, token)),
-                                            [expected_data, expected_status_code],
-                                            assert_contains)
+    def get(self, **kwargs):
+        self.make_request(self.client.get, **kwargs)
 
-    def post(self, token=None, test_args=None, assert_contains=False):
-        for url, input_data, expected_data, expected_status_code in self.eval_test_args(test_args):
-            self.assert_response_and_status(self.client.post(url,
-                                                             data=self.add_token(input_data, token),
-                                                             content_type="application/json"),
-                                            [expected_data, expected_status_code],
-                                            assert_contains)
+    def post(self, **kwargs):
+        self.make_request(self.client.post, **kwargs)
 
-    def put(self, token=None, test_args=None, assert_contains=False):
-        for url, input_data, expected_data, expected_status_code in self.eval_test_args(test_args):
-            self.assert_response_and_status(self.client.put(url,
-                                                            data=self.add_token(input_data, token),
-                                                            content_type="application/json"),
-                                            [expected_data, expected_status_code],
-                                            assert_contains)
+    def put(self, **kwargs):
+        self.make_request(self.client.put, **kwargs)
 
-    def delete(self, token=None, test_args=None, assert_contains=False):
-        for url, expected_data, expected_status_code in self.eval_test_args(test_args):
-            self.assert_response_and_status(self.client.delete(url,
-                                                               data=self.add_token({}, token)),
-                                            [expected_data, expected_status_code],
-                                            assert_contains)
+    def delete(self, **kwargs):
+        self.make_request(self.client.delete, **kwargs)
+
+
+class GenericTestSuite(TestCase):
+    def get(self):
+        pass
+
+    def post(self):
+        pass
+
+    def put(self):
+        pass
+
+    def delete(self):
+        pass
 
     def test(self):
         self.post()
@@ -76,48 +81,68 @@ class GenericTestSuite(TestCase):
         self.delete()
 
 
-#
-# Each test class will test a single model, simulating CRUD requests to the views class of that model
-#
 class QuestionTestSuite(GenericTestSuite):
-    def setUp(self, *args):
-        required_objects = [{'question_title': 'This is a test question',
-                             'question_description': 'This is a question description'},
-                            Question]
-        skeleton_data = {
+    def setUp(self):
+        user = create_model_instance(User, username="user")
+        self.token = Token.objects.get(user=user)
+        self.test_operator = TestOperator()
+        self.test_operator.client = Client()
+        self.test_operator.set_token(self.token)
+        question_data = {'question_title': 'This is a test question',
+                         'question_description': 'This is a question description',
+                         'creator': create_model_instance(UserProfile, user=user)}
+        create_model_instance(Question, **question_data)
+        self.skeleton_data = {
+            "creator": None,
             "question_title": '',
             "question_description": '',
             "tag_names": ''
         }
-        super().setUp(required_objects=required_objects, skeleton_data=skeleton_data)
+        super().setUp()
 
-    def get(self, **kwargs):
+    def get(self):
         expected_data = {
             "question_title": "This is a test question",
             "question_description": "This is a question description",
             "tag_names": "",
-            "id": 1
+            "id": 1,
+            "creator": 1,
+            "solutions": []
         }
-        super().get([("/api_questions/question_title=This is a test question", expected_data, 200),
-                     ("/api_questions/question_title= ", self.skeleton_data, 400)])
+        self.test_operator.get(url="/api_questions/",
+                               params={"question_title": "This is a test question"},
+                               expected_data=expected_data,
+                               expected_status_code=200)
+        self.test_operator.get(url="/api_questions/",
+                               params={"question_title": " "},
+                               expected_data=self.skeleton_data,
+                               expected_status_code=400)
 
-    def post(self, **kwargs):
+    def post(self):
         input_data = {
+            "creator": 1,
             "question_title": "This is a posted maths question",
             "question_description": "This is a posted maths question description",
-            "tag_names": "maths,challenge"
+            "tag_names": "maths,challenge",
         }
-        expected_data = dict(input_data, **{"id": 2})
-        super().post([("/api_questions/", input_data, expected_data, 201)])
+        expected_data = dict(input_data, **{"id": 2, "solutions": []})
+        self.test_operator.post(url="/api_questions/",
+                                input_data=input_data,
+                                expected_data=expected_data,
+                                expected_status_code=201)
 
-    def put(self, **kwargs):
+    def put(self):
         updated_question_data = {
             "id": 2,
             "question_title": "This is an updated posted maths question",
             "question_description": "This is a posted maths question description",
-            "tag_names": "maths"
+            "tag_names": "maths",
         }
-        super().put([("/api_questions/id=2", updated_question_data, updated_question_data, 200)])
+        self.test_operator.put(url="/api_questions/",
+                               params={"id": 2},
+                               input_data=updated_question_data,
+                               expected_data=dict(updated_question_data, **{"creator": 1, "solutions": []}),
+                               expected_status_code=200)
         updated_question_data['question_title'] = ""
         updated_question_data['question_description'] = ""
         updated_question_data['tag_names'] = ""
@@ -129,37 +154,53 @@ class QuestionTestSuite(GenericTestSuite):
                 "This field may not be blank."
             ]
         }
-        super().put([("/api_questions/question_title=This is an updated posted maths question",
-                      updated_question_data,
-                      expected_data,
-                      400)])
+        self.test_operator.put(url="/api_questions/",
+                               params={"question_title": "This is an updated posted maths question"},
+                               input_data=updated_question_data,
+                               expected_data=expected_data,
+                               expected_status_code=400)
 
-    def delete(self, **kwargs):
-        super().delete([("/api_questions/tag_names=maths", None, 204)])
-        super().get([("/api_questions/id=2", self.skeleton_data, 400)])
+    def delete(self):
+        self.test_operator.delete(url="/api_questions/",
+                                  params={"tag_names": "maths"},
+                                  expected_data=None,
+                                  expected_status_code=204)
+        self.test_operator.get(url="/api_questions/",
+                               params={"id": 2},
+                               expected_data=self.skeleton_data,
+                               expected_status_code=400)
 
 
 class UserProfileTestSuite(GenericTestSuite):
     def setUp(self):
-        required_objects = [{"username": "user1"}, {"username": "user2"}, User]
-        skeleton_data = {
+        user = create_model_instance(User, username="user1")
+        self.token = user.auth_token
+        self.test_operator = TestOperator()
+        self.test_operator.client = Client()
+        self.test_operator.set_token(self.token)
+        create_model_instance(User, username='user2')
+        self.skeleton_data = {
             "num_points": None,
             "year_group": "",
             "class_name": "",
             "email_address": "",
             "user": None
         }
-        super().setUp(required_objects=required_objects, skeleton_data=skeleton_data)
+        super().setUp()
 
-    def post(self, **kwargs):
+    def post(self):
         input_data = {
             "user": 1,
             "year_group": "10",
             "class_name": "MathsClass",
             "email_address": "this.is.a.valid.email.address@gmail.com"
         }
-        expected_data = dict(input_data, **{"id": 1, "saved_questions": [], "attempted_questions": [], "num_points": 0})
-        super().post([("/api_profiles/", input_data, expected_data, 201)])
+        expected_data = dict(input_data, **{"id": 1, "solutions": [], "created_questions": [], "saved_questions": [],
+                                            "attempted_questions": [], "num_points": 0})
+        self.test_operator.post(url="/api_profiles/",
+                                input_data=input_data,
+                                expected_data=expected_data,
+                                expected_status_code=201)
         input_data['email_address'] = "this_is_not_a_valid_email"
         expected_output = {
             "email_address": [
@@ -169,24 +210,38 @@ class UserProfileTestSuite(GenericTestSuite):
                 "This field must be unique."
             ]
         }
-        super().post([("/api_profiles/", input_data, expected_output, 400)])
+        self.test_operator.post(url="/api_profiles/",
+                                input_data=input_data,
+                                expected_data=expected_output,
+                                expected_status_code=400)
 
-    def get(self, **kwargs):
+    def get(self):
         expected_data = {
             "id": 1,
             "saved_questions": [],
             "attempted_questions": [],
+            "created_questions": [],
+            "solutions": [],
             "user": 1,
             "num_points": 0,
             "year_group": "10",
             "class_name": "MathsClass",
             "email_address": "this.is.a.valid.email.address@gmail.com"
         }
-        super().get([("/api_profiles/username=user1", expected_data, 200),
-                     ("/api_profiles/id=1", expected_data, 200),
-                     ("/api_profiles/username=user2", self.skeleton_data, 400)])
+        self.test_operator.get(url="/api_profiles/",
+                               params={"username": "user1"},
+                               expected_data=expected_data,
+                               expected_status_code=200)
+        self.test_operator.get(url="/api_profiles/",
+                               params={"id": 1},
+                               expected_data=expected_data,
+                               expected_status_code=200)
+        self.test_operator.get(url="/api_profiles/",
+                               params={"username": "user2"},
+                               expected_data=self.skeleton_data,
+                               expected_status_code=400)
 
-    def put(self, **kwargs):
+    def put(self):
         updated_data = {
             "id": 1,
             "saved_questions": [],
@@ -197,7 +252,11 @@ class UserProfileTestSuite(GenericTestSuite):
             "class_name": "EnglishClass",
             "email_address": "this.is.a.valid.email.address@gmail.com"
         }
-        super().put([("/api_profiles/id=1", updated_data, updated_data, 200)])
+        self.test_operator.put(url="/api_profiles/",
+                               params={"id": 1},
+                               input_data=updated_data,
+                               expected_data=dict(updated_data, **{"created_questions": [], "solutions": []}),
+                               expected_status_code=200)
         updated_data['year_group'] = ""
         updated_data['email_address'] = ""
         updated_data['class_name'] = ""
@@ -212,33 +271,53 @@ class UserProfileTestSuite(GenericTestSuite):
                 "This field may not be blank."
             ]
         }
-        super().put([("/api_profiles/username=user1", updated_data, expected_data, 400)])
+        self.test_operator.put(url="/api_profiles/",
+                               params={"username": "user1"},
+                               input_data=updated_data,
+                               expected_data=expected_data,
+                               expected_status_code=400)
 
-    def delete(self, **kwargs):
-        super().delete([("/api_profiles/username=user1", None, 204)])
-        super().get([("/api_profiles/id=1", self.skeleton_data, 400)])
+    def delete(self):
+        self.test_operator.delete(url="/api_profiles/",
+                                  params={"username": "user1"},
+                                  expected_data=None,
+                                  expected_status_code=204)
+        self.test_operator.get(url="/api_profiles/",
+                               params={"id": 1},
+                               expected_data=self.skeleton_data,
+                               expected_status_code=400)
 
 
 class SolutionTestSuite(GenericTestSuite):
     def setUp(self):
-        user = User.objects.create(username="user")
-        UserProfile.objects.create(user=user)
-        Question.objects.create(question_title="question", question_description="question_description")
+        user = create_model_instance(User, username='user')
+        self.token = user.auth_token
+        self.test_operator = TestOperator()
+        self.test_operator.client = Client()
+        self.test_operator.set_token(self.token)
+        user_profile = create_model_instance(UserProfile, user=user)
+        question_data = {
+            'question_title': 'question',
+            'question_description': 'question_description',
+            'creator': user_profile
+        }
+        create_model_instance(Question, **question_data)
         self.skeleton_data = {
-            "user_profile": None,
+            "creator": None,
             "question": None,
             "solution": ""
         }
+        super().setUp()
 
-    def post(self, **kwargs):
+    def post(self):
         valid_data = {
-            "user_profile": 1,
+            "creator": 1,
             "question": 1,
             "solution": "This is a solution"
         }
         output_from_valid_data = dict(valid_data, **{"id": 1})
         erroneous_data = {
-            "user_profile": "",
+            "creator": "",
             "question": "",
             "solution": ""
         }
@@ -246,43 +325,68 @@ class SolutionTestSuite(GenericTestSuite):
             "solution": [
                 "This field may not be blank."
             ],
-            "user_profile": [
+            "creator": [
                 "This field may not be null."
             ],
             "question": [
                 "This field may not be null."
             ]
         }
-        super().post([("/api_solutions/", valid_data, output_from_valid_data, 201),
-                      ("/api_solutions/", erroneous_data, output_from_erroneous_data, 400)],
-                     assert_contains=True)
+        self.test_operator.post(url="/api_solutions/",
+                                input_data=valid_data,
+                                expected_data=output_from_valid_data,
+                                expected_status_code=201,
+                                assert_contains=True)
+        self.test_operator.post(url="/api_solutions/",
+                                input_data=erroneous_data,
+                                expected_data=output_from_erroneous_data,
+                                expected_status_code=400)
 
-    def get(self, **kwargs):
+    def get(self):
         expected_data = {
             "id": 1,
-            "user_profile": 1,
+            "creator": 1,
             "question": 1,
             "solution": "This is a solution"
         }
-        super().get([("/api_solutions/user_profile=1", expected_data, 200),
-                     ("/api_solutions/id=1", expected_data, 200)],
-                    assert_contains=True)
-        super().get([("/api_solutions/user_profile=2", self.skeleton_data, 400)])
+        self.test_operator.get(url="/api_solutions/",
+                               params={"creator": 1},
+                               expected_data=expected_data,
+                               expected_status_code=200,
+                               assert_contains=True)
+        self.test_operator.get(url="/api_solutions/",
+                               params={"id": 1},
+                               expected_data=expected_data,
+                               expected_status_code=200,
+                               assert_contains=True)
+        self.test_operator.get(url="/api_solutions/",
+                               params={"creator": 2},
+                               expected_data=self.skeleton_data,
+                               expected_status_code=400)
 
     def put(self, **kwargs):
         updated_data = {
             "id": 1,
-            "user_profile": 1,
+            "creator": 1,
             "question": 1,
             "solution": "This is an updated solution"
         }
-        super().put([("/api_solutions/id=1", updated_data, updated_data, 200)], assert_contains=True)
-        super().get([("/api_solutions/id=1", updated_data, 200)], assert_contains=True)
-        updated_data['user_profile'] = ""
+        self.test_operator.put(url="/api_solutions/",
+                               params={"id": 1},
+                               input_data=updated_data,
+                               expected_data=updated_data,
+                               expected_status_code=200,
+                               assert_contains=True)
+        self.test_operator.get(url="/api_solutions/",
+                               params={"id": 1},
+                               expected_data=updated_data,
+                               expected_status_code=200,
+                               assert_contains=True)
+        updated_data['creator'] = ""
         updated_data['question'] = ""
         updated_data['solution'] = ""
         expected_data = {
-            "user_profile": [
+            "creator": [
                 "This field may not be null."
             ],
             "question": [
@@ -292,30 +396,44 @@ class SolutionTestSuite(GenericTestSuite):
                 "This field may not be blank."
             ]
         }
-        super().put([("/api_solutions/question=1", updated_data, expected_data, 400)])
+        self.test_operator.put(url="/api_solutions/",
+                               params={"question": 1},
+                               input_data=updated_data,
+                               expected_data=expected_data,
+                               expected_status_code=400)
 
-    def delete(self, **kwargs):
-        super().delete([("/api_solutions/id=1", None, 204)])
-        super().get([("/api_solutions/id=1", self.skeleton_data, 400)])
-
-    def test(self):
-        self.post()
-        self.get()
-        self.put()
-        self.delete()
+    def delete(self):
+        self.test_operator.delete(url="/api_solutions/",
+                                  params={"id": 1},
+                                  expected_data=None,
+                                  expected_status_code=204)
+        self.test_operator.get(url="/api_solutions/",
+                               params={"id": 1},
+                               expected_data=self.skeleton_data,
+                               expected_status_code=400)
 
 
 class SavedQuestionTestSuite(GenericTestSuite):
     def setUp(self):
-        user = User.objects.create(username="user")
-        UserProfile.objects.create(user=user)
-        Question.objects.create(question_title="question", question_description="question_description")
+        user = create_model_instance(User, username="user")
+        self.token = user.auth_token
+        self.test_operator = TestOperator()
+        self.test_operator.client = Client()
+        self.test_operator.set_token(self.token)
+        user_profile = create_model_instance(UserProfile, user=user)
+        question_data = {
+            'question_title': 'question',
+            'question_description': 'question_description',
+            'creator': user_profile
+        }
+        create_model_instance(Question, **question_data)
         self.skeleton_data = {
             "user_profile": None,
             "question": None,
         }
+        super().setUp()
 
-    def post(self, **kwargs):
+    def post(self):
         valid_data = {
             "user_profile": 1,
             "question": 1
@@ -333,27 +451,49 @@ class SavedQuestionTestSuite(GenericTestSuite):
                 "This field may not be null."
             ]
         }
-        super().post([("/api_saved_questions/", valid_data, output_from_valid_data, 201),
-                      ("/api_saved_questions/", erroneous_data, output_from_erroneous_data, 400)])
+        self.test_operator.post(url="/api_saved_questions/",
+                                input_data=valid_data,
+                                expected_data=output_from_valid_data,
+                                expected_status_code=201)
+        self.test_operator.post(url="/api_saved_questions/",
+                                input_data=erroneous_data,
+                                expected_data=output_from_erroneous_data,
+                                expected_status_code=400)
 
-    def get(self, **kwargs):
+    def get(self):
         expected_data = {
             "id": 1,
             "user_profile": 1,
             "question": 1,
         }
-        super().get([("/api_saved_questions/user_profile=1", expected_data, 200),
-                     ("/api_saved_questions/id=1", expected_data, 200),
-                     ("/api_saved_questions/user_profile=2", self.skeleton_data, 400)])
+        self.test_operator.get(url="/api_saved_questions/",
+                               params={"user_profile": 1},
+                               expected_data=expected_data,
+                               expected_status_code=200)
+        self.test_operator.get(url="/api_saved_questions/",
+                               params={"id": 1},
+                               expected_data=expected_data,
+                               expected_status_code=200)
+        self.test_operator.get(url="/api_saved_questions/",
+                               params={"user_profile": 2},
+                               expected_data=self.skeleton_data,
+                               expected_status_code=400)
 
-    def put(self, **kwargs):
+    def put(self):
         updated_data = {
             "id": 1,
             "user_profile": 1,
             "question": 1,
         }
-        super().put([("/api_saved_questions/id=1", updated_data, updated_data, 200)])
-        super().get([("/api_saved_questions/id=1", updated_data, 200)])
+        self.test_operator.put(url="/api_saved_questions/",
+                               params={"id": 1},
+                               input_data=updated_data,
+                               expected_data=updated_data,
+                               expected_status_code=200)
+        self.test_operator.get(url="/api_saved_questions/",
+                               params={"id": 1},
+                               expected_data=updated_data,
+                               expected_status_code=200)
         updated_data['user_profile'] = ""
         updated_data['question'] = ""
         expected_data = {
@@ -364,31 +504,45 @@ class SavedQuestionTestSuite(GenericTestSuite):
                 "This field may not be null."
             ],
         }
-        super().put([("/api_saved_questions/question=1", updated_data, expected_data, 400)])
+        self.test_operator.put(url="/api_saved_questions/",
+                               params={"question": 1},
+                               input_data=updated_data,
+                               expected_data=expected_data,
+                               expected_status_code=400)
 
-    def delete(self, **kwargs):
-        super().delete([("/api_saved_questions/id=1", None, 204)])
-        super().get([("/api_saved_questions/id=1", self.skeleton_data, 400)])
-
-    def test(self):
-        self.post()
-        self.get()
-        self.put()
-        self.delete()
+    def delete(self):
+        self.test_operator.delete(url="/api_saved_questions/",
+                                  params={"id": 1},
+                                  expected_data=None,
+                                  expected_status_code=204)
+        self.test_operator.get(url="/api_saved_questions/",
+                                  params={"id": 1},
+                                  expected_data=self.skeleton_data,
+                                  expected_status_code=400)
 
 
 class AttemptedQuestionTestSuite(GenericTestSuite):
     def setUp(self):
-        user = User.objects.create(username="user")
-        UserProfile.objects.create(user=user)
-        Question.objects.create(question_title="question", question_description="question_description")
+        user = create_model_instance(User, username="user")
+        self.token = user.auth_token
+        self.test_operator = TestOperator()
+        self.test_operator.client = Client()
+        self.test_operator.set_token(self.token)
+        user_profile = create_model_instance(UserProfile, user=user)
+        question_data = {
+            'question_title': 'question',
+            'question_description': 'question_description',
+            'creator': user_profile
+        }
+        create_model_instance(Question, **question_data)
         self.skeleton_data = {
             "user_profile": None,
             "question": None,
             "num_times_attempted": None,
         }
+        super().setUp()
 
-    def post(self, **kwargs):
+    def post(self):
         valid_data = {
             "user_profile": 1,
             "question": 1,
@@ -408,8 +562,14 @@ class AttemptedQuestionTestSuite(GenericTestSuite):
                 "This field may not be null."
             ]
         }
-        super().post([("/api_attempted_questions/", valid_data, output_from_valid_data, 201),
-                      ("/api_attempted_questions/", erroneous_data, output_from_erroneous_data, 400)])
+        self.test_operator.post(url="/api_attempted_questions/",
+                                input_data=valid_data,
+                                expected_data=output_from_valid_data,
+                                expected_status_code=201)
+        self.test_operator.post(url="/api_attempted_questions/",
+                                input_data=erroneous_data,
+                                expected_data=output_from_erroneous_data,
+                                expected_status_code=400)
 
     def get(self, **kwargs):
         expected_data = {
@@ -418,19 +578,35 @@ class AttemptedQuestionTestSuite(GenericTestSuite):
             "question": 1,
             'num_times_attempted': 1
         }
-        super().get([("/api_attempted_questions/user_profile=1", expected_data, 200),
-                     ("/api_attempted_questions/id=1", expected_data, 200),
-                     ("/api_attempted_questions/user_profile=2", self.skeleton_data, 400)])
+        self.test_operator.get(url="/api_attempted_questions/",
+                               params={"user_profile": 1},
+                               expected_data=expected_data,
+                               expected_status_code=200)
+        self.test_operator.get(url="/api_attempted_questions/",
+                               params={"id": 1},
+                               expected_data=expected_data,
+                               expected_status_code=200)
+        self.test_operator.get(url="/api_attempted_questions/",
+                               params={"user_profile": 2},
+                               expected_data=self.skeleton_data,
+                               expected_status_code=400)
 
-    def put(self, **kwargs):
+    def put(self):
         updated_data = {
             "id": 1,
             "user_profile": 1,
             "question": 1,
             'num_times_attempted': 1
         }
-        super().put([("/api_attempted_questions/id=1", updated_data, updated_data, 200)])
-        super().get([("/api_attempted_questions/id=1", updated_data, 200)])
+        self.test_operator.put(url="/api_attempted_questions/",
+                               params={"id": 1},
+                               input_data=updated_data,
+                               expected_data=updated_data,
+                               expected_status_code=200)
+        self.test_operator.get(url="/api_attempted_questions/",
+                               params={"id": 1},
+                               expected_data=updated_data,
+                               expected_status_code=200)
         updated_data['user_profile'] = ""
         updated_data['question'] = ""
         expected_data = {
@@ -441,14 +617,18 @@ class AttemptedQuestionTestSuite(GenericTestSuite):
                 "This field may not be null."
             ],
         }
-        super().put([("/api_attempted_questions/question=1", updated_data, expected_data, 400)])
+        self.test_operator.put(url="/api_attempted_questions/",
+                               params={"question": 1},
+                               input_data=updated_data,
+                               expected_data=expected_data,
+                               expected_status_code=400)
 
-    def delete(self, **kwargs):
-        super().delete([("/api_attempted_questions/id=1", None, 204)])
-        super().get([("/api_attempted_questions/id=1", self.skeleton_data, 400)])
-
-    def test(self):
-        self.post()
-        self.get()
-        self.put()
-        self.delete()
+    def delete(self):
+        self.test_operator.delete(url="/api_attempted_questions/",
+                                  params={"id": 1},
+                                  expected_data=None,
+                                  expected_status_code=204)
+        self.test_operator.get(url="/api_attempted_questions/",
+                               params={"id": 1},
+                               expected_data=self.skeleton_data,
+                               expected_status_code=400)

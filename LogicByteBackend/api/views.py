@@ -6,6 +6,8 @@ from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSeri
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
+import json
+
 
 def check_password(request):
     password = request.GET.get('password', '')
@@ -16,20 +18,22 @@ def check_password(request):
     return JsonResponse({"result": "bad"})
 
 
-class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin, 
-                      mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     def __init__(self, queryset, serializer_class, **kwargs):
         super().__init__(**kwargs)
         self.queryset = queryset
         self.serializer_class = serializer_class
-    
+
     @staticmethod
     def get_params(request):
         return {key: value[0] for key, value in dict(request.GET).items()}
 
-    def filter(self, request, secondary={}):
+    def filter(self, request, secondary=None):
         queryset = self.queryset
         params = self.get_params(request)
+        if secondary is None:
+            secondary = {}
         for key in params.keys():
             if key in secondary.keys():
                 primary_params = secondary[key](params[key])
@@ -48,7 +52,11 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         return Response(self.get_serializer(model_instances, many=True).data, status.HTTP_200_OK)
 
     def post(self, request):
-        return self.create(request)
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def replace_record_with_new_data(self, old_data, new_data):
         for key in new_data.keys():
@@ -62,7 +70,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         request_data = request.data
         if model_instances.count() > 1:
             return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
-        
+
         model_instance = model_instances.first()
         record = self.get_serializer(model_instance).data.copy()
         self.replace_record_with_new_data(record, request_data)
@@ -70,28 +78,28 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         serializer = self.get_serializer(model_instance, record)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
         saved_model = serializer.save()
 
         return Response(self.get_serializer(saved_model).data)
-        
-    def delete(self, request, **kwargs):
-        model_instances = self.access(**kwargs)
-        if model_instances.count > 1:
-            return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
-        model_instances.first().delete()
-        return Response(status=status.HTTP_204_NO_CONTENT, data=None)
+
+    def delete(self, request):
+        model_instances = self.filter(request)
+        if model_instances.count() == 1:
+            model_instances.first().delete()
+            return Response(status=status.HTTP_204_NO_CONTENT, data=None)
+        return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserProfileView(GenericView):
     def __init__(self):
         super().__init__(UserProfile.objects.all(), UserProfileSerializer)
 
-    def filter_by_username(queryset, username) -> tuple:
+    def filter_by_username(self, username) -> tuple:
         user = User.objects.filter(**{"username": username}).first()
         return "user", user
 
-    def filter(self, request):
+    def filter(self, request, *args):
         return super().filter(request, {'username': self.filter_by_username})
 
 
@@ -102,11 +110,12 @@ class QuestionView(GenericView):
     def get_questions_with_tag_names(self, tag_names: list):
         tag_names = tag_names.lower().split(",")
         queryset = self.queryset
+        tag_name = ""
         for tag_name in tag_names:
             queryset = queryset.filter(tag_names__contains=tag_name)
         return 'tag_names__contains', tag_name
 
-    def filter(self, request):
+    def filter(self, request, *args):
         return super().filter(request, {'tag_names': self.get_questions_with_tag_names})
 
 
@@ -118,8 +127,8 @@ class SolutionView(GenericView):
         question = Question.objects.filter(id=question_id).first()
         return 'question', question
 
-    def filter(self, request):
-        return super().filter(request, {'question_id': self.get_solution_by_question_id})#
+    def filter(self, request, *args):
+        return super().filter(request, {'question_id': self.get_solution_by_question_id})  #
 
 
 class SavedQuestionView(GenericView):
