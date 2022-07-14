@@ -19,6 +19,7 @@ class UserProfile(models.Model):
 
 
 class Question(models.Model):
+    creator = models.ForeignKey(UserProfile, related_name="created_questions", on_delete=models.CASCADE)
     question_title = models.CharField(max_length=100, unique=True)
     question_description = models.TextField()
     tag_names = models.CharField(max_length=150, blank=True)
@@ -28,8 +29,8 @@ class Question(models.Model):
 
 
 class Solution(models.Model):
-    user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
-    question = models.OneToOneField(Question, on_delete=models.CASCADE)
+    creator = models.ForeignKey(UserProfile, related_name="solutions", on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name="solutions", on_delete=models.CASCADE)
     solution = models.TextField()
     date_modified = models.DateTimeField(auto_now_add=True)
 
