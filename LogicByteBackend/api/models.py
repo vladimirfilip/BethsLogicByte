@@ -41,6 +41,7 @@ class Question(models.Model):
     num_points = models.IntegerField(default=0)
     question_type = models.CharField(max_length=15, blank=True)
     official_solution = models.TextField(blank=True)
+    multiple_choices = models.TextField(blank=True)
 
 
 class QuestionImage(models.Model):

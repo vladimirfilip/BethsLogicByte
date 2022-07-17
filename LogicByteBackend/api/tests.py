@@ -101,7 +101,8 @@ class QuestionTestSuite(GenericTestSuite):
             "num_points": None,
             "question_type": "",
             "official_solution": "",
-            "creator": None
+            "creator": None,
+            "multiple_choices": ""
         }
 
         super().setUp()
@@ -118,7 +119,8 @@ class QuestionTestSuite(GenericTestSuite):
             "official_solution": '',
             "question_type": '',
             "difficulty": '',
-            "exam_board": ''
+            "exam_board": '',
+            "multiple_choices": ''
         }
         self.test_operator.get(url="/api_questions/",
                                params={"id": "1"},
@@ -139,7 +141,8 @@ class QuestionTestSuite(GenericTestSuite):
             "exam_type": "t",
             "num_points": 120,
             "official_solution": "t",
-            "question_type": "t"
+            "question_type": "t",
+            "multiple_choices": ""
         }
         expected_data = dict(input_data, **{"id": 2, "solutions": []})
         self.test_operator.post(url="/api_questions/",
@@ -153,17 +156,21 @@ class QuestionTestSuite(GenericTestSuite):
             "question_description": "This is a posted maths question description",
             "tag_names": "maths",
         }
+        extra_data = {
+            "creator": 1,
+            "solutions": [],
+            "difficulty": "t",
+            "exam_board": "t",
+            "exam_type": "t",
+            "num_points": 120,
+            "official_solution": "t",
+            "question_type": "t",
+            "multiple_choices": ""
+        }
         self.test_operator.put(url="/api_questions/",
                                params={"id": 2},
                                input_data=updated_question_data,
-                               expected_data=dict(updated_question_data, **{"creator": 1,
-                                                                            "solutions": [],
-                                                                            "difficulty": "t",
-                                                                            "exam_board": "t",
-                                                                            "exam_type": "t",
-                                                                            "num_points": 120,
-                                                                            "official_solution": "t",
-                                                                            "question_type": "t"}),
+                               expected_data=dict(updated_question_data, **extra_data),
                                expected_status_code=200)
         updated_question_data['question_title'] = ""
         updated_question_data['question_description'] = ""
