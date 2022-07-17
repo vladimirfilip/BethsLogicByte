@@ -1,8 +1,7 @@
-from .models import UserProfile, Solution, Question, SavedQuestion, AttemptedQuestion
+from .models import *
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
-from .serializers import UserProfileSerializer, QuestionSerializer, SolutionSerializer, SavedQuestionSerializer, \
-    AttemptedQuestionSerializer, UserSerializer
+from .serializers import *
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
@@ -121,7 +120,7 @@ class QuestionView(GenericView):
 
 class SolutionView(GenericView):
     def __init__(self):
-        super().__init__(Solution.objects.all(), SolutionSerializer)
+        super().__init__(SolutionAttempt.objects.all(), SolutionSerializer)
 
     def get_solution_by_question_id(self, question_id):
         question = Question.objects.filter(id=question_id).first()
@@ -144,3 +143,18 @@ class AttemptedQuestionView(GenericView):
 class UserView(GenericView):
     def __init__(self):
         super().__init__(User.objects.all(), UserSerializer)
+
+
+class ProfilePictureView(GenericView):
+    def __init__(self):
+        super().__init__(ProfilePicture.objects.all(), ProfilePictureSerializer)
+
+
+class QuestionImageView(GenericView):
+    def __init__(self):
+        super().__init__(QuestionImage.objects.all(), QuestionImageSerializer)
+
+
+class SolutionImageView(GenericView):
+    def __init__(self):
+        super().__init__(SolutionImage.objects.all(), SolutionImageSerializer)

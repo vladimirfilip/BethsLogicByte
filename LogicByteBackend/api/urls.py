@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+from django.conf.urls.static import static
 from rest_framework.authtoken.views import ObtainAuthToken
 
 
@@ -10,13 +11,16 @@ url_views = {
     "api_questions/": QuestionView.as_view(),
     "api_solutions/": SolutionView.as_view(),
     "api_saved_questions/": SavedQuestionView.as_view(),
-    "api_attempted_questions/": AttemptedQuestionView.as_view(),
     "api_token_auth/": ObtainAuthToken.as_view(),
     "api_users/": UserView.as_view(),
     "api_check_password/": check_password,
+    "api_solution_image/": SolutionImageView.as_view(),
+    "api_question_image/": QuestionImageView.as_view(),
+    "api_profile_picture/": ProfilePictureView.as_view(),
 }
 
 
 urlpatterns = []
 for url, view in url_views.items():
     urlpatterns.append(path(url, view))
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
