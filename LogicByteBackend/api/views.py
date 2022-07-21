@@ -49,8 +49,12 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
             serialized_data = self.get_serializer(model_instances.first()).data
             if request.data:
                 serialized_data = {key: serialized_data[key] for key in request.data.keys()}
-            return Response(serialized_data, status_code)
-        return Response(self.get_serializer(model_instances, many=True).data, status.HTTP_200_OK)
+        else:
+            status_code = status.HTTP_200_OK
+            serialized_data = self.get_serializer(model_instances, many=True).data
+            if request.data:
+                serialized_data = [{key: fragment[key] for key in request.data.keys()} for fragment in serialized_data]
+        return Response(serialized_data, status_code)
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
