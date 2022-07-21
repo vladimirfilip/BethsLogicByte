@@ -134,12 +134,6 @@ class SavedQuestionView(GenericView):
     def __init__(self):
         super().__init__(SavedQuestion.objects.all(), SavedQuestionSerializer)
 
-
-class AttemptedQuestionView(GenericView):
-    def __init__(self):
-        super().__init__(AttemptedQuestion.objects.all(), AttemptedQuestionSerializer)
-
-
 class UserView(GenericView):
     def __init__(self):
         super().__init__(User.objects.all(), UserSerializer)

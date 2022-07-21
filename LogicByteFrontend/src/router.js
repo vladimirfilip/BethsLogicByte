@@ -1,10 +1,11 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import MainNavBar from "./Components/MainNavBar";
 import Home from "./Pages/home";
 import User from "./Pages/user";
 import Login from "./Pages/login";
-import Settings from "./Components/Settings";
+import Settings from "./Pages/settings";
+import QuestionPage from "./Pages/questionPage";
+import FinishSession from "./Pages/finishSession";
 import { clearAuthInfo, storeAuthInfo, isLoggedIn } from "./helpers/authHelper";
 
 function getURL() {
@@ -82,9 +83,11 @@ function Router() {
     {
       home: Home,
       settings: Settings,
+      finish: FinishSession,
     },
     {
       user: User,
+      question: QuestionPage,
     },
   ];
   let pageNamesStandard = Object.keys(pages[0]);
@@ -95,7 +98,6 @@ function Router() {
     let PageComponent = pages[0][page[0]];
     return (
       <>
-        <MainNavBar link={changePage} />
         <PageComponent changePage={changePage} />
       </>
     );
@@ -103,8 +105,7 @@ function Router() {
     let PageComponent = pages[1][page[0]];
     return (
       <>
-        <MainNavBar link={changePage} />
-        <PageComponent changePage={changePage} argument={page[1]} />
+        <PageComponent changePage={changePage} argument={parseInt(page[1])} />
       </>
     );
   } else if (page == "logoff") {
