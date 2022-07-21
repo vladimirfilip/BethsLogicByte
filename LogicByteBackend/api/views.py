@@ -47,6 +47,8 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         if model_instances.count() < 2:
             status_code = status.HTTP_400_BAD_REQUEST if model_instances.count() == 0 else status.HTTP_200_OK
             serialized_data = self.get_serializer(model_instances.first()).data
+            if request.data:
+                serialized_data = {key: serialized_data[key] for key in request.data.keys()}
             return Response(serialized_data, status_code)
         return Response(self.get_serializer(model_instances, many=True).data, status.HTTP_200_OK)
 
