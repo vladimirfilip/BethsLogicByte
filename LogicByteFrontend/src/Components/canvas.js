@@ -95,16 +95,16 @@ function Canvas() {
       let x = JSON.parse(localStorage.canvas);
       return x;
     } else {
-      console.log("No data");
+      // console.log("No data");
       return [];
     }
   }
 
-  // function saveLocalStorage() {
-  //   let data = JSON.stringify(strokes);
-  //   console.log("saving");
-  //   localStorage.canvas = data;
-  // }
+  function saveLocalStorage() {
+    let data = JSON.stringify(strokes);
+    console.log("saving");
+    localStorage.canvas = data;
+  }
 
   function handlePointerMove(e) {
     if (e.buttons !== 1 || isDrawing == false) return;
@@ -145,7 +145,7 @@ function Canvas() {
   });
 
   // Only saves sketch to localstorage when strokes is updated
-  // useEffect(() => saveLocalStorage(), [strokes]);
+  useEffect(() => saveLocalStorage(), [strokes]);
 
   let i = 0;
   const otherStrokes = strokes.map((x) => {
