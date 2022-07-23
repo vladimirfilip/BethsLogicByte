@@ -6,14 +6,7 @@ import User from "./Pages/user";
 import Login from "./Pages/login";
 import Settings from "./Components/Settings";
 import { clearAuthInfo, storeAuthInfo, isLoggedIn } from "./helpers/authHelper";
-
-function getURL() {
-  let url = window.location.href;
-  url = url.split("/");
-  url = url.slice(3);
-
-  return url;
-}
+import getURL from "./helpers/getUrl";
 
 function changeURL(url) {
   // URLs should be lowercase

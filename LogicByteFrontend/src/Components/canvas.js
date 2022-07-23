@@ -3,6 +3,7 @@ import { getStroke } from "perfect-freehand";
 import "./canvas.css";
 import MultiSelect from "./multiSelect";
 import PropTypes from "prop-types";
+import getURL from "../helpers/getUrl";
 
 function getSvgPathFromStroke(stroke) {
   if (!stroke.length) return "";
@@ -139,18 +140,33 @@ function Canvas() {
 
   function restoreLocalStorage() {
     if (localStorage.canvas != undefined) {
-      let x = JSON.parse(localStorage.canvas);
-      return x;
-    } else {
-      // console.log("No data");
-      return [];
+      let data = JSON.parse(localStorage.canvas);
+      let key = getURL().join("/");
+
+      if (data[key] != undefined) {
+        let x = data[key];
+        return x;
+      }
     }
+    return [];
   }
 
   function saveLocalStorage() {
-    let data = JSON.stringify(strokes);
-    localStorage.canvas = data;
+    if (localStorage.canvas != undefined) {
+      let data = JSON.parse(localStorage.canvas);
+      let key = getURL().join("/");
+      data[key] = strokes;
+      localStorage.canvas = JSON.stringify(data);
+    } else {
+      let data = {};
+      let key = getURL().join("/");
+      data[key] = strokes;
+      localStorage.canvas = JSON.stringify(data);
+    }
   }
+  // let key = getURL().join("/");
+  // let data = JSON.stringify(strokes);
+  // localStorage.canvas = data;
 
   function clearCanvas() {
     setStrokes([]);
