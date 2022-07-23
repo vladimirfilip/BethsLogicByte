@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 
 
 def user_profile_pic_directory(instance, *args):
-    return f"profile_pics/profile_pic_{instance.user_profile.id}.jpg"
+    return f"profile_pics/profile_pic_{instance.user_profile.id}.png"
 
 
 class UserProfile(models.Model):
@@ -28,7 +28,7 @@ class ProfilePicture(models.Model):
 
 
 def question_img_directory(instance, *args):
-    return f"question_images/question_img_{instance.question.id}.jpg"
+    return f"question_images/question_img_{instance.question.id}.png"
 
 
 class Question(models.Model):
@@ -55,7 +55,7 @@ class SavedQuestion(models.Model):
 
 
 def solution_img_directory(instance, *args):
-    return f"solution_images/solution_img_{instance.solution.id}.jpg"
+    return f"solution_images/solution_img_{instance.solution.id}.png"
 
 
 class SolutionAttempt(models.Model):

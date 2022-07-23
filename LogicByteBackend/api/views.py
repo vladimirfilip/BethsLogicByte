@@ -17,6 +17,18 @@ def check_password(request):
     return JsonResponse({"result": "bad"})
 
 
+def get_username(request):
+    token = request.GET.get('token', '')
+    if not token:
+        return JsonResponse({"error": "required token missing"})
+    user_instance = User.objects.filter(auth_token=token)
+    if not user_instance:
+        return JsonResponse({"error": "token invalid"})
+    user_instance = user_instance.first()
+    user_data = UserSerializer(user_instance).data
+    return JsonResponse({"username": user_data['username']})
+
+
 class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin,
                   mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     def __init__(self, queryset, serializer_class, **kwargs):
@@ -139,6 +151,7 @@ class SolutionView(GenericView):
 class SavedQuestionView(GenericView):
     def __init__(self):
         super().__init__(SavedQuestion.objects.all(), SavedQuestionSerializer)
+
 
 class UserView(GenericView):
     def __init__(self):
