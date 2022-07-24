@@ -22,38 +22,20 @@ function getSvgPathFromStroke(stroke) {
 }
 
 var options = {
-  size: 10,
+  size: 9,
+  smoothing: 0.01,
   thinning: 0.5,
-  smoothing: 0.5,
-  streamline: 0.5,
+  streamline: 0.46,
   easing: (t) => t,
   start: {
-    taper: 0,
-    easing: (t) => t,
+    taper: 7,
     cap: true,
   },
   end: {
-    taper: 100,
-    easing: (t) => t,
+    taper: 7,
     cap: true,
   },
 };
-
-// var options = {
-//   size: 16,
-//   smoothing: 0.5,
-//   thinning: 0.5,
-//   streamline: 0.5,
-//   easing: (t) => t,
-//   start: {
-//     taper: 0,
-//     cap: true,
-//   },
-//   end: {
-//     taper: 0,
-//     cap: true,
-//   },
-// };
 
 function getClassNameForColour(colour) {
   switch (colour) {
@@ -84,7 +66,6 @@ function CurrentLine(props) {
   }
   function handlePointerMove(e) {
     if (e.buttons !== 1 || props.isDrawing == false) return;
-    // setPoints([...points, [e.clientX, e.clientY, e.pressure]]);
     setPoints({
       colour: props.colour,
       thickness: props.thickness,
@@ -94,7 +75,6 @@ function CurrentLine(props) {
 
   function handlePointerUp() {
     if (props.isDrawing) {
-      // props.setStrokes([...strokes, points]);
       props.setStrokes(points);
       setPoints({ points: [] });
     }
@@ -135,8 +115,10 @@ function Canvas() {
   const [strokes, setStrokes] = useState(restoreLocalStorage());
   const [isDrawing, setIsDrawing] = useState(false);
   // The slider returns a string, this keeps types consistent
-  const [thickness, setThickness] = useState("20");
+  const [thickness, setThickness] = useState("4");
   const [colour, setColour] = useState(colours[0]);
+
+  console.log(thickness);
 
   function restoreLocalStorage() {
     if (localStorage.canvas != undefined) {
@@ -164,9 +146,6 @@ function Canvas() {
       localStorage.canvas = JSON.stringify(data);
     }
   }
-  // let key = getURL().join("/");
-  // let data = JSON.stringify(strokes);
-  // localStorage.canvas = data;
 
   function clearCanvas() {
     setStrokes([]);
@@ -200,7 +179,7 @@ function Canvas() {
       <input
         type="range"
         min="1"
-        max="40"
+        max="20"
         value={thickness}
         onChange={(e) => setThickness(e.target.value)}
       ></input>
