@@ -69,7 +69,8 @@ function CurrentLine(props) {
     setPoints({
       colour: props.colour,
       thickness: props.thickness,
-      points: [...points.points, [e.clientX, e.clientY, e.pressure]],
+      points: [...points.points, [e.clientX, e.clientY]],
+      // points: [...points.points, [e.clientX, e.clientY, e.pressure]],
     });
   }
 
