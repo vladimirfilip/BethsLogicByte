@@ -3,7 +3,6 @@ import { getStroke } from "perfect-freehand";
 import "./canvas.css";
 import MultiSelect from "./multiSelect";
 import PropTypes from "prop-types";
-import getURL from "../helpers/getUrl";
 
 function getSvgPathFromStroke(stroke) {
   if (!stroke.length) return "";
@@ -112,39 +111,11 @@ function Canvas() {
   const colours = ["Black", "Blue", "Green", "Red", "Yellow"];
 
   // Strokes contains all of the lines that the user has drawn
-  const [strokes, setStrokes] = useState(restoreLocalStorage());
+  const [strokes, setStrokes] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   // The slider returns a string, this keeps types consistent
   const [thickness, setThickness] = useState("4");
   const [colour, setColour] = useState(colours[0]);
-
-  function restoreLocalStorage() {
-    if (localStorage.canvas != undefined) {
-      let data = JSON.parse(localStorage.canvas);
-      let key = getURL().join("/");
-
-      if (data[key] != undefined) {
-        let x = data[key];
-        return x;
-      }
-    }
-    return [];
-  }
-
-  function saveLocalStorage() {
-    if (localStorage.canvas != undefined) {
-      let data = JSON.parse(localStorage.canvas);
-      let key = getURL().join("/");
-      data[key] = strokes;
-      localStorage.canvas = JSON.stringify(data);
-    } else {
-      let data = {};
-      let key = getURL().join("/");
-      data[key] = strokes;
-      localStorage.canvas = JSON.stringify(data);
-    }
-  }
-
   function clearCanvas() {
     setStrokes([]);
   }
@@ -156,9 +127,6 @@ function Canvas() {
   function handleSetStrokes(points) {
     setStrokes([...strokes, points]);
   }
-
-  // Only saves sketch to localstorage when strokes is updated
-  useEffect(() => saveLocalStorage(), [strokes]);
 
   let i = 0;
   const otherStrokes = strokes.map((x) => {
