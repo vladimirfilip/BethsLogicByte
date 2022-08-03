@@ -46,6 +46,7 @@ class Question(models.Model):
 
 class QuestionImage(models.Model):
     question = models.ForeignKey(Question, related_name="question_images", on_delete=models.CASCADE)
+    type = models.CharField(max_length=20, blank=True)
     image = models.ImageField(upload_to=question_img_directory)
 
 
