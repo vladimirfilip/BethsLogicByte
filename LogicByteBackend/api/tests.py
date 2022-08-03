@@ -120,7 +120,8 @@ class QuestionTestSuite(GenericTestSuite):
             "question_type": '',
             "difficulty": '',
             "exam_board": '',
-            "multiple_choices": ''
+            "multiple_choices": '',
+            "question_images": [],
         }
         self.test_operator.get(url="/api_questions/",
                                params={"id": "1"},
@@ -142,7 +143,8 @@ class QuestionTestSuite(GenericTestSuite):
             "num_points": 120,
             "official_solution": "t",
             "question_type": "t",
-            "multiple_choices": ""
+            "multiple_choices": "",
+            "question_images": [],
         }
         expected_data = dict(input_data, **{"id": 2, "solutions": []})
         self.test_operator.post(url="/api_questions/",
@@ -165,7 +167,8 @@ class QuestionTestSuite(GenericTestSuite):
             "num_points": 120,
             "official_solution": "t",
             "question_type": "t",
-            "multiple_choices": ""
+            "multiple_choices": "",
+            "question_images": [],
         }
         self.test_operator.put(url="/api_questions/",
                                params={"id": 2},
