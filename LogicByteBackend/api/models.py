@@ -42,6 +42,7 @@ class Question(models.Model):
     question_type = models.CharField(max_length=15, blank=True)
     official_solution = models.TextField(blank=True)
     multiple_choices = models.TextField(blank=True)
+    has_images = models.BooleanField(default=False)
 
 
 class QuestionImage(models.Model):

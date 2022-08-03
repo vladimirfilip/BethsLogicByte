@@ -102,7 +102,8 @@ class QuestionTestSuite(GenericTestSuite):
             "question_type": "",
             "official_solution": "",
             "creator": None,
-            "multiple_choices": ""
+            "multiple_choices": "",
+            "has_images": False,
         }
 
         super().setUp()
@@ -122,6 +123,7 @@ class QuestionTestSuite(GenericTestSuite):
             "exam_board": '',
             "multiple_choices": '',
             "question_images": [],
+            "has_images": False,
         }
         self.test_operator.get(url="/api_questions/",
                                params={"id": "1"},
@@ -145,6 +147,7 @@ class QuestionTestSuite(GenericTestSuite):
             "question_type": "t",
             "multiple_choices": "",
             "question_images": [],
+            "has_images": False,
         }
         expected_data = dict(input_data, **{"id": 2, "solutions": []})
         self.test_operator.post(url="/api_questions/",
@@ -169,6 +172,7 @@ class QuestionTestSuite(GenericTestSuite):
             "question_type": "t",
             "multiple_choices": "",
             "question_images": [],
+            "has_images": False,
         }
         self.test_operator.put(url="/api_questions/",
                                params={"id": 2},
