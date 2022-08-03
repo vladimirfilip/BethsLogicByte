@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { getAuthInfo } from "../helpers/authHelper";
 import PropTypes from "prop-types";
 import MathJaxRender from "../helpers/mathJaxRender";
-import completed_qs from "../helpers/completedQs";
+import { UsernameContext } from "../router";
 
 function DoQuestion(props) {
+  const username = useContext(UsernameContext);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCorrect, setIsCorrect] = useState(true);
@@ -30,12 +31,26 @@ function DoQuestion(props) {
   //
   const [inputs, setInputs] = useState([]);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const getCorrectAnswer = () => {
+    axios
+      .get("http://127.0.0.1:8000/api_questions/", {
+        params: { id: props.id.toString(), s_official_solution: "" },
+        headers: { Authorization: `token ${getAuthInfo().token}` },
+      })
+      .then((response) => {
+        setCorrectAnswer(response.data.official_solution);
+        handleSubmit(response.data.official_solution);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const handleSubmit = (correct_answer) => {
     //
     // Marks user's answer
     //
-    if (selectedOption == correctAnswer) {
+    if (selectedOption == correct_answer) {
       props.showResult(true);
       setIsCorrect(true);
     } else {
@@ -48,7 +63,7 @@ function DoQuestion(props) {
     //
     axios
       .get("http://127.0.0.1:8000/api_profiles/", {
-        params: { username: getAuthInfo().username },
+        params: { username: username },
         headers: { Authorization: `token ${getAuthInfo().token}` },
       })
       .then((response) => {
@@ -59,7 +74,7 @@ function DoQuestion(props) {
               creator: parseInt(response.data.id),
               question: props.id,
               solution: selectedOption,
-              is_correct: selectedOption == correctAnswer ? true : false,
+              is_correct: selectedOption == correct_answer ? true : false,
             },
             { headers: { Authorization: `token ${getAuthInfo().token}` } }
           )
@@ -73,12 +88,14 @@ function DoQuestion(props) {
     //
     // Adds to completed_qs DTO for future use
     //
-    completed_qs.add_q(
-      props.id,
-      { question_description: questionDescription, solution: correctAnswer },
-      selectedOption
+    localStorage.setItem(
+      `${props.id}`,
+      JSON.stringify({
+        question_description: questionDescription.props.text,
+        solution: correct_answer,
+        selected_option: selectedOption,
+      })
     );
-
     setShowSubmit(false);
   };
 
@@ -106,11 +123,15 @@ function DoQuestion(props) {
     setShowSubmit(true);
     //
     // Retrieves info on question
-    // MVP includes only multiple choice questions
+    // MVP includes only multiple choice que  stions
     //
     axios
       .get("http://127.0.0.1:8000/api_questions/", {
-        params: { id: props.id.toString() },
+        params: {
+          id: props.id.toString(),
+          s_multiple_choices: "",
+          s_question_description: "",
+        },
         headers: { Authorization: `token ${getAuthInfo().token}` },
       })
       .then((response) => {
@@ -119,8 +140,6 @@ function DoQuestion(props) {
         setQuestionDescription(
           <MathJaxRender text={response.data.question_description} />
         );
-
-        setCorrectAnswer(response.data.official_solution);
       })
       .catch((error) => {
         console.log(error);
@@ -135,7 +154,10 @@ function DoQuestion(props) {
       <>
         {questionDescription}
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e) => {
+            e.preventDefault();
+            getCorrectAnswer();
+          }}
           onChange={(e) => {
             setSelectedOption(e.target.value);
           }}

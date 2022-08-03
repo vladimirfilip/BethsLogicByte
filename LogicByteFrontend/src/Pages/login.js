@@ -18,7 +18,7 @@ function Login(props) {
         password: password,
       })
       .then((response) => {
-        props.logIn({ username: username, token: response.data.token });
+        props.logIn(username, response.data.token);
       })
       .catch((error) => {
         console.error(error.response.data);

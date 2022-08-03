@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import completed_qs from "../helpers/completedQs";
 import PropTypes from "prop-types";
+import MathJaxRender from "../helpers/mathJaxRender";
 
 function ViewQuestion(props) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -23,10 +23,16 @@ function ViewQuestion(props) {
     //
     // Uses stored question data to prevent excessive database requests
     //
-    const question_data = completed_qs.get_q_data(props.id);
-    setQuestionDescription(question_data[0].question_description);
-    setCorrectAnswer(question_data[0].solution);
-    setUserAnswer(question_data[1]);
+
+    const current_id = props.id;
+    const question_data = JSON.parse(
+      localStorage.getItem(current_id.toString())
+    );
+    setQuestionDescription(
+      <MathJaxRender text={question_data.question_description} />
+    );
+    setCorrectAnswer(question_data.solution);
+    setUserAnswer(question_data.selected_option);
 
     setIsLoaded(true);
   }, [props.id]);

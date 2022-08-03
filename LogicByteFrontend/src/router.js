@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext } from "react";
 import { useState, useEffect } from "react";
 import Home from "./Pages/home";
 import User from "./Pages/user";
@@ -6,7 +6,13 @@ import Login from "./Pages/login";
 import Settings from "./Pages/settings";
 import QuestionPage from "./Pages/questionPage";
 import FinishSession from "./Pages/finishSession";
-import { clearAuthInfo, storeAuthInfo, isLoggedIn } from "./helpers/authHelper";
+import {
+  clearAuthInfo,
+  storeAuthInfo,
+  isLoggedIn,
+  getAuthInfo,
+} from "./helpers/authHelper";
+import axios from "axios";
 
 function getURL() {
   let url = window.location.href;
@@ -31,17 +37,21 @@ function changeURL(url) {
   history.pushState(data, "", url);
 }
 
+const UsernameContext = createContext();
+
 function Router() {
   const [page, setPageState] = useState(getURL());
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());
+  const [username, setUsername] = useState("");
 
   const changePage = (page) => {
     changeURL(page);
     setPageState(getURL());
   };
 
-  const logIn = (account) => {
-    storeAuthInfo(account);
+  const logIn = (entered_username, token) => {
+    storeAuthInfo({ token: token });
+    setUsername(entered_username);
     setLoggedIn(true);
   };
 
@@ -59,9 +69,25 @@ function Router() {
   };
 
   useEffect(() => {
+    //
+    // Gets username using token
+    //
+    if (loggedIn) {
+      axios
+        .get("http://127.0.0.1:8000/api_get_username/", {
+          params: { token: getAuthInfo().token },
+          headers: { Authorization: `token ${getAuthInfo().token}` },
+        })
+        .then((response) => {
+          setUsername(response.data.username);
+        })
+        .catch((error) => console.log(error));
+    }
+
     window.addEventListener("popstate", () => {
       onPopState();
     });
+
     return () => {
       window.removeEventListener("popstate", () => {
         onPopState();
@@ -83,11 +109,11 @@ function Router() {
     {
       home: Home,
       settings: Settings,
-      finish: FinishSession,
     },
     {
       user: User,
       question: QuestionPage,
+      finish: FinishSession,
     },
   ];
   let pageNamesStandard = Object.keys(pages[0]);
@@ -97,16 +123,16 @@ function Router() {
   if (pageNamesStandard.indexOf(page[0]) != -1) {
     let PageComponent = pages[0][page[0]];
     return (
-      <>
+      <UsernameContext.Provider value={username}>
         <PageComponent changePage={changePage} />
-      </>
+      </UsernameContext.Provider>
     );
   } else if (pageNamesExtended.indexOf(page[0]) != -1 && page.length == 2) {
     let PageComponent = pages[1][page[0]];
     return (
-      <>
+      <UsernameContext.Provider value={username}>
         <PageComponent changePage={changePage} argument={parseInt(page[1])} />
-      </>
+      </UsernameContext.Provider>
     );
   } else if (page == "logoff") {
     logOff();
@@ -115,4 +141,4 @@ function Router() {
   }
 }
 
-export default Router;
+export { Router, UsernameContext };
