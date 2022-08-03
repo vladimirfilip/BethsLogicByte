@@ -15,6 +15,7 @@ class UserProfileSerializer(ModelSerializer):
 
 class QuestionSerializer(ModelSerializer):
     solutions = PrimaryKeyRelatedField(many=True, read_only=True)
+    question_images = PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Question

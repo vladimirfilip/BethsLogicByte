@@ -45,7 +45,7 @@ class Question(models.Model):
 
 
 class QuestionImage(models.Model):
-    question = models.OneToOneField(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name="question_images", on_delete=models.CASCADE)
     image = models.ImageField(upload_to=question_img_directory)
 
 
