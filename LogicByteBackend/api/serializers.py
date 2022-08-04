@@ -56,3 +56,9 @@ class SolutionImageSerializer(ModelSerializer):
     class Meta:
         model = SolutionImage
         fields = "__all__"
+
+
+class QuestionInSessionSerializer(ModelSerializer):
+    class Meta:
+        model = QuestionInSession
+        fields = "__all__"

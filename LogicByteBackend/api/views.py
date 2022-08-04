@@ -186,3 +186,8 @@ class QuestionImageView(GenericView):
 class SolutionImageView(GenericView):
     def __init__(self):
         super().__init__(SolutionImage.objects.all(), SolutionImageSerializer)
+
+
+class QuestionInSessionView(GenericView):
+    def __init__(self):
+        super().__init__(QuestionInSession.objects.all(), QuestionInSessionSerializer)

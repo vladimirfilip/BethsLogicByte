@@ -51,6 +51,16 @@ class QuestionImage(models.Model):
     image = models.ImageField(upload_to=question_img_directory)
 
 
+class QuestionInSession(models.Model):
+    username = models.TextField()
+    question_id = models.IntegerField()
+    question_description = models.TextField()
+    solution = models.TextField()
+    selected_option = models.TextField()
+    q_image = models.TextField()
+    img_options = models.BooleanField(default=False)
+
+
 class SavedQuestion(models.Model):
     user_profile = models.ForeignKey(UserProfile, related_name="saved_questions", on_delete=models.CASCADE)
     question = models.OneToOneField(Question, on_delete=models.CASCADE)
