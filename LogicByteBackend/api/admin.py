@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import UserProfile, Question, SolutionAttempt, SavedQuestion, SolutionImage, QuestionImage, ProfilePicture
+from .models import UserProfile, Question, SolutionAttempt, SavedQuestion, SolutionImage, QuestionImage, \
+    ProfilePicture, QuestionInSession
 
 # Register your models here.
 admin.site.register(UserProfile)
@@ -9,3 +10,4 @@ admin.site.register(SavedQuestion)
 admin.site.register(SolutionImage)
 admin.site.register(QuestionImage)
 admin.site.register(ProfilePicture)
+admin.site.register(QuestionInSession)
