@@ -54,10 +54,10 @@ class QuestionImage(models.Model):
 class QuestionInSession(models.Model):
     username = models.TextField()
     question_id = models.IntegerField()
-    question_description = models.TextField()
-    solution = models.TextField()
-    selected_option = models.TextField()
-    q_image = models.TextField()
+    question_description = models.TextField(blank=True)
+    solution = models.TextField(blank=True)
+    selected_option = models.TextField(blank=True)
+    q_image = models.TextField(blank=True)
     img_options = models.BooleanField(default=False)
 
 

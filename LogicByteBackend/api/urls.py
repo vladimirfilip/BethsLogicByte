@@ -18,7 +18,8 @@ url_views = {
     "api_solution_image/": SolutionImageView.as_view(),
     "api_question_image/": QuestionImageView.as_view(),
     "api_profile_picture/": ProfilePictureView.as_view(),
-    "api_questions_in_session/": QuestionInSessionView.as_view()
+    "api_questions_in_session/": QuestionInSessionView.as_view(),
+    "api_check_question_completed/": check_if_question_completed,
 }
 
 

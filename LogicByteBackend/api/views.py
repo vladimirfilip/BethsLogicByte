@@ -27,6 +27,19 @@ def get_username(request):
     return JsonResponse({"username": user_data['username']})
 
 
+def check_if_question_completed(request):
+    username = request.GET.get('username', '')
+    if not username:
+        return JsonResponse({"error": "username missing from params"})
+    question_id = request.GET.get('question_id', '')
+    if not question_id:
+        return JsonResponse({"error": "question id missing from params"})
+    question_in_session = QuestionInSession.objects.filter(username=username, question_id=question_id)
+    if not question_in_session:
+        return JsonResponse({"data": "false"})
+    return JsonResponse({"data": "true"})
+
+
 class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin,
                   mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     def __init__(self, queryset, serializer_class, **kwargs):
