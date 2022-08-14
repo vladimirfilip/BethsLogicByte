@@ -80,7 +80,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
     def get(self, request):
         model_instances = self.filter(request)
         if model_instances.count() < 2:
-            status_code = status.HTTP_200_OK
+            status_code = status.HTTP_200_OK if model_instances.count() == 1 else status.HTTP_400_BAD_REQUEST
             serialized_data = self.get_serializer(model_instances.first()).data
             specific_fields = self.get_specific_fields_from_params(request, serialized_data)
             if specific_fields:
