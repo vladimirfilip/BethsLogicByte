@@ -80,7 +80,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
     def get(self, request):
         model_instances = self.filter(request)
         if model_instances.count() < 2:
-            status_code = status.HTTP_400_BAD_REQUEST if model_instances.count() == 0 else status.HTTP_200_OK
+            status_code = status.HTTP_200_OK
             serialized_data = self.get_serializer(model_instances.first()).data
             specific_fields = self.get_specific_fields_from_params(request, serialized_data)
             if specific_fields:
@@ -130,8 +130,10 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         model_instances = self.filter(request)
         if model_instances.count() == 1:
             model_instances.first().delete()
-            return Response(status=status.HTTP_204_NO_CONTENT, data=None)
-        return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            for model_instance in model_instances:
+                model_instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT, data=None)
 
 
 class UserProfileView(GenericView):

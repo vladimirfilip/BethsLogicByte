@@ -124,14 +124,18 @@ function Router() {
     let PageComponent = pages[0][page[0]];
     return (
       <UsernameContext.Provider value={username}>
-        <PageComponent changePage={changePage} />
+        <PageComponent changePage={changePage} username={username} />
       </UsernameContext.Provider>
     );
   } else if (pageNamesExtended.indexOf(page[0]) != -1 && page.length == 2) {
     let PageComponent = pages[1][page[0]];
     return (
       <UsernameContext.Provider value={username}>
-        <PageComponent changePage={changePage} argument={parseInt(page[1])} />
+        <PageComponent
+          changePage={changePage}
+          argument={page[1]}
+          username={username}
+        />
       </UsernameContext.Provider>
     );
   } else if (page == "logoff") {

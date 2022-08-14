@@ -1,16 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import questionIDs from "../helpers/questionIDs";
 import PropTypes from "prop-types";
+import { UsernameContext } from "../router";
+import axios from "axios";
+import { getAuthInfo } from "../helpers/authHelper";
 
 function FinishSession(props) {
+  const username = useContext(UsernameContext);
   //
   // score is calculated as percentage and only from completed questions
   //
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const clearSessionData = () => {
+    axios
+      .delete("http://127.0.0.1:8000/api_questions_in_session/", {
+        params: { username: username },
+        headers: { Authorization: `token ${getAuthInfo().token}` },
+      })
+      .catch((error) => console.log(error));
+  };
+
   useEffect(() => {
     questionIDs.clear_data();
-
+    clearSessionData();
     setIsLoaded(true);
   }, []);
 
@@ -23,7 +36,7 @@ function FinishSession(props) {
           <h1>Session complete</h1>
           <button onClick={() => props.changePage("home")}>X</button>
         </div>
-        <h2>You got {props.argument.toString() + "%"}</h2>
+        <h2>You got {props.argument + "%"}</h2>
         <button onClick={() => props.changePage("home")}>Exit</button>
       </>
     );
@@ -32,7 +45,7 @@ function FinishSession(props) {
 
 FinishSession.propTypes = {
   changePage: PropTypes.func,
-  argument: PropTypes.number,
+  argument: PropTypes.string,
 };
 
 export default FinishSession;
