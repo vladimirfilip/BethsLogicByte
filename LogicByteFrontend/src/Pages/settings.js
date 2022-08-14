@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useEffect } from "react";
 import useForm from "../helpers/useForm";
 import { getAuthInfo } from "../helpers/authHelper";
+import MainNavBar from "../Components/MainNavBar";
+
 import isSecurePassword from "../helpers/passwd";
 import PropTypes from "prop-types";
 
@@ -121,6 +123,7 @@ function Settings(props) {
 
   return (
     <div>
+      <MainNavBar link={props.changePage}></MainNavBar>
       <h2>{username}</h2>
       {/* Image field not yet added to user model */}
       <img alt="profile picture"></img>

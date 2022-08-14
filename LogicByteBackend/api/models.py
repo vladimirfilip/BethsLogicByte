@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 
 
 def user_profile_pic_directory(instance, *args):
-    return f"profile_pics/profile_pic_{instance.user_profile.id}.jpg"
+    return f"profile_pics/profile_pic_{instance.user_profile.id}.png"
 
 
 class UserProfile(models.Model):
@@ -28,7 +28,7 @@ class ProfilePicture(models.Model):
 
 
 def question_img_directory(instance, *args):
-    return f"question_images/question_img_{instance.question.id}.jpg"
+    return f"question_images/question_img_{instance.question.id}.png"
 
 
 class Question(models.Model):
@@ -42,11 +42,23 @@ class Question(models.Model):
     question_type = models.CharField(max_length=15, blank=True)
     official_solution = models.TextField(blank=True)
     multiple_choices = models.TextField(blank=True)
+    has_images = models.BooleanField(default=False)
 
 
 class QuestionImage(models.Model):
-    question = models.OneToOneField(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name="question_images", on_delete=models.CASCADE)
+    type = models.CharField(max_length=20, blank=True)
     image = models.ImageField(upload_to=question_img_directory)
+
+
+class QuestionInSession(models.Model):
+    username = models.TextField()
+    question_id = models.IntegerField()
+    question_description = models.TextField(blank=True)
+    solution = models.TextField(blank=True)
+    selected_option = models.TextField(blank=True)
+    q_image = models.TextField(blank=True)
+    img_options = models.BooleanField(default=False)
 
 
 class SavedQuestion(models.Model):
@@ -55,7 +67,7 @@ class SavedQuestion(models.Model):
 
 
 def solution_img_directory(instance, *args):
-    return f"solution_images/solution_img_{instance.solution.id}.jpg"
+    return f"solution_images/solution_img_{instance.solution.id}.png"
 
 
 class SolutionAttempt(models.Model):

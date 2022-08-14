@@ -15,6 +15,7 @@ class UserProfileSerializer(ModelSerializer):
 
 class QuestionSerializer(ModelSerializer):
     solutions = PrimaryKeyRelatedField(many=True, read_only=True)
+    question_images = PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Question
@@ -54,4 +55,10 @@ class QuestionImageSerializer(ModelSerializer):
 class SolutionImageSerializer(ModelSerializer):
     class Meta:
         model = SolutionImage
+        fields = "__all__"
+
+
+class QuestionInSessionSerializer(ModelSerializer):
+    class Meta:
+        model = QuestionInSession
         fields = "__all__"
