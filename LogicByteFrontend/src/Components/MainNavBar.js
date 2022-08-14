@@ -16,27 +16,33 @@ function MainNavBar(props) {
         </button>
       </div>
       <div className="col">
-        <button onClick={() => props.link("")} className="nav__button">
+        <button
+          onClick={() => props.link("mathematics")}
+          className="nav__button"
+        >
           Mathematics
         </button>
       </div>
       <div className="col">
-        <button onClick={() => props.link("")} className="nav__button">
+        <button onClick={() => props.link("physics")} className="nav__button">
           Physics
         </button>
       </div>
       <div className="col">
-        <button onClick={() => props.link("")} className="nav__button">
+        <button onClick={() => props.link("chemistry")} className="nav__button">
           Chemistry
         </button>
       </div>
       <div className="col">
-        <button onClick={() => props.link("")} className="nav__button">
+        <button onClick={() => props.link("biology")} className="nav__button">
           Biology
         </button>
       </div>
       <div className="col">
-        <button onClick={() => props.link("")} className="nav__button">
+        <button
+          onClick={() => props.link("informatics")}
+          className="nav__button"
+        >
           Informatics
         </button>
       </div>
