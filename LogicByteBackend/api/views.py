@@ -198,11 +198,11 @@ class QuestionImageView(GenericView):
         super().__init__(QuestionImage.objects.all(), QuestionImageSerializer)
 
 
-class SolutionImageView(GenericView):
-    def __init__(self):
-        super().__init__(SolutionImage.objects.all(), SolutionImageSerializer)
-
-
 class QuestionInSessionView(GenericView):
     def __init__(self):
         super().__init__(QuestionInSession.objects.all(), QuestionInSessionSerializer)
+
+
+class UserQuestionSessionView(GenericView):
+    def __init__(self):
+        super().__init__(UserQuestionSession.objects.all(), UserQuestionSessionSerializer)
