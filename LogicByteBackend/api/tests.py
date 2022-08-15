@@ -229,7 +229,7 @@ class UserProfileTestSuite(GenericTestSuite):
             "email_address": "this.is.a.valid.email.address@gmail.com",
         }
         expected_data = dict(input_data, **{"id": 1, "solutions": [], "created_questions": [], "saved_questions": [],
-                                            "num_points": 0})
+                                            "num_points": 0, "question_sessions": []})
         self.test_operator.post(url="/api_profiles/",
                                 input_data=input_data,
                                 expected_data=expected_data,
@@ -258,7 +258,8 @@ class UserProfileTestSuite(GenericTestSuite):
             "num_points": 0,
             "year_group": "10",
             "class_name": "MathsClass",
-            "email_address": "this.is.a.valid.email.address@gmail.com"
+            "email_address": "this.is.a.valid.email.address@gmail.com",
+            "question_sessions": [],
         }
         self.test_operator.get(url="/api_profiles/",
                                params={"username": "user1"},
@@ -289,6 +290,7 @@ class UserProfileTestSuite(GenericTestSuite):
                                expected_data=dict(updated_data,
                                                   **{"created_questions": [],
                                                      "solutions": [],
+                                                     "question_sessions": [],
                                                      }),
                                expected_status_code=200)
         updated_data['year_group'] = ""
@@ -339,7 +341,8 @@ class SolutionTestSuite(GenericTestSuite):
             "creator": None,
             "solution": "",
             "question": None,
-            "is_correct": False
+            "is_correct": False,
+            "session_id": "",
         }
         super().setUp()
 

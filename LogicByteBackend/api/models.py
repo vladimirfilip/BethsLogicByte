@@ -76,14 +76,15 @@ class SolutionAttempt(models.Model):
     solution = models.TextField()
     date_modified = models.DateTimeField(auto_now_add=True)
     is_correct = models.BooleanField(default=False)
+    session_id = models.TextField(null=True)
 
     def __str__(self):
         return f"[SOL] {self.creator}/{self.question}/{self.date_modified.strftime('%Y/%m/%d %H:%M:%S')}"
 
 
-class SolutionImage(models.Model):
-    solution = models.OneToOneField(SolutionAttempt, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=solution_img_directory)
+class UserQuestionSession(models.Model):
+    session_id = models.TextField(null=True)
+    user_profile = models.ForeignKey(UserProfile, related_name="question_sessions", on_delete=models.CASCADE)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -136,25 +137,6 @@ def delete_question_img_on_change(sender, instance: QuestionImage, **kwargs):
     try:
         old_file = QuestionImage.objects.get(pk=instance.pk).image
     except QuestionImage.DoesNotExist:
-        return False
-
-    new_file = instance.image
-    delete_file_on_change(new_file, old_file)
-
-
-@receiver(post_delete, sender=SolutionImage)
-def delete_solution_img_on_delete(sender, instance: SolutionImage, **kwargs):
-    delete_file_on_delete(instance.image)
-
-
-@receiver(pre_save, sender=SolutionImage)
-def delete_solution_img_on_change(sender, instance: SolutionImage, **kwargs):
-    if not instance.pk:
-        return False
-
-    try:
-        old_file = SolutionImage.objects.get(pk=instance.pk).image
-    except SolutionImage.DoesNotExist:
         return False
 
     new_file = instance.image
