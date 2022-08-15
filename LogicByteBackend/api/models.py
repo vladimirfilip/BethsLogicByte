@@ -77,6 +77,7 @@ class SolutionAttempt(models.Model):
     date_modified = models.DateTimeField(auto_now_add=True)
     is_correct = models.BooleanField(default=False)
     session_id = models.TextField(null=True)
+    question_num = models.IntegerField(null=True)
 
     def __str__(self):
         return f"[SOL] {self.creator}/{self.question}/{self.date_modified.strftime('%Y/%m/%d %H:%M:%S')}"
@@ -85,6 +86,7 @@ class SolutionAttempt(models.Model):
 class UserQuestionSession(models.Model):
     session_id = models.TextField(null=True)
     user_profile = models.ForeignKey(UserProfile, related_name="question_sessions", on_delete=models.CASCADE)
+    score = models.FloatField(null=True)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

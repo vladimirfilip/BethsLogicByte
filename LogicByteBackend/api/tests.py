@@ -343,6 +343,7 @@ class SolutionTestSuite(GenericTestSuite):
             "question": None,
             "is_correct": False,
             "session_id": "",
+            "question_num": None,
         }
         super().setUp()
 
