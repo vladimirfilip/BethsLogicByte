@@ -85,7 +85,7 @@ class SolutionAttempt(models.Model):
 
 class UserQuestionSession(models.Model):
     session_id = models.TextField(null=True)
-    user_profile = models.ForeignKey(UserProfile, related_name="question_sessions", on_delete=models.CASCADE)
+    username = models.TextField(null=True)
     score = models.FloatField(null=True)
 
 
