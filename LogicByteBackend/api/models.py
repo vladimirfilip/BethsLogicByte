@@ -52,7 +52,7 @@ class QuestionImage(models.Model):
 
 
 class QuestionInSession(models.Model):
-    username = models.TextField()
+    user_profile_id = models.IntegerField()
     question_id = models.IntegerField()
     question_description = models.TextField(blank=True)
     solution = models.TextField(blank=True)
@@ -85,7 +85,7 @@ class SolutionAttempt(models.Model):
 
 class UserQuestionSession(models.Model):
     session_id = models.TextField(null=True)
-    username = models.TextField(null=True)
+    user_profile = models.ForeignKey(UserProfile, related_name="question_sessions", on_delete=models.CASCADE)
     score = models.FloatField(null=True)
 
 
