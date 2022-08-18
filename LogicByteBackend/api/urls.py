@@ -14,7 +14,7 @@ url_views = {
     "api_token_auth/": ObtainAuthToken.as_view(),
     "api_users/": UserView.as_view(),
     "api_check_password/": check_password,
-    "api_get_username/": get_username,
+    "api_get_username_and_profile_id/": get_username_and_profile_id,
     "api_user_question_session/": UserQuestionSessionView.as_view(),
     "api_question_image/": QuestionImageView.as_view(),
     "api_profile_picture/": ProfilePictureView.as_view(),
