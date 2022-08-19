@@ -23,7 +23,7 @@ class UserProfile(models.Model):
 
 
 class ProfilePicture(models.Model):
-    user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
+    user_id = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
     image = models.ImageField(upload_to=user_profile_pic_directory)
 
 
@@ -32,7 +32,7 @@ def question_img_directory(instance, *args):
 
 
 class Question(models.Model):
-    creator = models.ForeignKey(UserProfile, related_name="created_questions", on_delete=models.CASCADE)
+    user_id = models.ForeignKey(UserProfile, related_name="created_questions", on_delete=models.CASCADE)
     question_description = models.TextField()
     tag_names = models.CharField(max_length=150, blank=True)
     exam_board = models.CharField(max_length=15, blank=True)
@@ -52,7 +52,7 @@ class QuestionImage(models.Model):
 
 
 class QuestionInSession(models.Model):
-    user_profile_id = models.IntegerField()
+    user_id = models.IntegerField()
     question_id = models.IntegerField()
     question_description = models.TextField(blank=True)
     solution = models.TextField(blank=True)
@@ -62,7 +62,7 @@ class QuestionInSession(models.Model):
 
 
 class SavedQuestion(models.Model):
-    user_profile = models.ForeignKey(UserProfile, related_name="saved_questions", on_delete=models.CASCADE)
+    user_id = models.ForeignKey(UserProfile, related_name="saved_questions", on_delete=models.CASCADE)
     question = models.OneToOneField(Question, on_delete=models.CASCADE)
 
 
@@ -71,7 +71,7 @@ def solution_img_directory(instance, *args):
 
 
 class SolutionAttempt(models.Model):
-    creator = models.ForeignKey(UserProfile, related_name="solutions", on_delete=models.CASCADE)
+    user_id = models.ForeignKey(UserProfile, related_name="solutions", on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name="solutions", on_delete=models.CASCADE)
     solution = models.TextField()
     date_modified = models.DateTimeField(auto_now_add=True)
@@ -85,7 +85,7 @@ class SolutionAttempt(models.Model):
 
 class UserQuestionSession(models.Model):
     session_id = models.TextField(null=True)
-    user_profile = models.ForeignKey(UserProfile, related_name="question_sessions", on_delete=models.CASCADE)
+    user_id = models.ForeignKey(UserProfile, related_name="question_sessions", on_delete=models.CASCADE)
     score = models.FloatField(null=True)
 
 
