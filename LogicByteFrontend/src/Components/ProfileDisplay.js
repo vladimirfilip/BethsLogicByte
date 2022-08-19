@@ -3,7 +3,7 @@ import axios from "axios";
 import { getAuthInfo } from "../helpers/authHelper";
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { UsernameContext } from "../router";
+import { UserDataContext } from "../router";
 
 function ProfileDisplay(props) {
   //const [picRef, setPicRef] = useState("");
@@ -11,7 +11,7 @@ function ProfileDisplay(props) {
   const [numPoints, setNumPoints] = useState(0);
   const [rank, setRank] = useState(1);
 
-  const username = useContext(UsernameContext);
+  const username = useContext(UserDataContext);
 
   const calcRank = (points) => {
     //
@@ -91,7 +91,7 @@ function ProfileDisplay(props) {
           <h2>Rank</h2>
           <p>{rank}</p>
         </div>
-        <button onClick={() => props.link("home")}>My Questions</button>
+        <button onClick={() => props.link("my_questions")}>My Questions</button>
         <button onClick={() => props.link("home")}>My Classes</button>
         <button onClick={() => props.link("settings")}>Settings</button>
         <button onClick={() => props.link("logoff")}>Log off</button>
