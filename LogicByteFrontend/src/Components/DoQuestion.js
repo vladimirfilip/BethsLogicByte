@@ -3,10 +3,10 @@ import axios from "axios";
 import { getAuthInfo } from "../helpers/authHelper";
 import PropTypes from "prop-types";
 import MathJaxRender from "../helpers/mathJaxRender";
-import { UserDataContext } from "../router.js";
+import { UsernameContext } from "../router.js";
 
 function DoQuestion(props) {
-  const username = useContext(UserDataContext);
+  const username = useContext(UsernameContext);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [isCorrect, setIsCorrect] = useState(true);
@@ -145,7 +145,6 @@ function DoQuestion(props) {
     // Retrieves user id to pass to post request
     // Adds user's attempt to attempted questions
     //
-    console.log(props.sessionID);
     axios
       .get("http://127.0.0.1:8000/api_profiles/", {
         params: { username: username },
@@ -160,8 +159,6 @@ function DoQuestion(props) {
               question: props.id,
               solution: selectedOption,
               is_correct: selectedOption == correct_answer ? true : false,
-              session_id: props.sessionID,
-              question_num: parseInt(localStorage.getItem("currentIdx")) + 1,
             },
             { headers: { Authorization: `token ${getAuthInfo().token}` } }
           )
@@ -343,7 +340,6 @@ DoQuestion.propTypes = {
   showResult: PropTypes.func,
   id: PropTypes.number,
   updateTags: PropTypes.func,
-  sessionID: PropTypes.string,
 };
 
 export default DoQuestion;

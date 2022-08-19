@@ -14,7 +14,6 @@ import {
 } from "./helpers/authHelper";
 import axios from "axios";
 import SubjectPage from "./Pages/subjectPage";
-import MyQPage from "./Pages/myQPage";
 
 function getURL() {
   let url = window.location.href;
@@ -39,7 +38,7 @@ function changeURL(url) {
   history.pushState(data, "", url);
 }
 
-const UserDataContext = createContext();
+const UsernameContext = createContext();
 
 function Router() {
   const [page, setPageState] = useState(getURL());
@@ -116,7 +115,6 @@ function Router() {
       chemistry: SubjectPage,
       biology: SubjectPage,
       informatics: SubjectPage,
-      my_questions: MyQPage,
     },
     {
       user: User,
@@ -131,20 +129,20 @@ function Router() {
   if (pageNamesStandard.indexOf(page[0]) != -1) {
     let PageComponent = pages[0][page[0]];
     return (
-      <UserDataContext.Provider value={username}>
+      <UsernameContext.Provider value={username}>
         <PageComponent changePage={changePage} username={username} />
-      </UserDataContext.Provider>
+      </UsernameContext.Provider>
     );
   } else if (pageNamesExtended.indexOf(page[0]) != -1 && page.length == 2) {
     let PageComponent = pages[1][page[0]];
     return (
-      <UserDataContext.Provider value={username}>
+      <UsernameContext.Provider value={username}>
         <PageComponent
           changePage={changePage}
           argument={page[1]}
           username={username}
         />
-      </UserDataContext.Provider>
+      </UsernameContext.Provider>
     );
   } else if (page == "logoff") {
     logOff();
@@ -153,4 +151,4 @@ function Router() {
   }
 }
 
-export { Router, UserDataContext };
+export { Router, UsernameContext };
