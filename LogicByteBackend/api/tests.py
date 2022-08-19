@@ -102,7 +102,8 @@ class QuestionTestSuite(GenericTestSuite):
             "question_type": "",
             "official_solution": "",
             "creator": None,
-            "multiple_choices": ""
+            "multiple_choices": "",
+            "has_images": False,
         }
 
         super().setUp()
@@ -120,7 +121,9 @@ class QuestionTestSuite(GenericTestSuite):
             "question_type": '',
             "difficulty": '',
             "exam_board": '',
-            "multiple_choices": ''
+            "multiple_choices": '',
+            "question_images": [],
+            "has_images": False,
         }
         self.test_operator.get(url="/api_questions/",
                                params={"id": "1"},
@@ -142,7 +145,9 @@ class QuestionTestSuite(GenericTestSuite):
             "num_points": 120,
             "official_solution": "t",
             "question_type": "t",
-            "multiple_choices": ""
+            "multiple_choices": "",
+            "question_images": [],
+            "has_images": False,
         }
         expected_data = dict(input_data, **{"id": 2, "solutions": []})
         self.test_operator.post(url="/api_questions/",
@@ -165,7 +170,9 @@ class QuestionTestSuite(GenericTestSuite):
             "num_points": 120,
             "official_solution": "t",
             "question_type": "t",
-            "multiple_choices": ""
+            "multiple_choices": "",
+            "question_images": [],
+            "has_images": False,
         }
         self.test_operator.put(url="/api_questions/",
                                params={"id": 2},
@@ -222,7 +229,7 @@ class UserProfileTestSuite(GenericTestSuite):
             "email_address": "this.is.a.valid.email.address@gmail.com",
         }
         expected_data = dict(input_data, **{"id": 1, "solutions": [], "created_questions": [], "saved_questions": [],
-                                            "num_points": 0})
+                                            "num_points": 0, "question_sessions": []})
         self.test_operator.post(url="/api_profiles/",
                                 input_data=input_data,
                                 expected_data=expected_data,
@@ -251,7 +258,8 @@ class UserProfileTestSuite(GenericTestSuite):
             "num_points": 0,
             "year_group": "10",
             "class_name": "MathsClass",
-            "email_address": "this.is.a.valid.email.address@gmail.com"
+            "email_address": "this.is.a.valid.email.address@gmail.com",
+            "question_sessions": [],
         }
         self.test_operator.get(url="/api_profiles/",
                                params={"username": "user1"},
@@ -282,6 +290,7 @@ class UserProfileTestSuite(GenericTestSuite):
                                expected_data=dict(updated_data,
                                                   **{"created_questions": [],
                                                      "solutions": [],
+                                                     "question_sessions": [],
                                                      }),
                                expected_status_code=200)
         updated_data['year_group'] = ""
@@ -332,7 +341,8 @@ class SolutionTestSuite(GenericTestSuite):
             "creator": None,
             "solution": "",
             "question": None,
-            "is_correct": False
+            "is_correct": False,
+            "session_id": "",
         }
         super().setUp()
 

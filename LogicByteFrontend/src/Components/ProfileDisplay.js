@@ -1,14 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import axios from "axios";
 import { getAuthInfo } from "../helpers/authHelper";
 import { useState } from "react";
 import PropTypes from "prop-types";
+import { UsernameContext } from "../router";
 
 function ProfileDisplay(props) {
   //const [picRef, setPicRef] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
   const [numPoints, setNumPoints] = useState(0);
   const [rank, setRank] = useState(1);
+
+  const username = useContext(UsernameContext);
 
   const calcRank = (points) => {
     //
@@ -41,39 +44,39 @@ function ProfileDisplay(props) {
         console.log(error);
       });
   };
-
-  let username = getAuthInfo().username;
   //
   // To set user specific fields in display
   //
   useEffect(() => {
-    axios
-      .get(`http://127.0.0.1:8000/api_profiles/`, {
-        headers: {
-          Authorization: `token ${getAuthInfo().token}`,
-        },
-        params: { username: username },
-      })
-      .then((response) => {
-        // setPicRef(response.data.profile_pic);
-        setNumPoints(response.data.num_points);
-        //
-        // Waits for numPoints to be updated before calculating rank
-        //
-        setNumPoints((state) => {
-          calcRank(state);
-          return state;
+    if (username) {
+      axios
+        .get(`http://127.0.0.1:8000/api_profiles/`, {
+          headers: {
+            Authorization: `token ${getAuthInfo().token}`,
+          },
+          params: { username: username },
+        })
+        .then((response) => {
+          // setPicRef(response.data.profile_pic);
+          setNumPoints(response.data.num_points);
+          //
+          // Waits for numPoints to be updated before calculating rank
+          //
+          setNumPoints((state) => {
+            calcRank(state);
+            return state;
+          });
+        })
+        .catch((error) => {
+          console.error(error.response.data);
         });
-      })
-      .catch((error) => {
-        console.error(error.response.data);
-      });
-    setIsLoaded(true);
+      setIsLoaded(true);
+    }
     //
     // cleanup function
     //
     return () => clearTimeout();
-  }, []);
+  }, [username]);
 
   if (!isLoaded) {
     return <h1>Loading...</h1>;

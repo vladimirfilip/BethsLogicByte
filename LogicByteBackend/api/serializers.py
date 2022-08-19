@@ -7,6 +7,7 @@ class UserProfileSerializer(ModelSerializer):
     saved_questions = PrimaryKeyRelatedField(many=True, read_only=True)
     solutions = PrimaryKeyRelatedField(many=True, read_only=True)
     created_questions = PrimaryKeyRelatedField(many=True, read_only=True)
+    question_sessions = PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = UserProfile
@@ -15,6 +16,7 @@ class UserProfileSerializer(ModelSerializer):
 
 class QuestionSerializer(ModelSerializer):
     solutions = PrimaryKeyRelatedField(many=True, read_only=True)
+    question_images = PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Question
@@ -51,7 +53,13 @@ class QuestionImageSerializer(ModelSerializer):
         fields = "__all__"
 
 
-class SolutionImageSerializer(ModelSerializer):
+class QuestionInSessionSerializer(ModelSerializer):
     class Meta:
-        model = SolutionImage
+        model = QuestionInSession
+        fields = "__all__"
+
+
+class UserQuestionSessionSerializer(ModelSerializer):
+    class Meta:
+        model = UserQuestionSession
         fields = "__all__"
