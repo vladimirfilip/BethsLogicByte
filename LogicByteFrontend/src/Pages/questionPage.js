@@ -58,6 +58,22 @@ function QuestionPage(props) {
       .catch((error) => console.log(error));
   };
 
+  const addSessionID = (score) => {
+    axios
+      .post(
+        "http://127.0.0.1:8000/api_user_question_session/",
+        {
+          session_id: session_id.current,
+          username: username,
+          score: score,
+        },
+        {
+          headers: { Authorization: `token ${getAuthInfo().token}` },
+        }
+      )
+      .catch((error) => console.log(error));
+  };
+
   const displayQuestionComponent = (completed) => {
     if (completed) {
       setQuestionComponent(
@@ -129,21 +145,6 @@ function QuestionPage(props) {
       .catch((error) => console.log(error));
   };
 
-  const addSessionID = (score) => {
-    axios
-      .post(
-        "http://127.0.0.1:8000/api_user_question_session/",
-        {
-          session_id: session_id.current,
-          username: username,
-          score: score,
-        },
-        {
-          headers: { Authorization: `token ${getAuthInfo().token}` },
-        }
-      )
-      .catch((error) => console.log(error));
-  };
   const showResult = (isCorrect) => {
     if (isCorrect) {
       setResult("Correct!");
