@@ -15,7 +15,7 @@ def check_password(request):
     return JsonResponse({"result": "bad"})
 
 
-def get_profile_id(request):
+def get_username_and_profile_id(request):
     token = request.GET.get('token', '')
     if not token:
         return JsonResponse({"error": "required token missing"})
@@ -23,8 +23,9 @@ def get_profile_id(request):
     if not user_instance:
         return JsonResponse({"error": "token invalid"})
     user_instance = user_instance.first()
+    username = UserSerializer(user_instance).data['username']
     user_profile_id = UserProfileSerializer(UserProfile.objects.filter(user=user_instance).first()).data['id']
-    return JsonResponse({"user_profile_id": user_profile_id})
+    return JsonResponse({"username": username, "user_profile_id": user_profile_id})
 
 
 def check_if_question_completed(request):
