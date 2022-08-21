@@ -71,7 +71,7 @@ def solution_img_directory(instance, *args):
 
 
 class SolutionAttempt(models.Model):
-    creator = models.ForeignKey(UserProfile, related_name="solutions", on_delete=models.CASCADE)
+    username = models.TextField()
     question = models.ForeignKey(Question, related_name="solutions", on_delete=models.CASCADE)
     solution = models.TextField()
     date_modified = models.DateTimeField(auto_now_add=True)
