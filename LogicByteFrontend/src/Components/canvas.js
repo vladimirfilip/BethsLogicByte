@@ -113,6 +113,7 @@ function Canvas() {
   // Strokes contains all of the lines that the user has drawn
   const [strokes, setStrokes] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isErasing, setIsErasing] = useState(false);
   // The slider returns a string, this keeps types consistent
   const [thickness, setThickness] = useState("4");
   const [colour, setColour] = useState(colours[0]);
@@ -127,6 +128,33 @@ function Canvas() {
   function handleSetStrokes(points) {
     setStrokes([...strokes, points]);
   }
+
+  function handlePointerMove(e) {
+    if (isErasing && e.buttons) {
+      console.log("deleteing");
+      for (let i = 0; i < strokes.length; i++) {
+        for (let j = 0; j < strokes[i].points.length; j++) {
+          let dx = strokes[i].points[j][0] - e.clientX;
+          let dy = strokes[i].points[j][1] - e.clientY;
+
+          let dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < strokes[i].thickness) {
+            let newStrokes = [...strokes];
+            newStrokes.splice(i, 1);
+            setStrokes(newStrokes);
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (isErasing) {
+      document.onpointermove = handlePointerMove;
+    }
+    // I don't know why strokes has to be here but it is
+  }, [isErasing, strokes]);
 
   let i = 0;
   const otherStrokes = strokes.map((x) => {
@@ -167,6 +195,20 @@ function Canvas() {
       >
         Start Drawing
       </button>
+      <button
+        onClick={(e) => {
+          if (isErasing) {
+            setIsErasing(false);
+            e.target.innerHTML = "Start Erasing";
+          } else {
+            setIsErasing(true);
+            e.target.innerHTML = "Stop Erasing";
+          }
+        }}
+      >
+        Start Erasing
+      </button>
+
       <button onClick={clearCanvas}> Clear</button>
       <button onClick={undo}> Undo</button>
       <svg>
