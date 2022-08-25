@@ -3,10 +3,10 @@ import axios from "axios";
 import { getAuthInfo } from "../helpers/authHelper";
 import PropTypes from "prop-types";
 import MathJaxRender from "../helpers/mathJaxRender";
-import { UserDataContext } from "../router.js";
+import { UsernameContext } from "../router.js";
 
 function DoQuestion(props) {
-  const username = useContext(UserDataContext);
+  const username = useContext(UsernameContext);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [isCorrect, setIsCorrect] = useState(true);
@@ -146,32 +146,24 @@ function DoQuestion(props) {
     // Adds user's attempt to attempted questions
     //
     console.log(props.sessionID);
+
     axios
-      .get("http://127.0.0.1:8000/api_profiles/", {
-        params: { username: username },
-        headers: { Authorization: `token ${getAuthInfo().token}` },
-      })
-      .then((response) => {
-        axios
-          .post(
-            "http://127.0.0.1:8000/api_solutions/",
-            {
-              creator: parseInt(response.data.id),
-              question: props.id,
-              solution: selectedOption,
-              is_correct: selectedOption == correct_answer ? true : false,
-              session_id: props.sessionID,
-              question_num: parseInt(localStorage.getItem("currentIdx")) + 1,
-            },
-            { headers: { Authorization: `token ${getAuthInfo().token}` } }
-          )
-          .catch((error) => {
-            console.error(error.response.data);
-          });
-      })
+      .post(
+        "http://127.0.0.1:8000/api_solutions/",
+        {
+          username: username,
+          question: props.id,
+          solution: selectedOption,
+          is_correct: selectedOption == correct_answer ? true : false,
+          session_id: props.sessionID,
+          question_num: parseInt(localStorage.getItem("currentIdx")) + 1,
+        },
+        { headers: { Authorization: `token ${getAuthInfo().token}` } }
+      )
       .catch((error) => {
-        console.log(error);
+        console.error(error.response.data);
       });
+
     //
     // Adds to completed_qs DTO for future use
     //

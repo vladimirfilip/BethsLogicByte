@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 import MathJaxRender from "../helpers/mathJaxRender";
 import axios from "axios";
 import { getAuthInfo } from "../helpers/authHelper";
-import { UserDataContext } from "../router.js";
+import { UsernameContext } from "../router.js";
 
 function ViewQuestion(props) {
-  const username = useContext(UserDataContext);
+  const username = useContext(UsernameContext);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCorrect, setIsCorrect] = useState(true);
   //

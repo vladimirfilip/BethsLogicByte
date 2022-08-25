@@ -1,14 +1,13 @@
 import React from "react";
 import MainNavBar from "../Components/MainNavBar";
-import ViewCompletedQs from "../Components/viewCompletedQs";
 import PropTypes from "prop-types";
+import ViewAllSessions from "../Components/ViewAllSessions";
 
 function MyQPage(props) {
-  console.log("good");
   return (
     <>
       <MainNavBar link={props.changePage} />
-      <ViewCompletedQs />
+      <ViewAllSessions />
     </>
   );
 }

@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { UserDataContext } from "../router";
+import { UsernameContext } from "../router";
 import { getAuthInfo } from "../helpers/authHelper";
-import ViewQInSession from "./viewQInSession";
+import ViewSession from "./ViewSession";
 
-function ViewCompletedQs() {
-  const username = useContext(UserDataContext);
+function ViewAllSessions() {
+  const username = useContext(UsernameContext);
   const [prevSessions, setPrevSessions] = useState([]);
   const [currentSession, setCurrentSession] = useState(null);
 
@@ -17,6 +17,9 @@ function ViewCompletedQs() {
       })
       .then((response) => {
         let sessionData = response.data.slice(0, 10);
+        //
+        // Obtains the session date from the session id
+        //
         for (const session of sessionData) {
           let day = session.session_id.slice(6, 8);
           let month = session.session_id.slice(4, 6);
@@ -42,15 +45,12 @@ function ViewCompletedQs() {
     }
   }, [username]);
 
-  useEffect(() => {
-    console.log(currentSession);
-  }, [currentSession]);
   return (
     <>
       <div>{prevSessions}</div>
-      {currentSession && <ViewQInSession sessionId={currentSession} />}
+      {currentSession && <ViewSession sessionId={currentSession} />}
     </>
   );
 }
 
-export default ViewCompletedQs;
+export default ViewAllSessions;

@@ -39,7 +39,7 @@ function changeURL(url) {
   history.pushState(data, "", url);
 }
 
-const UserDataContext = createContext();
+const UsernameContext = createContext();
 
 function Router() {
   const [page, setPageState] = useState(getURL());
@@ -131,20 +131,20 @@ function Router() {
   if (pageNamesStandard.indexOf(page[0]) != -1) {
     let PageComponent = pages[0][page[0]];
     return (
-      <UserDataContext.Provider value={username}>
+      <UsernameContext.Provider value={username}>
         <PageComponent changePage={changePage} username={username} />
-      </UserDataContext.Provider>
+      </UsernameContext.Provider>
     );
   } else if (pageNamesExtended.indexOf(page[0]) != -1 && page.length == 2) {
     let PageComponent = pages[1][page[0]];
     return (
-      <UserDataContext.Provider value={username}>
+      <UsernameContext.Provider value={username}>
         <PageComponent
           changePage={changePage}
           argument={page[1]}
           username={username}
         />
-      </UserDataContext.Provider>
+      </UsernameContext.Provider>
     );
   } else if (page == "logoff") {
     logOff();
@@ -153,4 +153,4 @@ function Router() {
   }
 }
 
-export { Router, UserDataContext };
+export { Router, UsernameContext };

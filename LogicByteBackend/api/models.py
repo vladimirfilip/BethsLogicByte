@@ -80,7 +80,7 @@ class SolutionAttempt(models.Model):
     question_num = models.IntegerField(null=True)
 
     def __str__(self):
-        return f"[SOL] {self.creator}/{self.question}/{self.date_modified.strftime('%Y/%m/%d %H:%M:%S')}"
+        return f"[SOL] {self.username}/{self.question}/{self.date_modified.strftime('%Y/%m/%d %H:%M:%S')}"
 
 
 class UserQuestionSession(models.Model):

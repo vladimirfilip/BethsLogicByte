@@ -5,11 +5,11 @@ import questionIDs from "../helpers/questionIDs";
 import PropTypes from "prop-types";
 import axios from "axios";
 import { getAuthInfo } from "../helpers/authHelper";
-import { UserDataContext } from "../router.js";
+import { UsernameContext } from "../router.js";
 import moment from "moment";
 
 function QuestionPage(props) {
-  const username = useContext(UserDataContext);
+  const username = useContext(UsernameContext);
   const [isLoaded, setIsLoaded] = useState(false);
   const [buttonCounter, setButtonCounter] = useState(0);
   //
