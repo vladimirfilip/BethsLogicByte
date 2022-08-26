@@ -131,13 +131,16 @@ function Canvas() {
 
   function handlePointerMove(e) {
     if (isErasing && e.buttons) {
-      console.log("deleteing");
       for (let i = 0; i < strokes.length; i++) {
         for (let j = 0; j < strokes[i].points.length; j++) {
           let dx = strokes[i].points[j][0] - e.clientX;
           let dy = strokes[i].points[j][1] - e.clientY;
 
           let dist = Math.sqrt(dx * dx + dy * dy);
+          if (strokes[i].thickness < 4) {
+            // Room for error
+            dist -= 10;
+          }
           if (dist < strokes[i].thickness) {
             let newStrokes = [...strokes];
             newStrokes.splice(i, 1);
@@ -175,7 +178,10 @@ function Canvas() {
         min="1"
         max="20"
         value={thickness}
-        onChange={(e) => setThickness(e.target.value)}
+        onChange={(e) => {
+          setThickness(e.target.value);
+          setIsDrawing(false);
+        }}
       ></input>
       <MultiSelect
         values={colours}
@@ -183,30 +189,28 @@ function Canvas() {
         setSelectedValue={setColour}
       />
       <button
-        onClick={(e) => {
+        onClick={() => {
           if (isDrawing) {
             setIsDrawing(false);
-            e.target.innerHTML = "Start Drawing";
           } else {
             setIsDrawing(true);
-            e.target.innerHTML = "Stop Drawing";
+            setIsErasing(false);
           }
         }}
       >
-        Start Drawing
+        {isDrawing ? "Stop Drawing" : "Start Drawing"}
       </button>
       <button
-        onClick={(e) => {
+        onClick={() => {
           if (isErasing) {
             setIsErasing(false);
-            e.target.innerHTML = "Start Erasing";
           } else {
             setIsErasing(true);
-            e.target.innerHTML = "Stop Erasing";
+            setIsDrawing(false);
           }
         }}
       >
-        Start Erasing
+        {isErasing ? "Stop Erasing" : "Start Erasing"}
       </button>
 
       <button onClick={clearCanvas}> Clear</button>
