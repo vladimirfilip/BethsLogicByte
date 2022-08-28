@@ -13,6 +13,8 @@ import {
   getAuthInfo,
 } from "./helpers/authHelper";
 import axios from "axios";
+import SubjectPage from "./Pages/subjectPage";
+import MyQPage from "./Pages/myQPage";
 
 function getURL() {
   let url = window.location.href;
@@ -109,6 +111,12 @@ function Router() {
     {
       home: Home,
       settings: Settings,
+      mathematics: SubjectPage,
+      physics: SubjectPage,
+      chemistry: SubjectPage,
+      biology: SubjectPage,
+      informatics: SubjectPage,
+      my_questions: MyQPage,
     },
     {
       user: User,

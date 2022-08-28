@@ -72,7 +72,7 @@ function ProblemOfDay(props) {
 }
 
 ProblemOfDay.propTypes = {
-  data: PropTypes.object,
+  data: PropTypes.array,
 };
 
 export default ProblemOfDay;

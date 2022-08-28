@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
 import axios from "axios";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import useForm from "../helpers/useForm";
 import { getAuthInfo } from "../helpers/authHelper";
 import MainNavBar from "../Components/MainNavBar";
-
 import isSecurePassword from "../helpers/passwd";
 import PropTypes from "prop-types";
-
+import { UsernameContext } from "../router";
 function Settings(props) {
+  const username = useContext(UsernameContext);
+
   const [passwords, handleChange] = useForm({
     current_password: "",
     new_password: "",
@@ -29,8 +29,6 @@ function Settings(props) {
   // secureMsg stores error messages passed from isSecurePassword
   //
   const [secureMsg, setSecureMsg] = useState([]);
-
-  let username = getAuthInfo().username;
 
   const checkPassword = () => {
     //

@@ -91,7 +91,7 @@ function ProfileDisplay(props) {
           <h2>Rank</h2>
           <p>{rank}</p>
         </div>
-        <button onClick={() => props.link("home")}>My Questions</button>
+        <button onClick={() => props.link("my_questions")}>My Questions</button>
         <button onClick={() => props.link("home")}>My Classes</button>
         <button onClick={() => props.link("settings")}>Settings</button>
         <button onClick={() => props.link("logoff")}>Log off</button>

@@ -228,8 +228,8 @@ class UserProfileTestSuite(GenericTestSuite):
             "class_name": "MathsClass",
             "email_address": "this.is.a.valid.email.address@gmail.com",
         }
-        expected_data = dict(input_data, **{"id": 1, "solutions": [], "created_questions": [], "saved_questions": [],
-                                            "num_points": 0, "question_sessions": []})
+        expected_data = dict(input_data, **{"id": 1, "created_questions": [], "saved_questions": [],
+                                            "num_points": 0})
         self.test_operator.post(url="/api_profiles/",
                                 input_data=input_data,
                                 expected_data=expected_data,
@@ -253,13 +253,11 @@ class UserProfileTestSuite(GenericTestSuite):
             "id": 1,
             "saved_questions": [],
             "created_questions": [],
-            "solutions": [],
             "user": 1,
             "num_points": 0,
             "year_group": "10",
             "class_name": "MathsClass",
             "email_address": "this.is.a.valid.email.address@gmail.com",
-            "question_sessions": [],
         }
         self.test_operator.get(url="/api_profiles/",
                                params={"username": "user1"},
@@ -288,10 +286,7 @@ class UserProfileTestSuite(GenericTestSuite):
                                params={"id": 1},
                                input_data=updated_data,
                                expected_data=dict(updated_data,
-                                                  **{"created_questions": [],
-                                                     "solutions": [],
-                                                     "question_sessions": [],
-                                                     }),
+                                                  **{"created_questions": []}),
                                expected_status_code=200)
         updated_data['year_group'] = ""
         updated_data['email_address'] = ""
@@ -338,17 +333,18 @@ class SolutionTestSuite(GenericTestSuite):
         }
         create_model_instance(Question, **question_data)
         self.skeleton_data = {
-            "creator": None,
+            "username": "",
             "solution": "",
             "question": None,
             "is_correct": False,
             "session_id": "",
+            "question_num": None,
         }
         super().setUp()
 
     def post(self):
         valid_data = {
-            "creator": 1,
+            "username": "username",
             "question": 1,
             "solution": "This is a solution"
         }
@@ -362,8 +358,8 @@ class SolutionTestSuite(GenericTestSuite):
             "solution": [
                 "This field may not be blank."
             ],
-            "creator": [
-                "This field may not be null."
+            "username": [
+                "This field is required."
             ],
             "question": [
                 "This field may not be null."
@@ -382,12 +378,12 @@ class SolutionTestSuite(GenericTestSuite):
     def get(self):
         expected_data = {
             "id": 1,
-            "creator": 1,
+            "username": "username",
             "question": 1,
             "solution": "This is a solution"
         }
         self.test_operator.get(url="/api_solutions/",
-                               params={"creator": 1},
+                               params={"username": "username"},
                                expected_data=expected_data,
                                expected_status_code=200,
                                assert_contains=True)
@@ -397,14 +393,14 @@ class SolutionTestSuite(GenericTestSuite):
                                expected_status_code=200,
                                assert_contains=True)
         self.test_operator.get(url="/api_solutions/",
-                               params={"creator": 2},
+                               params={"username": "username2"},
                                expected_data=self.skeleton_data,
                                expected_status_code=400)
 
     def put(self, **kwargs):
         updated_data = {
             "id": 1,
-            "creator": 1,
+            "username": "updated username",
             "question": 1,
             "solution": "This is an updated solution"
         }
@@ -419,12 +415,12 @@ class SolutionTestSuite(GenericTestSuite):
                                expected_data=updated_data,
                                expected_status_code=200,
                                assert_contains=True)
-        updated_data['creator'] = ""
+        updated_data['username'] = ""
         updated_data['question'] = ""
         updated_data['solution'] = ""
         expected_data = {
-            "creator": [
-                "This field may not be null."
+            "username": [
+                "This field may not be blank."
             ],
             "question": [
                 "This field may not be null."

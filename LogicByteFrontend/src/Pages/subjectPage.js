@@ -4,14 +4,25 @@ import ProfileDisplay from "../Components/ProfileDisplay";
 import MainNavBar from "../Components/MainNavBar";
 import ProblemOfDay from "../Components/ProblemOfDay";
 
-function Home(props) {
+function SubjectPage(props) {
+  let subject = window.location.pathname.slice(1);
+  subject = subject[0].toUpperCase() + subject.slice(1);
+
+  if (subject == "Informatics") {
+    return (
+      <>
+        <MainNavBar link={props.changePage} />
+        <h1>Coming soon!</h1>
+      </>
+    );
+  }
   return (
     <>
-      <MainNavBar link={props.changePage}></MainNavBar>
+      <MainNavBar link={props.changePage} />
       <ProblemOfDay
         data={[
           {
-            title: "Problem of the day",
+            title: `${subject} Problem of the Day`,
             description:
               "Description for any random question for some subject.",
           },
@@ -22,8 +33,8 @@ function Home(props) {
   );
 }
 
-Home.propTypes = {
+SubjectPage.propTypes = {
   changePage: PropTypes.func,
 };
 
-export default Home;
+export default SubjectPage;
