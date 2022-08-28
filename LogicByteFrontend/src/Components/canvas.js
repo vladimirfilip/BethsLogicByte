@@ -152,6 +152,17 @@ function Canvas() {
     }
   }
 
+  if (isDrawing) {
+    document.body.classList.add("pen");
+    document.body.classList.remove("eraser");
+  } else if (isErasing) {
+    document.body.classList.remove("pen");
+    document.body.classList.add("eraser");
+  } else {
+    document.body.classList.remove("pen");
+    document.body.classList.remove("eraser");
+  }
+
   useEffect(() => {
     if (isErasing) {
       document.onpointermove = handlePointerMove;

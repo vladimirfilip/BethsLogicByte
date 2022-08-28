@@ -13,6 +13,14 @@ body {
   user-select: none;
 }
 
+.pen {
+  cursor: url("../../public/pen.png") 0 32, auto;
+}
+
+.eraser {
+  cursor: url("../../public/eraser.png") 0 32, auto;
+}
+
 .filter-green {
   filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg)
     brightness(118%) contrast(119%);
