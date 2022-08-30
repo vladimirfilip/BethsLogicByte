@@ -2,7 +2,7 @@
 
 # Beths _LogicByte_
 
-<strong>Olympiad preparation made easy</strong>
+<strong>A unified platform for practicing higher level STEM questions for Beths students</strong>
 
 </div>
 

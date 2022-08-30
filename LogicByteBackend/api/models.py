@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 
 
 def user_profile_pic_directory(instance, *args):
-    return f"profile_pics/profile_pic_{instance.user_profile.id}.jpg"
+    return f"profile_pics/profile_pic_{instance.user_profile.id}.png"
 
 
 class UserProfile(models.Model):
@@ -28,7 +28,7 @@ class ProfilePicture(models.Model):
 
 
 def question_img_directory(instance, *args):
-    return f"question_images/question_img_{instance.question.id}.jpg"
+    return f"question_images/question_img_{instance.question.id}.png"
 
 
 class Question(models.Model):
@@ -42,11 +42,23 @@ class Question(models.Model):
     question_type = models.CharField(max_length=15, blank=True)
     official_solution = models.TextField(blank=True)
     multiple_choices = models.TextField(blank=True)
+    has_images = models.BooleanField(default=False)
 
 
 class QuestionImage(models.Model):
-    question = models.OneToOneField(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name="question_images", on_delete=models.CASCADE)
+    type = models.CharField(max_length=20, blank=True)
     image = models.ImageField(upload_to=question_img_directory)
+
+
+class QuestionInSession(models.Model):
+    username = models.TextField()
+    question_id = models.IntegerField()
+    question_description = models.TextField(blank=True)
+    solution = models.TextField(blank=True)
+    selected_option = models.TextField(blank=True)
+    q_image = models.TextField(blank=True)
+    img_options = models.BooleanField(default=False)
 
 
 class SavedQuestion(models.Model):
@@ -55,7 +67,7 @@ class SavedQuestion(models.Model):
 
 
 def solution_img_directory(instance, *args):
-    return f"solution_images/solution_img_{instance.solution.id}.jpg"
+    return f"solution_images/solution_img_{instance.solution.id}.png"
 
 
 class SolutionAttempt(models.Model):
@@ -64,14 +76,15 @@ class SolutionAttempt(models.Model):
     solution = models.TextField()
     date_modified = models.DateTimeField(auto_now_add=True)
     is_correct = models.BooleanField(default=False)
+    session_id = models.TextField(null=True)
 
     def __str__(self):
         return f"[SOL] {self.creator}/{self.question}/{self.date_modified.strftime('%Y/%m/%d %H:%M:%S')}"
 
 
-class SolutionImage(models.Model):
-    solution = models.OneToOneField(SolutionAttempt, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=solution_img_directory)
+class UserQuestionSession(models.Model):
+    session_id = models.TextField(null=True)
+    user_profile = models.ForeignKey(UserProfile, related_name="question_sessions", on_delete=models.CASCADE)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -124,25 +137,6 @@ def delete_question_img_on_change(sender, instance: QuestionImage, **kwargs):
     try:
         old_file = QuestionImage.objects.get(pk=instance.pk).image
     except QuestionImage.DoesNotExist:
-        return False
-
-    new_file = instance.image
-    delete_file_on_change(new_file, old_file)
-
-
-@receiver(post_delete, sender=SolutionImage)
-def delete_solution_img_on_delete(sender, instance: SolutionImage, **kwargs):
-    delete_file_on_delete(instance.image)
-
-
-@receiver(pre_save, sender=SolutionImage)
-def delete_solution_img_on_change(sender, instance: SolutionImage, **kwargs):
-    if not instance.pk:
-        return False
-
-    try:
-        old_file = SolutionImage.objects.get(pk=instance.pk).image
-    except SolutionImage.DoesNotExist:
         return False
 
     new_file = instance.image
