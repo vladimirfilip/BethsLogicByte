@@ -141,7 +141,7 @@ function Canvas() {
             // Room for error
             dist -= 10;
           }
-          if (dist < strokes[i].thickness) {
+          if (dist / 1.5 < strokes[i].thickness) {
             let newStrokes = [...strokes];
             newStrokes.splice(i, 1);
             setStrokes(newStrokes);
