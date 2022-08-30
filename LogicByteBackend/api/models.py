@@ -71,20 +71,22 @@ def solution_img_directory(instance, *args):
 
 
 class SolutionAttempt(models.Model):
-    creator = models.ForeignKey(UserProfile, related_name="solutions", on_delete=models.CASCADE)
+    username = models.TextField()
     question = models.ForeignKey(Question, related_name="solutions", on_delete=models.CASCADE)
     solution = models.TextField()
     date_modified = models.DateTimeField(auto_now_add=True)
     is_correct = models.BooleanField(default=False)
     session_id = models.TextField(null=True)
+    question_num = models.IntegerField(null=True)
 
     def __str__(self):
-        return f"[SOL] {self.creator}/{self.question}/{self.date_modified.strftime('%Y/%m/%d %H:%M:%S')}"
+        return f"[SOL] {self.username}/{self.question}/{self.date_modified.strftime('%Y/%m/%d %H:%M:%S')}"
 
 
 class UserQuestionSession(models.Model):
     session_id = models.TextField(null=True)
-    user_profile = models.ForeignKey(UserProfile, related_name="question_sessions", on_delete=models.CASCADE)
+    username = models.TextField(null=True)
+    score = models.FloatField(null=True)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

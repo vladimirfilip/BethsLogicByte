@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import DoQuestion from "../Components/DoQuestion";
 import ViewQuestion from "../Components/ViewQuestion";
 import questionIDs from "../helpers/questionIDs";
@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import { getAuthInfo } from "../helpers/authHelper";
 import { UsernameContext } from "../router.js";
+import moment from "moment";
 
 function QuestionPage(props) {
   const username = useContext(UsernameContext);
@@ -40,6 +41,8 @@ function QuestionPage(props) {
     props.changePage("home");
   }
 
+  let session_id = useRef(moment().format("YYYYMMDDHHmmss"));
+
   const checkCompleted = (question_id) => {
     //
     // Checks whether the question has already been completed in this particular session
@@ -55,6 +58,22 @@ function QuestionPage(props) {
       .catch((error) => console.log(error));
   };
 
+  const addSessionID = (score) => {
+    axios
+      .post(
+        "http://127.0.0.1:8000/api_user_question_session/",
+        {
+          session_id: session_id.current,
+          username: username,
+          score: score,
+        },
+        {
+          headers: { Authorization: `token ${getAuthInfo().token}` },
+        }
+      )
+      .catch((error) => console.log(error));
+  };
+
   const displayQuestionComponent = (completed) => {
     if (completed) {
       setQuestionComponent(
@@ -66,11 +85,13 @@ function QuestionPage(props) {
       );
     } else {
       setQCompleted(false);
+
       setQuestionComponent(
         <DoQuestion
           id={q_ids[parseInt(localStorage.getItem("currentIdx"))]}
           showResult={showResult}
           updateTags={updateTags}
+          sessionID={session_id.current}
         ></DoQuestion>
       );
     }
@@ -91,10 +112,11 @@ function QuestionPage(props) {
         headers: { Authorization: `token ${getAuthInfo().token}` },
       })
       .then((response) => {
+        let score = 0;
+        clearSessionData();
         try {
           let total_correct = 0;
           let total = 0;
-          let score = 0;
           for (const entry of response.data) {
             if (entry.solution == entry.selected_option) {
               total_correct += 1;
@@ -107,17 +129,18 @@ function QuestionPage(props) {
             let percent = (total_correct / total) * 100;
             score = Math.round(percent * 10) / 10;
           }
-          props.changePage(`finish/${score}`);
         } catch (err) {
           if (
             response.data.solution &&
             response.data.solution == response.data.selected_option
           ) {
-            props.changePage(`finish/${100}`);
+            score = 100;
           } else {
-            props.changePage(`finish/${0}`);
+            score = 0;
           }
         }
+        addSessionID(score);
+        props.changePage(`finish/${score}`);
       })
       .catch((error) => console.log(error));
   };
@@ -211,7 +234,7 @@ function QuestionPage(props) {
           <button
             onClick={() => {
               localStorage.removeItem("currentIdx");
-              clearSessionData();
+              calculateScore();
               props.changePage("home");
             }}
           >

@@ -145,30 +145,25 @@ function DoQuestion(props) {
     // Retrieves user id to pass to post request
     // Adds user's attempt to attempted questions
     //
+    console.log(props.sessionID);
+
     axios
-      .get("http://127.0.0.1:8000/api_profiles/", {
-        params: { username: username },
-        headers: { Authorization: `token ${getAuthInfo().token}` },
-      })
-      .then((response) => {
-        axios
-          .post(
-            "http://127.0.0.1:8000/api_solutions/",
-            {
-              creator: parseInt(response.data.id),
-              question: props.id,
-              solution: selectedOption,
-              is_correct: selectedOption == correct_answer ? true : false,
-            },
-            { headers: { Authorization: `token ${getAuthInfo().token}` } }
-          )
-          .catch((error) => {
-            console.error(error.response.data);
-          });
-      })
+      .post(
+        "http://127.0.0.1:8000/api_solutions/",
+        {
+          username: username,
+          question: props.id,
+          solution: selectedOption,
+          is_correct: selectedOption == correct_answer ? true : false,
+          session_id: props.sessionID,
+          question_num: parseInt(localStorage.getItem("currentIdx")) + 1,
+        },
+        { headers: { Authorization: `token ${getAuthInfo().token}` } }
+      )
       .catch((error) => {
-        console.log(error);
+        console.error(error.response.data);
       });
+
     //
     // Adds to completed_qs DTO for future use
     //
@@ -340,6 +335,7 @@ DoQuestion.propTypes = {
   showResult: PropTypes.func,
   id: PropTypes.number,
   updateTags: PropTypes.func,
+  sessionID: PropTypes.string,
 };
 
 export default DoQuestion;
