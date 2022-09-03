@@ -6,6 +6,7 @@ function MultiSelect(props) {
 
   return (
     <select
+      data-html2canvas-ignore
       value={props.selectedValue}
       onChange={(e) => props.setSelectedValue(e.target.value)}
     >

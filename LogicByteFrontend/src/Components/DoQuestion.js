@@ -323,7 +323,11 @@ function DoQuestion(props) {
           }}
         >
           {optionsLoaded && inputs}
-          {showSubmit && <button type="Submit">Submit</button>}
+          {showSubmit && (
+            <button data-html2canvas-ignore type="Submit">
+              Submit
+            </button>
+          )}
         </form>
         {!isCorrect && <h2>The correct answer is {correctAnswer}</h2>}
       </>

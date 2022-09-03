@@ -139,7 +139,7 @@ function Canvas() {
           let dist = Math.sqrt(dx * dx + dy * dy);
           if (strokes[i].thickness < 4) {
             // Room for error
-            dist -= 10;
+            dist -= 20;
           }
           if (dist / 1.5 < strokes[i].thickness) {
             let newStrokes = [...strokes];
@@ -185,6 +185,7 @@ function Canvas() {
   return (
     <>
       <input
+        data-html2canvas-ignore
         type="range"
         min="1"
         max="20"
@@ -200,6 +201,7 @@ function Canvas() {
         setSelectedValue={setColour}
       />
       <button
+        data-html2canvas-ignore
         onClick={() => {
           if (isDrawing) {
             setIsDrawing(false);
@@ -212,6 +214,7 @@ function Canvas() {
         {isDrawing ? "Stop Drawing" : "Start Drawing"}
       </button>
       <button
+        data-html2canvas-ignore
         onClick={() => {
           if (isErasing) {
             setIsErasing(false);
@@ -224,8 +227,14 @@ function Canvas() {
         {isErasing ? "Stop Erasing" : "Start Erasing"}
       </button>
 
-      <button onClick={clearCanvas}> Clear</button>
-      <button onClick={undo}> Undo</button>
+      <button data-html2canvas-ignore onClick={clearCanvas}>
+        {" "}
+        Clear
+      </button>
+      <button data-html2canvas-ignore onClick={undo}>
+        {" "}
+        Undo
+      </button>
       <svg>
         {otherStrokes}
         <CurrentLine
