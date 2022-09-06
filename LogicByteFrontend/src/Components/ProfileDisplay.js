@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 import { UsernameContext } from "../router";
 
 function ProfileDisplay(props) {
-  //const [picRef, setPicRef] = useState("");
+  const [picSrc, setPicSrc] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
   const [numPoints, setNumPoints] = useState(0);
   const [rank, setRank] = useState(1);
@@ -66,6 +66,17 @@ function ProfileDisplay(props) {
             calcRank(state);
             return state;
           });
+          axios
+            .get(`http://127.0.0.1:8000/api_profile_picture/`, {
+              params: { user_profile: response.data.id },
+              headers: { Authorization: `token ${getAuthInfo().token}` },
+            })
+            .then((response) => {
+              setPicSrc(response.data.image);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
         })
         .catch((error) => {
           console.error(error.response.data);
@@ -84,7 +95,7 @@ function ProfileDisplay(props) {
     return (
       <div>
         <h1>{username}</h1>
-        <img src="" alt="Profile picture"></img>
+        <img src={picSrc} alt="Profile picture"></img>
         <div>
           <h2>Points</h2>
           <p>{numPoints}</p>
