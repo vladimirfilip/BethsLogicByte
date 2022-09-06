@@ -22,16 +22,16 @@ function getSvgPathFromStroke(stroke) {
 
 var options = {
   size: 9,
-  smoothing: 0.01,
-  thinning: 0.5,
-  streamline: 0.46,
+  smoothing: 0,
+  thinning: 0,
+  streamline: 0.9,
   easing: (t) => t,
   start: {
-    taper: 7,
+    taper: 0,
     cap: true,
   },
   end: {
-    taper: 7,
+    taper: 0,
     cap: true,
   },
 };
@@ -117,6 +117,9 @@ function Canvas() {
   // The slider returns a string, this keeps types consistent
   const [thickness, setThickness] = useState("4");
   const [colour, setColour] = useState(colours[0]);
+
+  console.log(strokes);
+
   function clearCanvas() {
     setStrokes([]);
   }
