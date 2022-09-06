@@ -22,9 +22,9 @@ function getSvgPathFromStroke(stroke) {
 
 var options = {
   size: 9,
-  smoothing: 0,
+  smoothing: 0.5,
   thinning: 0,
-  streamline: 0.9,
+  streamline: 0.5,
   easing: (t) => t,
   start: {
     taper: 0,
