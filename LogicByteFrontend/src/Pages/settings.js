@@ -1,13 +1,13 @@
 import React from "react";
 import axios from "axios";
-import { useState, useEffect, useContext } from "react";
+import { useState } from "react";
+import { useEffect } from "react";
 import useForm from "../helpers/useForm";
 import { getAuthInfo } from "../helpers/authHelper";
 import MainNavBar from "../Components/MainNavBar";
-import ProfilePicInput from "../Components/ProfilePicInput";
+
 import isSecurePassword from "../helpers/passwd";
 import PropTypes from "prop-types";
-import { UsernameContext } from "../router";
 
 function Settings(props) {
   const [passwords, handleChange] = useForm({
@@ -29,23 +29,8 @@ function Settings(props) {
   // secureMsg stores error messages passed from isSecurePassword
   //
   const [secureMsg, setSecureMsg] = useState([]);
-  const [newProfilePic, setProfilePic] = useState("");
-  let username = useContext(UsernameContext);
 
-  const updateProfilePic = () => {
-    axios
-      .put(
-        `http://127.0.0.1:8000/api_profile_picture/`,
-        { image: newProfilePic },
-        {
-          params: { username: username },
-          headers: { Authorization: `token ${getAuthInfo().token}` },
-        }
-      )
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+  let username = getAuthInfo().username;
 
   const checkPassword = () => {
     //
@@ -99,9 +84,7 @@ function Settings(props) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (newProfilePic != "") {
-      updateProfilePic();
-    }
+
     checkPassword();
     if (isPasswordCorrect && passwords.current_password != "") {
       //
@@ -141,9 +124,9 @@ function Settings(props) {
   return (
     <div>
       <MainNavBar link={props.changePage}></MainNavBar>
-      <ProfilePicInput setProfilePic={setProfilePic} />
       <h2>{username}</h2>
       {/* Image field not yet added to user model */}
+      <img alt="profile picture"></img>
       <h3>Change password</h3>
       {!isPasswordCorrect && <h2>Incorrect password</h2>}
       <form>
