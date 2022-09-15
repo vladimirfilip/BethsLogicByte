@@ -7,6 +7,8 @@ import axios from "axios";
 import { getAuthInfo } from "../helpers/authHelper";
 import { UsernameContext } from "../router.js";
 import moment from "moment";
+import Canvas from "../Components/canvas";
+import exportAsImage from "../helpers/exportAsImage";
 
 function QuestionPage(props) {
   const username = useContext(UsernameContext);
@@ -232,6 +234,7 @@ function QuestionPage(props) {
               (parseInt(localStorage.getItem("currentIdx")) + 1).toString()}
           </h1>
           <button
+            data-html2canvas-ignore
             onClick={() => {
               localStorage.removeItem("currentIdx");
               calculateScore();
@@ -242,9 +245,9 @@ function QuestionPage(props) {
           </button>
         </div>
         <div>
-          <p>{tags.exam_board}</p>
-          <p>{tags.difficulty}</p>
-          <p>{tags.exam_type}</p>
+          <p data-html2canvas-ignore>{tags.exam_board}</p>
+          <p data-html2canvas-ignore>{tags.difficulty}</p>
+          <p data-html2canvas-ignore>{tags.exam_type}</p>
         </div>
         {/*--------*/}
         {showResultHead && <h2>{result}</h2>}
@@ -255,6 +258,7 @@ function QuestionPage(props) {
         {!qCompleted &&
           parseInt(localStorage.getItem("currentIdx")) < q_ids.length - 1 && (
             <button
+              data-html2canvas-ignore
               onClick={() => {
                 calculateScore();
                 localStorage.removeItem("currentIdx");
@@ -266,17 +270,25 @@ function QuestionPage(props) {
         {/*------------------------------------------------------------------*/}
         <div>
           <button
+            data-html2canvas-ignore
             onClick={handle_previous}
             disabled={parseInt(localStorage.getItem("currentIdx")) == 0}
           >
             Previous
           </button>
-          <button onClick={handle_next}>
+          <button data-html2canvas-ignore onClick={handle_next}>
             {parseInt(localStorage.getItem("currentIdx")) == q_ids.length - 1
               ? "Finish"
               : "Next"}
           </button>
         </div>
+        <Canvas />
+        <button
+          data-html2canvas-ignore
+          onClick={() => exportAsImage(document.body, "sketch")}
+        >
+          Save sketch
+        </button>
       </>
     );
   }

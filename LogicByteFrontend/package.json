@@ -7,6 +7,8 @@
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.27.2",
+    "html2canvas": "^1.4.1",
+    "perfect-freehand": "^1.1.0",
     "better-react-mathjax": "^2.0.0",
     "moment": "^2.29.4",
     "react": "^17.0.2",
