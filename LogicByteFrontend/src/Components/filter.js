@@ -8,9 +8,7 @@ function Filter(props) {
     indent = 0;
   }
   let indentString = "";
-  for (let i = 0; i < indent; i++) {
-    indentString += "\u00A0";
-    indentString += "\u00A0";
+  for (let i = 0; i < indent * 3; i++) {
     indentString += "\u00A0";
   }
 
@@ -24,26 +22,45 @@ function Filter(props) {
     setFolded(dict);
   }, []);
 
-  const elements = props.data.map((x) => {
-    let hiddenClass = folded[x.name] ? "hidden" : "";
-    if (x.subcategories === undefined) {
+  const elements = props.data.map((element) => {
+    let hiddenClass = folded[element.name] ? "hidden" : "";
+
+    if (element.subcategories === undefined) {
       return (
-        <p key={x.name}>
+        <p
+          key={element.name}
+          onClick={() => props.callback(element.name)}
+          className="pointer"
+        >
           {indentString}
-          {x.name}
+          {element.name}
         </p>
       );
     } else {
       return (
-        <div key={x.name}>
-          <p
-            onClick={() => setFolded({ ...folded, [x.name]: !folded[x.name] })}
-          >
+        <div key={element.name}>
+          <p>
             {indentString}
-            {x.name}
+            <span
+              onClick={() =>
+                setFolded({ ...folded, [element.name]: !folded[element.name] })
+              }
+            >
+              {folded[element.name] ? "▲ " : "▼ "}
+            </span>
+            <span
+              onClick={() => props.callback(element.name)}
+              className="pointer"
+            >
+              {element.name}
+            </span>
           </p>
           <div className={hiddenClass}>
-            <Filter indent={indent + 1} data={x.subcategories}></Filter>
+            <Filter
+              indent={indent + 1}
+              data={element.subcategories}
+              callback={props.callback}
+            ></Filter>
           </div>
         </div>
       );
@@ -62,6 +79,7 @@ Filter.propTypes = {
   data: PropTypes.array,
   indent: PropTypes.number,
   hidden: PropTypes.bool,
+  callback: PropTypes.func,
 };
 
 export default Filter;
