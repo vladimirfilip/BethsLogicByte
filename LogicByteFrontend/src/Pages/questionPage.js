@@ -56,6 +56,7 @@ function QuestionPage(props) {
   };
 
   const displayQuestionComponent = (completed) => {
+    console.log(completed);
     if (completed) {
       setQuestionComponent(
         <ViewQuestion
