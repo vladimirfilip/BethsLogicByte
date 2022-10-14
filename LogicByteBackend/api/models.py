@@ -34,6 +34,7 @@ def question_img_directory(instance, *args):
 class Question(models.Model):
     creator = models.ForeignKey(UserProfile, related_name="created_questions", on_delete=models.CASCADE)
     question_description = models.TextField()
+    topic = models.TextField(blank=True)
     tag_names = models.CharField(max_length=150, blank=True)
     exam_board = models.CharField(max_length=15, blank=True)
     exam_type = models.CharField(max_length=20, blank=True)
