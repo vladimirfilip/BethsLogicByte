@@ -74,6 +74,9 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
                 field_name, field_value = primary_params
                 queryset = queryset.filter(**{field_name: field_value})
                 continue
+            if key == "topic":
+                queryset = queryset.filter(topic__startswith=params[key])
+                continue
             queryset = queryset.filter(**{key: params[key]})
         return queryset
 
