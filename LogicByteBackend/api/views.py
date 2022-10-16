@@ -4,6 +4,7 @@ from .serializers import *
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
+from django.db.models.query import QuerySet
 
 
 def check_password(request):
@@ -75,7 +76,12 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
                 queryset = queryset.filter(**{field_name: field_value})
                 continue
             if key == "topic":
-                queryset = queryset.filter(topic__startswith=params[key])
+                topic_sequences = params[key].split("OR")
+                q = queryset.filter(topic__startswith=topic_sequences[0])
+                for i in range(1, len(topic_sequences)):
+                    topic_sequence = topic_sequences[i]
+                    q = q.union(queryset.filter(topic__startswith=topic_sequence))
+                queryset = q
                 continue
             queryset = queryset.filter(**{key: params[key]})
         return queryset
