@@ -79,6 +79,10 @@ function FilterParent(props) {
     setData(copy);
   }, [x]);
 
+  useEffect(() => {
+    setData(saturateData(props.data));
+  }, [props.data]);
+
   return <FilterNode data={data} callback={(name) => callback(name)} />;
 }
 
