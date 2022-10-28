@@ -1,6 +1,7 @@
-import React from "react";
-import FilterDisplay from "../../FilterDisplay";
+import React, { useState, useRef, useEffect } from "react";
+import FilterDisplay from "./FilterDisplay";
 import FilterDropDown from "./FilterDropDown";
+import PropTypes from "prop-types";
 
 const MATHEMATICS = {
   Algebra: {
@@ -25,59 +26,51 @@ const MATHEMATICS = {
 function FilterComponent(props) {
   const [showQuestions, setShowQuestions] = useState(false);
   const current_topic = useRef();
-  let filter_tree = null;
+  const [filterTree, setFilterTree] = useState([]);
 
-  function* generate_filter(sub_level, last_topic) {
-    for (const topic of sub_level) {
-      //
-      // Base case: no more sublevels
-      //
-      const current_topic = last_topic + "\\" + topic;
-      if (sub_level[topic].length == 0) {
-        yield (
-          <FilterDropDown
-            children={null}
-            title={current_topic}
-            selectTopic={changeTopic}
-          />
-        );
-      } else {
-        // Until list comprehensions...
-        let sub_comps = [];
-        for (const sub_comp of generate_filter(
-          sub_level[topic],
-          current_topic
-        )) {
-          sub_comps.push(sub_comp);
-        }
-        yield (
-          <FilterDropDown
-            children={sub_comps}
-            title={current_topic}
-            selectTopic={null}
-          />
-        );
-      }
+  const generate_filter = () => {
+    for (const topic of Object.keys(MATHEMATICS)) {
+      setFilterTree((prev) => [
+        ...prev,
+        <FilterDropDown
+          title={topic}
+          key={topic}
+          topicList={MATHEMATICS[topic]}
+          checked={false}
+          changeTopic={changeTopic}
+          updateChildSelected={null}
+        />,
+      ]);
     }
-  }
+  };
 
   const changeTopic = (new_topic) => {
+    setShowQuestions(true);
     if (new_topic != current_topic.current) {
       current_topic.current = new_topic;
     }
   };
 
-  if (props.subject == "Mathematics") {
-    for (const comp of generate_filter(MATHEMATICS, "")) {
-      filter_tree.push(comp);
-    }
-  }
+  useEffect(() => {
+    generate_filter(props.subject);
+  }, []);
+
   return (
     <>
-      {filter_tree}
-      <FilterDisplay topic={current_topic} />
+      {
+        <table>
+          {filterTree.map((comp) => (
+            <tr key={filterTree.indexOf(comp)}>{comp}</tr>
+          ))}
+        </table>
+      }
+      {showQuestions && <FilterDisplay topic={current_topic} />}
     </>
   );
 }
+
+FilterComponent.propTypes = {
+  subject: PropTypes.string,
+};
 
 export default FilterComponent;
