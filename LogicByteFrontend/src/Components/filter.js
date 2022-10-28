@@ -12,7 +12,7 @@ function Filter(props) {
 
 function FilterParent(props) {
   const callback = (name) => {
-    let copy = { ...data };
+    let copy = JSON.parse(JSON.stringify(data));
     recursionSearch(copy, name);
     recursionCheck(copy);
     setData(copy);
@@ -74,7 +74,7 @@ function FilterParent(props) {
   let [x, setX] = useState(0);
 
   useEffect(() => {
-    let copy = { ...data };
+    let copy = JSON.parse(JSON.stringify(data));
     recursionCheck(copy);
     setData(copy);
   }, [x]);
