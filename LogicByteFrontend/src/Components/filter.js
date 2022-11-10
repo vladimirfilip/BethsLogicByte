@@ -3,8 +3,21 @@ import PropTypes from "prop-types";
 import "./filter.css";
 
 function Filter(props) {
+  let update = () => {
+    console.log(tags);
+  };
+  let tags = {};
   let children = props.data.map((x) => {
-    return <FilterParent key={x.name} data={x} />;
+    tags[x.name] = [];
+    let callback = (arr) => {
+      if (arr !== undefined) {
+        tags[x.name] = arr;
+        update();
+      }
+    };
+    return (
+      <FilterParent key={x.name} data={x} callback={(arr) => callback(arr)} />
+    );
   });
 
   return children;
@@ -60,6 +73,30 @@ function FilterParent(props) {
     }
   }
 
+  function recursiveGetChecked(data) {
+    if (data.subcategories === undefined) {
+      if (data.checked) {
+        return [data.name];
+      }
+    } else {
+      let x = [];
+      for (let i = 0; i < data.subcategories.length; i++) {
+        let z = recursiveGetChecked(data.subcategories[i]);
+        if (z != undefined) {
+          if (z.length !== 0) {
+            x = [...x, ...z];
+          }
+        }
+      }
+
+      if (data.checked) {
+        return [data.name, ...x];
+      } else {
+        return x;
+      }
+    }
+  }
+
   function saturateData(data) {
     data.checked = false;
     if (data.subcategories !== undefined) {
@@ -82,6 +119,10 @@ function FilterParent(props) {
   useEffect(() => {
     setData(saturateData(props.data));
   }, [props.data]);
+
+  useEffect(() => {
+    props.callback(recursiveGetChecked(data));
+  }, [data]);
 
   return <FilterNode data={data} callback={(name) => callback(name)} />;
 }
@@ -140,6 +181,7 @@ FilterNode.propTypes = {
 
 FilterParent.propTypes = {
   data: PropTypes.object,
+  callback: PropTypes.func,
 };
 
 Filter.propTypes = {
