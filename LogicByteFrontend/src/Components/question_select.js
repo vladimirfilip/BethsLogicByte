@@ -2,10 +2,24 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { getAuthInfo } from "../helpers/authHelper";
 import PropTypes from "prop-types";
+import MathJaxRender from "../helpers/mathJaxRender";
+import questionIDs from "../helpers/questionIDs";
 
 function Question_select(props) {
   let [isLoaded, setLoaded] = useState(false);
   let [data, setData] = useState([]);
+  let [selected, setSelected] = useState({});
+
+  function start() {
+    let x = [];
+    for (let i in selected) {
+      if (selected[i] == true) {
+        x.push(+i);
+      }
+    }
+    questionIDs.ids = x;
+    props.changePage("question");
+  }
 
   useEffect(() => {
     let x = [];
@@ -51,19 +65,51 @@ function Question_select(props) {
     }
   }, [props.tags]);
 
+  useEffect(() => {
+    let selectedx = {};
+    for (let i = 0; i < data.length; i++) {
+      selectedx[data[i].id] = false;
+    }
+    setSelected(selectedx);
+  }, [data]);
+
   if (!isLoaded) {
     return <p>Loading</p>;
   } else {
     let children = data.map((x) => {
-      return <p key={x.id}>{x.question_description}</p>;
+      let value;
+      if (selected[x.id] == undefined) {
+        value = false;
+      } else {
+        value = selected[x.id];
+      }
+      return (
+        <div key={x.id}>
+          <input
+            type={"checkbox"}
+            onChange={() => {
+              setSelected({ ...selected, [x.id]: !selected[x.id] });
+            }}
+            checked={value}
+          ></input>
+
+          <MathJaxRender text={x.question_description} />
+        </div>
+      );
     });
-    return <> {children}</>;
+    return (
+      <>
+        {children}
+        <button onClick={() => start()}>Start</button>
+      </>
+    );
     // return <p>{JSON.stringify(data)}</p>;
   }
 }
 
 Question_select.propTypes = {
   tags: PropTypes.array,
+  changePage: PropTypes.func,
 };
 
 export default Question_select;

@@ -119,10 +119,10 @@ function Router() {
       informatics: SubjectPage,
       my_questions: MyQPage,
       question_picker: QuestionPicker,
+      question: QuestionPage,
     },
     {
       user: User,
-      question: QuestionPage,
       finish: FinishSession,
     },
   ];

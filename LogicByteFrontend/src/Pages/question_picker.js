@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import Filter from "../Components/filter";
 import Question_select from "../Components/question_select";
+import PropTypes from "prop-types";
 
-function QuestionPicker() {
+function QuestionPicker(props) {
   let data = [{ name: "trigonometry" }, { name: "numbers" }];
   let [tags, setTags] = useState([]);
   // Stops unncecessary rerenders
@@ -13,10 +14,16 @@ function QuestionPicker() {
 
   return (
     <>
+      <h1>Filter</h1>
       {filter}
-      <Question_select tags={tags} />
+      <h1>Questions</h1>
+      <Question_select tags={tags} changePage={props.changePage} />
     </>
   );
 }
+
+QuestionPicker.propTypes = {
+  changePage: PropTypes.func,
+};
 
 export default QuestionPicker;
