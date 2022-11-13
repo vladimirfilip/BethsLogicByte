@@ -4,16 +4,26 @@ import "./filter.css";
 
 function Filter(props) {
   let update = () => {
-    console.log(tags);
+    let arr = [];
+    for (let i in tags) {
+      // console.log(tags[i].length);
+      for (let j = 0; j < tags[i].length; j++) {
+        arr.push(tags[i][j]);
+      }
+    }
+    props.callback(arr);
   };
+
   let tags = {};
   let children = props.data.map((x) => {
     tags[x.name] = [];
     let callback = (arr) => {
       if (arr !== undefined) {
         tags[x.name] = arr;
-        update();
+      } else if (arr === undefined) {
+        tags[x.name] = [];
       }
+      update();
     };
     return (
       <FilterParent key={x.name} data={x} callback={(arr) => callback(arr)} />
@@ -186,6 +196,7 @@ FilterParent.propTypes = {
 
 Filter.propTypes = {
   data: PropTypes.array,
+  callback: PropTypes.func,
 };
 
 export default Filter;
