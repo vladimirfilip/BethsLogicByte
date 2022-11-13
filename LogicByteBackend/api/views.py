@@ -4,6 +4,7 @@ from .serializers import *
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
+from django.db.models.query import QuerySet
 
 
 def check_password(request):
@@ -154,11 +155,14 @@ class QuestionView(GenericView):
         super().__init__(Question.objects.all(), QuestionSerializer)
 
     def get_questions_with_tag_names(self, tag_names: str):
-        tag_names = [tag_name.lower() for tag_name in tag_names.split(",")]
+        queries = [query.split("|") for query in tag_names.split(",")]
         queryset = self.queryset
         tag_name = ""
-        for tag_name in tag_names:
-            queryset = queryset.filter(tag_names__contains=tag_name)
+        for query in queries:
+            new_queryset = QuerySet(Question)
+            for tag_name in query:
+                new_queryset = new_queryset | queryset.filter(tag_names__contains=tag_name)
+            queryset = queryset.intersection(new_queryset, queryset)
         return 'tag_names__contains', tag_name
 
     def filter(self, request, *args):
