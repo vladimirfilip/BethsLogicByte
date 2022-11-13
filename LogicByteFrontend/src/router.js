@@ -117,10 +117,10 @@ function Router() {
       biology: SubjectPage,
       informatics: SubjectPage,
       my_questions: MyQPage,
+      question: QuestionPage,
     },
     {
       user: User,
-      question: QuestionPage,
       finish: FinishSession,
     },
   ];

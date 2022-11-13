@@ -118,8 +118,6 @@ function Canvas() {
   const [thickness, setThickness] = useState("4");
   const [colour, setColour] = useState(colours[0]);
 
-  console.log(strokes);
-
   function clearCanvas() {
     setStrokes([]);
   }
