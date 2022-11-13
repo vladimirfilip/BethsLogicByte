@@ -19,7 +19,6 @@ function Question_select(props) {
       }
     }
     questionIDs.ids = x;
-    console.log(questionIDs.ids);
     props.changePage("question");
   }
 
@@ -70,8 +69,6 @@ function Question_select(props) {
     }
     setSelected(newSelected);
   }, [props.tags]);
-
-  console.log(selected);
 
   if (!isLoaded) {
     return <p>Loading</p>;
