@@ -4,7 +4,7 @@ import Question_select from "../Components/question_select";
 import PropTypes from "prop-types";
 
 function QuestionPicker(props) {
-  let data = [{ name: "trigonometry" }, { name: "numbers" }];
+  let data = [{ name: "trigonometry" }, { name: "numbers" }, {name: "john"}];
   let [tags, setTags] = useState([]);
   // Stops unncecessary rerenders
   // This doesn't allow for data to be updated but there should be no situation where that is necessary anyways

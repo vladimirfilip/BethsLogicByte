@@ -9,6 +9,7 @@ function Question_select(props) {
   let [isLoaded, setLoaded] = useState(false);
   let [data, setData] = useState([]);
   let [selected, setSelected] = useState({});
+  let [filteredData, setFilteredData] = useState([]);
 
   function start() {
     let x = [];
@@ -18,71 +19,64 @@ function Question_select(props) {
       }
     }
     questionIDs.ids = x;
+    console.log(questionIDs.ids);
     props.changePage("question");
   }
 
-  useEffect(() => {
-    let x = [];
+  function containsTags(element) {
     if (props.tags.length == 0) {
-      axios
-        .get("http://127.0.0.1:8000/api_questions/", {
-          headers: {
-            Authorization: `token ${getAuthInfo().token}`,
-          },
-        })
-        .then((response) => {
-          setLoaded(true);
-          setData(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      return true;
     }
-
+    let contains = false;
     for (let i = 0; i < props.tags.length; i++) {
-      axios
-        .get(
-          "http://127.0.0.1:8000/api_questions/?tag_names=" + props.tags[i],
-          {
-            headers: {
-              Authorization: `token ${getAuthInfo().token}`,
-            },
-          }
-        )
-        .then((response) => {
-          setLoaded(true);
-          console.log(response.data);
-          if (response.data.length !== undefined) {
-            x = [...x, ...response.data];
-          } else {
-            x = [...x, response.data];
-          }
-          setData(x);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      if (element.tag_names.includes(props.tags[i])) {
+        contains = true;
+      }
     }
+    return contains;
+  }
+
+  useEffect(() => {
+    axios
+      .get("http://127.0.0.1:8000/api_questions/", {
+        headers: {
+          Authorization: `token ${getAuthInfo().token}`,
+        },
+      })
+      .then((response) => {
+        setLoaded(true);
+        setData(response.data);
+        setFilteredData(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
+  useEffect(() => {
+    let filtered = data.filter(containsTags);
+    let newSelected = JSON.parse(JSON.stringify(selected));
+    setFilteredData(filtered);
+    for (let i in selected) {
+      let found = false;
+      for (let j = 0; j < filtered.length; j++) {
+        if (filtered[j].id == i) {
+          found = true;
+        }
+      }
+      if (found == false) {
+        delete newSelected[i];
+      }
+    }
+    setSelected(newSelected);
   }, [props.tags]);
 
-  useEffect(() => {
-    let selectedx = {};
-    for (let i = 0; i < data.length; i++) {
-      selectedx[data[i].id] = false;
-    }
-    setSelected(selectedx);
-  }, [data]);
+  console.log(selected);
 
   if (!isLoaded) {
     return <p>Loading</p>;
   } else {
-    let children = data.map((x) => {
-      let value;
-      if (selected[x.id] == undefined) {
-        value = false;
-      } else {
-        value = selected[x.id];
-      }
+    let children = filteredData.map((x) => {
       return (
         <div key={x.id}>
           <input
@@ -90,7 +84,7 @@ function Question_select(props) {
             onChange={() => {
               setSelected({ ...selected, [x.id]: !selected[x.id] });
             }}
-            checked={value}
+            checked={selected[x.id] != undefined ? selected[x.id] : false}
           ></input>
 
           <MathJaxRender text={x.question_description} />
