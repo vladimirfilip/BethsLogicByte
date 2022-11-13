@@ -15,7 +15,6 @@ import {
 import axios from "axios";
 import SubjectPage from "./Pages/subjectPage";
 import MyQPage from "./Pages/myQPage";
-import QuestionPicker from "./Pages/question_picker";
 
 function getURL() {
   let url = window.location.href;
@@ -118,7 +117,6 @@ function Router() {
       biology: SubjectPage,
       informatics: SubjectPage,
       my_questions: MyQPage,
-      question_picker: QuestionPicker,
       question: QuestionPage,
     },
     {
