@@ -240,7 +240,7 @@ class UserProfileTestSuite(GenericTestSuite):
                 "Enter a valid email address."
             ],
             "user": [
-                "This field must be unique."
+                "user profile with this user already exists."
             ]
         }
         self.test_operator.post(url="/api_profiles/",
