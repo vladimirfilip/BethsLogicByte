@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Filter from "./filter";
-import Question_select from "./question_select";
+import QuestionSelect from "./QuestionSelect";
 import PropTypes from "prop-types";
 
 function QuestionPicker(props) {
@@ -16,7 +16,7 @@ function QuestionPicker(props) {
       <h1>Filter</h1>
       {filter}
       <h1>Questions</h1>
-      <Question_select tags={tags} changePage={props.changePage} />
+      <QuestionSelect tags={tags} changePage={props.changePage} />
     </>
   );
 }

@@ -5,9 +5,9 @@ import PropTypes from "prop-types";
 import MathJaxRender from "../helpers/mathJaxRender";
 import questionIDs from "../helpers/questionIDs";
 
-function Question_select(props) {
+function QuestionSelect(props) {
   let [isLoaded, setLoaded] = useState(false);
-  let [data, setData] = useState([]);
+  // let [data, setData] = useState([]);
   let [selected, setSelected] = useState({});
   let [filteredData, setFilteredData] = useState([]);
 
@@ -22,44 +22,69 @@ function Question_select(props) {
     props.changePage("question");
   }
 
-  function containsTags(element) {
-    if (props.tags.length == 0) {
-      return true;
-    }
-    let contains = false;
-    for (let i = 0; i < props.tags.length; i++) {
-      if (element.tag_names.includes(props.tags[i])) {
-        contains = true;
-      }
-    }
-    return contains;
-  }
+  // function containsTags(element) {
+  //   if (props.tags.length == 0) {
+  //     return true;
+  //   }
+  //   let contains = false;
+  //   for (let i = 0; i < props.tags.length; i++) {
+  //     if (element.tag_names.includes(props.tags[i])) {
+  //       contains = true;
+  //     }
+  //   }
+  //   return contains;
+  // }
 
+  // useEffect(() => {
+  //   axios
+  //     .get("http://127.0.0.1:8000/api_questions/", {
+  //       headers: {
+  //         Authorization: `token ${getAuthInfo().token}`,
+  //       },
+  //     })
+  //     .then((response) => {
+  //       setLoaded(true);
+  //       setData(response.data);
+  //       setFilteredData(response.data);
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // }, []);
   useEffect(() => {
+    let filter = "?tag_names=";
+    if (props.tags.length == 0) {
+      filter = "";
+    } else {
+      filter = filter + props.tags.join("|");
+    }
+    console.log(filter);
     axios
-      .get("http://127.0.0.1:8000/api_questions/", {
+      .get("http://127.0.0.1:8000/api_questions/" + filter, {
         headers: {
           Authorization: `token ${getAuthInfo().token}`,
         },
       })
       .then((response) => {
         setLoaded(true);
-        setData(response.data);
-        setFilteredData(response.data);
+        if (response.data.length == undefined) {
+          setFilteredData([response.data]);
+        } else {
+          setFilteredData(response.data);
+        }
       })
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  }, [props.tags]);
 
   useEffect(() => {
-    let filtered = data.filter(containsTags);
     let newSelected = JSON.parse(JSON.stringify(selected));
-    setFilteredData(filtered);
+    setFilteredData(filteredData);
     for (let i in selected) {
       let found = false;
-      for (let j = 0; j < filtered.length; j++) {
-        if (filtered[j].id == i) {
+      for (let j = 0; j < filteredData.length; j++) {
+        if (filteredData[j].id == i) {
           found = true;
         }
       }
@@ -68,7 +93,7 @@ function Question_select(props) {
       }
     }
     setSelected(newSelected);
-  }, [props.tags]);
+  }, [filteredData]);
 
   if (!isLoaded) {
     return <p>Loading</p>;
@@ -98,9 +123,9 @@ function Question_select(props) {
   }
 }
 
-Question_select.propTypes = {
+QuestionSelect.propTypes = {
   tags: PropTypes.array,
   changePage: PropTypes.func,
 };
 
-export default Question_select;
+export default QuestionSelect;
