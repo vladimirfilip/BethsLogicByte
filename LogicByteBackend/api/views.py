@@ -62,18 +62,21 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         model_keys_in_headers = list(model_keys.intersection(param_keys))
         return model_keys_in_headers
 
-    def filter(self, request, secondary=None):
+    def filter(self, request, **kwargs):
         queryset = self.queryset
         params = self.get_params(request)
-        if secondary is None:
-            secondary = {}
+        secondary = kwargs.pop('secondary', {})
+        custom_filter = kwargs.pop('custom_filter', {})
         for key in params.keys():
             if key[:2] == "s_":
                 continue
-            if key in secondary.keys():
+            if secondary.get(key, None):
                 primary_params = secondary[key](params[key])
                 field_name, field_value = primary_params
                 queryset = queryset.filter(**{field_name: field_value})
+                continue
+            if custom_filter.get(key, None):
+                queryset = custom_filter[key](params[key])
                 continue
             queryset = queryset.filter(**{key: params[key]})
         return queryset
@@ -147,7 +150,7 @@ class UserProfileView(GenericView):
         return "user", user
 
     def filter(self, request, *args):
-        return super().filter(request, {'username': self.filter_by_username})
+        return super().filter(request, secondary={'username': self.filter_by_username})
 
 
 class QuestionView(GenericView):
@@ -157,16 +160,17 @@ class QuestionView(GenericView):
     def get_questions_with_tag_names(self, tag_names: str):
         queries = [query.split("|") for query in tag_names.split(",")]
         queryset = self.queryset
-        tag_name = ""
+        new_queryset = QuerySet(Question)
         for query in queries:
-            new_queryset = QuerySet(Question)
+            temp_queryset = Question.objects.none()
             for tag_name in query:
-                new_queryset = new_queryset | queryset.filter(tag_names__contains=tag_name)
-            queryset = queryset.intersection(new_queryset, queryset)
-        return 'tag_names__contains', tag_name
+                filtered = queryset.filter(tag_names__contains=tag_name)
+                temp_queryset = temp_queryset | filtered
+            new_queryset = new_queryset.intersection(new_queryset, temp_queryset)
+        return new_queryset
 
     def filter(self, request, *args):
-        return super().filter(request, {'tag_names': self.get_questions_with_tag_names})
+        return super().filter(request, custom_filter={'tag_names': self.get_questions_with_tag_names})
 
 
 class SolutionView(GenericView):
@@ -179,7 +183,7 @@ class SolutionView(GenericView):
         return 'question', question
 
     def filter(self, request, *args):
-        return super().filter(request, {'question_id': self.get_solution_by_question_id})  #
+        return super().filter(request, secondary={'question_id': self.get_solution_by_question_id})  #
 
 
 class SavedQuestionView(GenericView):
