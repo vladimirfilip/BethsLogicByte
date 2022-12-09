@@ -238,15 +238,13 @@ class UserProfileTestSuite(GenericTestSuite):
         expected_output = {
             "email_address": [
                 "Enter a valid email address."
-            ],
-            "user": [
-                "This field must be unique."
             ]
         }
         self.test_operator.post(url="/api_profiles/",
                                 input_data=input_data,
                                 expected_data=expected_output,
-                                expected_status_code=400)
+                                expected_status_code=400,
+                                assert_contains=True)
 
     def get(self):
         expected_data = {
