@@ -1,9 +1,7 @@
-from django.conf import settings
 from django.contrib.auth.models import User
 from .models import Question, UserProfile
 from rest_framework.authtoken.models import Token
 from django.test import Client, TestCase
-from rest_framework.test import APIClient, APITestCase
 
 
 def create_model_instance(model_type, **kwargs):
@@ -90,7 +88,7 @@ class QuestionTestSuite(GenericTestSuite):
         self.test_operator.client = Client()
         self.test_operator.set_token(self.token)
         question_data = {'question_description': 'This is a question description',
-                         'creator': create_model_instance(UserProfile, user=user)}
+                         'user_profile': create_model_instance(UserProfile, user=user)}
         create_model_instance(Question, **question_data)
         self.skeleton_data = {
             "question_description": "",
@@ -101,7 +99,7 @@ class QuestionTestSuite(GenericTestSuite):
             "num_points": None,
             "question_type": "",
             "official_solution": "",
-            "creator": None,
+            "user_profile": None,
             "multiple_choices": "",
             "has_images": False,
         }
@@ -113,7 +111,7 @@ class QuestionTestSuite(GenericTestSuite):
             "question_description": "This is a question description",
             "tag_names": "",
             "id": 1,
-            "creator": 1,
+            "user_profile": 1,
             "solutions": [],
             "exam_type": '',
             "num_points": 0,
@@ -136,7 +134,7 @@ class QuestionTestSuite(GenericTestSuite):
 
     def post(self):
         input_data = {
-            "creator": 1,
+            "user_profile": self.token.key,
             "question_description": "This is a posted maths question description",
             "tag_names": "maths,challenge",
             "difficulty": "t",
@@ -150,6 +148,7 @@ class QuestionTestSuite(GenericTestSuite):
             "has_images": False,
         }
         expected_data = dict(input_data, **{"id": 2, "solutions": []})
+        expected_data['user_profile'] = 1
         self.test_operator.post(url="/api_questions/",
                                 input_data=input_data,
                                 expected_data=expected_data,
@@ -162,7 +161,7 @@ class QuestionTestSuite(GenericTestSuite):
             "tag_names": "maths",
         }
         extra_data = {
-            "creator": 1,
+            "user_profile": 1,
             "solutions": [],
             "difficulty": "t",
             "exam_board": "t",
@@ -217,7 +216,8 @@ class UserProfileTestSuite(GenericTestSuite):
             "year_group": "",
             "class_name": "",
             "email_address": "",
-            "user": None
+            "user": None,
+            "rank": None,
         }
         super().setUp()
 
@@ -229,7 +229,7 @@ class UserProfileTestSuite(GenericTestSuite):
             "email_address": "this.is.a.valid.email.address@gmail.com",
         }
         expected_data = dict(input_data, **{"id": 1, "created_questions": [], "saved_questions": [],
-                                            "num_points": 0})
+                                            "num_points": 0, "question_sessions": [], "rank": 0})
         self.test_operator.post(url="/api_profiles/",
                                 input_data=input_data,
                                 expected_data=expected_data,
@@ -256,6 +256,8 @@ class UserProfileTestSuite(GenericTestSuite):
             "year_group": "10",
             "class_name": "MathsClass",
             "email_address": "this.is.a.valid.email.address@gmail.com",
+            "question_sessions": [],
+            "rank": 0,
         }
         self.test_operator.get(url="/api_profiles/",
                                params={"username": "user1"},
@@ -278,7 +280,9 @@ class UserProfileTestSuite(GenericTestSuite):
             "num_points": 1,
             "year_group": "10",
             "class_name": "EnglishClass",
-            "email_address": "this.is.a.valid.email.address@gmail.com"
+            "email_address": "this.is.a.valid.email.address@gmail.com",
+            "rank": 0,
+            "question_sessions": [],
         }
         self.test_operator.put(url="/api_profiles/",
                                params={"id": 1},
@@ -327,11 +331,11 @@ class SolutionTestSuite(GenericTestSuite):
         user_profile = create_model_instance(UserProfile, user=user)
         question_data = {
             'question_description': 'question_description',
-            'creator': user_profile
+            'user_profile': user_profile
         }
         create_model_instance(Question, **question_data)
         self.skeleton_data = {
-            "username": "",
+            "user_profile": None,
             "solution": "",
             "question": None,
             "is_correct": False,
@@ -342,13 +346,14 @@ class SolutionTestSuite(GenericTestSuite):
 
     def post(self):
         valid_data = {
-            "username": "username",
+            "user_profile": self.token.key,
             "question": 1,
             "solution": "This is a solution"
         }
         output_from_valid_data = dict(valid_data, **{"id": 1})
+        output_from_valid_data['user_profile'] = 1
         erroneous_data = {
-            "creator": "",
+            "user_profile": None,
             "question": "",
             "solution": ""
         }
@@ -356,7 +361,7 @@ class SolutionTestSuite(GenericTestSuite):
             "solution": [
                 "This field may not be blank."
             ],
-            "username": [
+            "user_profile": [
                 "This field is required."
             ],
             "question": [
@@ -376,12 +381,12 @@ class SolutionTestSuite(GenericTestSuite):
     def get(self):
         expected_data = {
             "id": 1,
-            "username": "username",
+            "user_profile": 1,
             "question": 1,
             "solution": "This is a solution"
         }
         self.test_operator.get(url="/api_solutions/",
-                               params={"username": "username"},
+                               params={"user_profile": self.token.key},
                                expected_data=expected_data,
                                expected_status_code=200,
                                assert_contains=True)
@@ -391,35 +396,33 @@ class SolutionTestSuite(GenericTestSuite):
                                expected_status_code=200,
                                assert_contains=True)
         self.test_operator.get(url="/api_solutions/",
-                               params={"username": "username2"},
+                               params={"user_profile": User.objects.create(username="otheruser").auth_token.key},
                                expected_data=self.skeleton_data,
                                expected_status_code=400)
 
     def put(self, **kwargs):
         updated_data = {
             "id": 1,
-            "username": "updated username",
+            "user_profile": self.token.key,
             "question": 1,
             "solution": "This is an updated solution"
         }
+        expected_data = updated_data.copy()
+        expected_data['user_profile'] = 1
         self.test_operator.put(url="/api_solutions/",
                                params={"id": 1},
                                input_data=updated_data,
-                               expected_data=updated_data,
+                               expected_data=expected_data,
                                expected_status_code=200,
                                assert_contains=True)
         self.test_operator.get(url="/api_solutions/",
                                params={"id": 1},
-                               expected_data=updated_data,
+                               expected_data=expected_data,
                                expected_status_code=200,
                                assert_contains=True)
-        updated_data['username'] = ""
         updated_data['question'] = ""
         updated_data['solution'] = ""
         expected_data = {
-            "username": [
-                "This field may not be blank."
-            ],
             "question": [
                 "This field may not be null."
             ],
@@ -446,15 +449,15 @@ class SolutionTestSuite(GenericTestSuite):
 
 class SavedQuestionTestSuite(GenericTestSuite):
     def setUp(self):
-        user = create_model_instance(User, username="user")
-        self.token = user.auth_token
+        self.user = create_model_instance(User, username="user")
+        self.token = self.user.auth_token
         self.test_operator = TestOperator()
         self.test_operator.client = Client()
         self.test_operator.set_token(self.token)
-        user_profile = create_model_instance(UserProfile, user=user)
+        user_profile = create_model_instance(UserProfile, user=self.user)
         question_data = {
             'question_description': 'question_description',
-            'creator': user_profile
+            'user_profile': user_profile
         }
         create_model_instance(Question, **question_data)
         self.skeleton_data = {
@@ -465,17 +468,18 @@ class SavedQuestionTestSuite(GenericTestSuite):
 
     def post(self):
         valid_data = {
-            "user_profile": 1,
+            "user_profile": self.token.key,
             "question": 1
         }
         output_from_valid_data = dict(valid_data, **{"id": 1})
+        output_from_valid_data['user_profile'] = 1
         erroneous_data = {
             "user_profile": "",
             "question": ""
         }
         output_from_erroneous_data = {
             "user_profile": [
-                "This field may not be null."
+                "This field is required."
             ],
             "question": [
                 "This field may not be null."
@@ -497,7 +501,7 @@ class SavedQuestionTestSuite(GenericTestSuite):
             "question": 1,
         }
         self.test_operator.get(url="/api_saved_questions/",
-                               params={"user_profile": 1},
+                               params={"user_profile": self.token.key},
                                expected_data=expected_data,
                                expected_status_code=200)
         self.test_operator.get(url="/api_saved_questions/",
@@ -505,31 +509,30 @@ class SavedQuestionTestSuite(GenericTestSuite):
                                expected_data=expected_data,
                                expected_status_code=200)
         self.test_operator.get(url="/api_saved_questions/",
-                               params={"user_profile": 2},
+                               params={"user_profile": create_model_instance(User, username="otheruser").auth_token.key},
                                expected_data=self.skeleton_data,
                                expected_status_code=400)
 
     def put(self):
         updated_data = {
             "id": 1,
-            "user_profile": 1,
+            "user_profile": self.token.key,
             "question": 1,
         }
+        expected_data = updated_data.copy()
+        expected_data['user_profile'] = 1
         self.test_operator.put(url="/api_saved_questions/",
                                params={"id": 1},
                                input_data=updated_data,
-                               expected_data=updated_data,
+                               expected_data=expected_data,
                                expected_status_code=200)
         self.test_operator.get(url="/api_saved_questions/",
                                params={"id": 1},
-                               expected_data=updated_data,
+                               expected_data=expected_data,
                                expected_status_code=200)
         updated_data['user_profile'] = ""
         updated_data['question'] = ""
         expected_data = {
-            "user_profile": [
-                "This field may not be null."
-            ],
             "question": [
                 "This field may not be null."
             ],

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from django.contrib.auth.hashers import make_password
 
 
 def user_profile_pic_directory(instance, *args):
@@ -17,6 +18,7 @@ class UserProfile(models.Model):
     year_group = models.CharField(max_length=10)
     class_name = models.CharField(max_length=100)
     email_address = models.EmailField(max_length=50, null=True)
+    rank = models.IntegerField(default=0)
 
     def __str__(self):
         return self.user.username
@@ -32,7 +34,7 @@ def question_img_directory(instance, *args):
 
 
 class Question(models.Model):
-    creator = models.ForeignKey(UserProfile, related_name="created_questions", on_delete=models.CASCADE)
+    user_profile = models.ForeignKey(UserProfile, related_name="created_questions", on_delete=models.CASCADE)
     question_description = models.TextField()
     tag_names = models.CharField(max_length=150, blank=True)
     exam_board = models.CharField(max_length=15, blank=True)
@@ -52,7 +54,7 @@ class QuestionImage(models.Model):
 
 
 class QuestionInSession(models.Model):
-    username = models.TextField()
+    user_profile = models.ForeignKey(UserProfile, related_name="questions_in_session", on_delete=models.CASCADE)
     question_id = models.IntegerField()
     question_description = models.TextField(blank=True)
     solution = models.TextField(blank=True)
@@ -71,7 +73,7 @@ def solution_img_directory(instance, *args):
 
 
 class SolutionAttempt(models.Model):
-    username = models.TextField()
+    user_profile = models.ForeignKey(UserProfile, related_name="solutions", on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name="solutions", on_delete=models.CASCADE)
     solution = models.TextField()
     date_modified = models.DateTimeField(auto_now_add=True)
@@ -85,14 +87,24 @@ class SolutionAttempt(models.Model):
 
 class UserQuestionSession(models.Model):
     session_id = models.TextField(null=True)
-    username = models.TextField(null=True)
+    user_profile = models.ForeignKey(UserProfile, related_name="question_sessions", on_delete=models.CASCADE)
     score = models.FloatField(null=True)
+
+
+class QuestionFilterResult(models.Model):
+    user_profile = models.ForeignKey(UserProfile, related_name="filter_results", on_delete=models.CASCADE)
+    question_ids = models.TextField(null=True)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def encrypt_password(sender, instance=None, created=False, **kwargs):
+    instance.password = make_password(instance.password)
 
 
 def delete_file_on_delete(file):

@@ -20,6 +20,7 @@ url_views = {
     "api_profile_picture/": ProfilePictureView.as_view(),
     "api_questions_in_session/": QuestionInSessionView.as_view(),
     "api_check_question_completed/": check_if_question_completed,
+    "api_filter_result/": FilterResultView.as_view()
 }
 
 

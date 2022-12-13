@@ -1,3 +1,5 @@
+import threading
+from time import time, sleep
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from .serializers import *
@@ -5,6 +7,31 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
 from django.db.models.query import QuerySet
+from rest_framework.authtoken.models import Token
+from random import shuffle
+from threading import Thread
+
+rank_calculation_started = False
+rank_calculation_delay = 10
+
+
+def start_rank_calculation():
+    thread = Thread(target=calculate_ranks)
+    thread.start()
+
+
+def calculate_ranks():
+    print("STARTED RANK CALCULATION LOOP")
+    main_thread = threading.enumerate()[0]
+    while main_thread.is_alive():
+        sleep(rank_calculation_delay)
+        print("STARTED RANK CALCULATION AT {}".format(time()))
+        id_to_points = {}
+        for model in UserProfile.objects.all():
+            id_to_points[model.id] = model.num_points
+        point_order = sorted(id_to_points.keys(), key=lambda k: id_to_points[k], reverse=True)
+        for i in range(1, len(point_order) + 1):
+            UserProfile.objects.filter(id=point_order[i - 1]).update(rank=i)
 
 
 def check_password(request):
@@ -41,6 +68,26 @@ def check_if_question_completed(request):
     return JsonResponse({"data": "true"})
 
 
+def get_user_with_token(token):
+    valid_token = Token.objects.filter(key=token).first()
+    return valid_token.user if valid_token else None
+
+
+def get_user_profile_with_token(token):
+    user = get_user_with_token(token)
+    return UserProfile.objects.filter(user=user).first() if user else None
+
+
+def filter_by_user_with_token(queryset, token):
+    user = get_user_with_token(token)
+    return queryset.filter(user=user) if user else UserProfile.objects.none()
+
+
+def filter_by_user_profile_with_token(queryset, token):
+    user_profile = get_user_profile_with_token(token)
+    return queryset.filter(user_profile=user_profile) if user_profile else UserProfile.objects.none()
+
+
 class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin,
                   mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     def __init__(self, queryset, serializer_class, **kwargs):
@@ -67,18 +114,31 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         params = self.get_params(request)
         secondary = kwargs.pop('secondary', {})
         custom_filter = kwargs.pop('custom_filter', {})
+        default_custom_filter = {"user": filter_by_user_with_token,
+                                 "user_profile": filter_by_user_profile_with_token}
+        arguments = kwargs.pop('arguments', {})
+        for k, v in default_custom_filter.items():
+            custom_filter[k] = v
+        final_alterations = []
         for key in params.keys():
+            value = params.get(key)
             if key[:2] == "s_":
                 continue
+            if key in arguments.keys():
+                final_alterations.append(key)
+                continue
             if secondary.get(key, None):
-                primary_params = secondary[key](params[key])
+                primary_params = secondary[key](value)
                 field_name, field_value = primary_params
                 queryset = queryset.filter(**{field_name: field_value})
                 continue
             if custom_filter.get(key, None):
-                queryset = custom_filter[key](params[key])
+                queryset = custom_filter[key](queryset, value)
                 continue
-            queryset = queryset.filter(**{key: params[key]})
+            queryset = queryset.filter(**{key: value})
+        for key in final_alterations:
+            value = params.get(key)
+            queryset = arguments[key](queryset, value)
         return queryset
 
     def get(self, request):
@@ -98,6 +158,11 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         return Response(serialized_data, status_code)
 
     def post(self, request):
+        request_data = request.data
+        user_profile_token = request_data.pop("user_profile", None)
+        if user_profile_token:
+            user_profile = get_user_profile_with_token(user_profile_token)
+            request_data['user_profile'] = user_profile.id if user_profile else None
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -115,6 +180,10 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
     def put(self, request):
         model_instances = self.filter(request)
         request_data = request.data
+        user_profile_token = request_data.pop("user_profile", None)
+        if user_profile_token:
+            user_profile = get_user_profile_with_token(user_profile_token)
+            request_data['user_profile'] = user_profile.id if user_profile else None
         if model_instances.count() > 1:
             return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
@@ -142,7 +211,11 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
 
 class UserProfileView(GenericView):
     def __init__(self):
+        global rank_calculation_started
         super().__init__(UserProfile.objects.all(), UserProfileSerializer)
+        if not rank_calculation_started:
+            rank_calculation_started = True
+            start_rank_calculation()
 
     @staticmethod
     def filter_by_username(username) -> tuple:
@@ -157,9 +230,9 @@ class QuestionView(GenericView):
     def __init__(self):
         super().__init__(Question.objects.all(), QuestionSerializer)
 
-    def get_questions_with_tag_names(self, tag_names: str):
+    @staticmethod
+    def get_questions_with_tag_names(queryset, tag_names: str):
         queries = [query.split("|") for query in tag_names.split(",")]
-        queryset = self.queryset
         new_queryset = QuerySet(Question)
         for query in queries:
             temp_queryset = Question.objects.none()
@@ -169,8 +242,19 @@ class QuestionView(GenericView):
             new_queryset = new_queryset.intersection(new_queryset, temp_queryset)
         return new_queryset
 
+    @staticmethod
+    def choose_randomly(queryset, n: int):
+        n = int(n)
+        ids = [model.id for model in queryset]
+        shuffle(ids)
+        new_queryset = Question.objects.none()
+        for id in ids[:n]:
+            new_queryset = new_queryset | Question.objects.filter(id=id)
+        return new_queryset
+
     def filter(self, request, *args):
-        return super().filter(request, custom_filter={'tag_names': self.get_questions_with_tag_names})
+        return super().filter(request, custom_filter={'tag_names': self.get_questions_with_tag_names},
+                              arguments={'number': self.choose_randomly})
 
 
 class SolutionView(GenericView):
@@ -183,7 +267,7 @@ class SolutionView(GenericView):
         return 'question', question
 
     def filter(self, request, *args):
-        return super().filter(request, secondary={'question_id': self.get_solution_by_question_id})  #
+        return super().filter(request, secondary={'question_id': self.get_solution_by_question_id})
 
 
 class SavedQuestionView(GenericView):
@@ -214,3 +298,8 @@ class QuestionInSessionView(GenericView):
 class UserQuestionSessionView(GenericView):
     def __init__(self):
         super().__init__(UserQuestionSession.objects.all(), UserQuestionSessionSerializer)
+
+
+class FilterResultView(GenericView):
+    def __init__(self):
+        super().__init__(QuestionFilterResult.objects.all(), FilterResultSerializer)
