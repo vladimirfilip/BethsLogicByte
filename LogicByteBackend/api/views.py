@@ -23,8 +23,12 @@ def start_rank_calculation():
 def calculate_ranks():
     print("STARTED RANK CALCULATION LOOP")
     main_thread = threading.enumerate()[0]
+    start_time = None
     while main_thread.is_alive():
-        sleep(rank_calculation_delay)
+        sleep(1)
+        if start_time and time() - start_time < rank_calculation_delay:
+            continue
+        start_time = time()
         print("STARTED RANK CALCULATION AT {}".format(time()))
         id_to_points = {}
         for model in UserProfile.objects.all():
@@ -248,8 +252,8 @@ class QuestionView(GenericView):
         ids = [model.id for model in queryset]
         shuffle(ids)
         new_queryset = Question.objects.none()
-        for id in ids[:n]:
-            new_queryset = new_queryset | Question.objects.filter(id=id)
+        for model_id in ids[:n]:
+            new_queryset = new_queryset | Question.objects.filter(id=model_id)
         return new_queryset
 
     def filter(self, request, *args):
