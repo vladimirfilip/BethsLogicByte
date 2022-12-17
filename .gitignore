@@ -1,8 +1,6 @@
-
 .idea
 .vscode
 *.pyc
 *.sqlite3
-profile_pics
-question_images
-solution_images
+/backend_media/
+/backups/
