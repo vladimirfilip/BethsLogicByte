@@ -145,7 +145,6 @@ function DoQuestion(props) {
     // Retrieves user id to pass to post request
     // Adds user's attempt to attempted questions
     //
-    console.log(props.sessionID);
 
     axios
       .post(

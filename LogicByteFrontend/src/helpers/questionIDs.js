@@ -1,6 +1,6 @@
 class QuestionIDs {
   constructor() {
-    this.ids = [];
+    this.ids = [1, 2, 3];
   }
   get get_ids() {
     return this.ids;

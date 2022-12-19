@@ -3,7 +3,6 @@ from .views import *
 from django.conf.urls.static import static
 from rest_framework.authtoken.views import ObtainAuthToken
 
-
 app_name = "api"
 
 url_views = {

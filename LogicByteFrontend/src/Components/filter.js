@@ -1,17 +1,69 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
+import AuxFilter from "./AuxFilter";
 import "./filter.css";
 
 function Filter(props) {
+  const prevTags = useRef([]);
+  const examBoards = ["OCR", "Edexcel", "AQA", "Eduqas", "WJEC", "UKMT"];
+  const exams = [
+    "GCSE",
+    "AS Level",
+    "A Level",
+    "JMC",
+    "IMC",
+    "SMC",
+    "BMO",
+    "TMUA",
+    "STEP",
+    "MAT",
+  ];
+
+  let boardChecks = {};
+  for (let board of examBoards) {
+    boardChecks[board] = useRef(false);
+  }
+  let examChecks = {};
+  for (let exam of exams) {
+    examChecks[exam] = useRef(false);
+  }
+
   let update = () => {
     let arr = [];
+    let tagsEqual = true;
     for (let i in tags) {
-      // console.log(tags[i].length);
       for (let j = 0; j < tags[i].length; j++) {
         arr.push(tags[i][j]);
+        if (!prevTags.current.includes(tags[i][j])) {
+          tagsEqual = false;
+        }
       }
     }
-    props.callback(arr);
+    for (let i = 0; i < examBoards.length; i++) {
+      let currentBoard = examBoards[i];
+      if (boardChecks[currentBoard].current) {
+        arr.push(currentBoard);
+        if (!prevTags.current.includes(currentBoard)) {
+          tagsEqual = false;
+        }
+      }
+    }
+    for (let i = 0; i < exams.length; i++) {
+      let currentExam = exams[i];
+      if (examChecks[currentExam].current) {
+        arr.push(currentExam);
+        if (!prevTags.current.includes(currentExam)) {
+          tagsEqual = false;
+        }
+      }
+    }
+    if (!(tagsEqual && prevTags.current.length == arr.length)) {
+      prevTags.current = arr;
+      props.callback(arr);
+    }
+    if (arr.length == 0) {
+      props.callback([]);
+    }
   };
 
   let tags = {};
@@ -23,14 +75,24 @@ function Filter(props) {
       } else if (arr === undefined) {
         tags[x.name] = [];
       }
-      update();
     };
     return (
       <FilterParent key={x.name} data={x} callback={(arr) => callback(arr)} />
     );
   });
 
-  return children;
+  return (
+    <>
+      <button onClick={update}>Apply filter</button>
+      <AuxFilter
+        options={examBoards}
+        checks={boardChecks}
+        filterType="Exam board"
+      />
+      <AuxFilter options={exams} checks={examChecks} filterType="Exam" />
+      {children}
+    </>
+  );
 }
 
 function FilterParent(props) {
@@ -138,7 +200,7 @@ function FilterParent(props) {
 }
 
 function FilterNode(props) {
-  let [hidden, setHidden] = useState(false);
+  let [hidden, setHidden] = useState(true);
 
   let indentString = "";
 
