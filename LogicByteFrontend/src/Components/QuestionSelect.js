@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { asyncPOSTAPI } from "../helpers/asyncBackend";
+import { asyncPOSTAPI, asyncGETAPI } from "../helpers/asyncBackend";
 import PropTypes from "prop-types";
 import { MathJax } from "better-react-mathjax";
-import { getAuthInfo } from "../helpers/authHelper";
 
 function QuestionSelect(props) {
   let [isLoaded, setLoaded] = useState(false);
@@ -17,38 +15,33 @@ function QuestionSelect(props) {
         ids.push(+i);
       }
     }
-    console.log(getAuthInfo().token);
-    await asyncPOSTAPI("api_filter_result", {
-      question_ids: ids.join(),
-      user_profile: "",
-    });
-    props.changePage("question");
+    if (ids.length > 0) {
+      await asyncPOSTAPI("api_filter_result", {
+        question_ids: ids.join(),
+        user_profile: "",
+      });
+      props.changePage("question");
+    }
   }
 
+  const retrieveQuestions = async (filterData) => {
+    const questions = await asyncGETAPI("api_questions" + filterData, {});
+    setLoaded(true);
+    if (questions.length == undefined) {
+      setFilteredData([questions]);
+    } else {
+      setFilteredData(questions);
+    }
+  };
+
   useEffect(() => {
-    let filter = "?tag_names=";
+    let filter = "/?tag_names=";
     if (props.tags.length == 0) {
       filter = "";
     } else {
       filter = filter + props.tags.join("|");
     }
-    axios
-      .get("http://127.0.0.1:8000/api_questions/" + filter, {
-        headers: {
-          Authorization: `token ${getAuthInfo().token}`,
-        },
-      })
-      .then((response) => {
-        setLoaded(true);
-        if (response.data.length == undefined) {
-          setFilteredData([response.data]);
-        } else {
-          setFilteredData(response.data);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    retrieveQuestions(filter);
   }, [props.tags]);
 
   useEffect(() => {

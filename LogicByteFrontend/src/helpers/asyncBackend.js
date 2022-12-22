@@ -20,7 +20,6 @@ const asyncPOSTAPI = async (url, data) => {
   if ("user_profile" in data) {
     data.user_profile = getAuthInfo().token;
   }
-  console.log(data);
   const res = await axios
     .post(`http://127.0.0.1:8000/${url}/`, data, {
       headers: { Authorization: `token ${getAuthInfo().token}` },
@@ -43,4 +42,17 @@ const asyncPUTAPI = async (url, params, data) => {
   return res;
 };
 
-export { asyncGETAPI, asyncPUTAPI, asyncPOSTAPI };
+const asyncDELETEAPI = async (url, params) => {
+  if ("user_profile" in params) {
+    params.user_profile = getAuthInfo().token;
+  }
+  const res = await axios
+    .delete(`http://127.0.0.1:8000/${url}/`, {
+      params: params,
+      headers: { Authorization: `token ${getAuthInfo().token}` },
+    })
+    .catch((err) => console.error(err));
+  return res;
+};
+
+export { asyncGETAPI, asyncPUTAPI, asyncPOSTAPI, asyncDELETEAPI };

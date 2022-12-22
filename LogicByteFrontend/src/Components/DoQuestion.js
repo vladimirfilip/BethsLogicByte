@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
-import { getAuthInfo } from "../helpers/authHelper";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import MathJaxRender from "../helpers/mathJaxRender";
-import { UsernameContext } from "../router.js";
+import { asyncGETAPI, asyncPOSTAPI } from "../helpers/asyncBackend";
 
 function DoQuestion(props) {
-  const username = useContext(UsernameContext);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [isCorrect, setIsCorrect] = useState(true);
@@ -16,7 +13,6 @@ function DoQuestion(props) {
   // state related to the value of the options and inputs
   //
   const [inputs, setInputs] = useState([]);
-  const [options, setOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
   //
@@ -24,110 +20,111 @@ function DoQuestion(props) {
   //
   const [showQImage, setShowQImage] = useState(false);
   const [imgSrc, setImgSrc] = useState("");
-  const [imgLoaded, setImgLoaded] = useState(false);
-  //
-  // Configures the synchronous sourcing, loading and rendering of images as multiple choice options
-  //
-  const [optionsLoaded, setOptionsLoaded] = useState(false);
-  const [showOptionsImages, setShowOptionsImages] = useState(false);
-  const [choiceImgIdx, setChoiceImgIdx] = useState(null);
-  const [imgIds, setImgIds] = useState(null);
-  const [choiceImgSrc, setChoiceImgSrc] = useState([]);
 
-  const getQImage = () => {
-    axios
-      .get("http://127.0.0.1:8000/api_question_image/", {
-        params: { question: props.id.toString() },
-        headers: { Authorization: `token ${getAuthInfo().token}` },
-      })
-      .then((response) => {
-        if (response.data.image) {
-          setImgSrc(response.data.image);
-          setImgLoaded(true);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  const [inputsLoaded, setInputsLoaded] = useState(false);
+  const [showOptionsImages, setShowOptionsImages] = useState(false);
+
+  const getQImage = async () => {
+    const imageData = await asyncGETAPI("api_question_image", {
+      question: props.id.toString(),
+    });
+    setImgSrc(imageData.image);
+    setShowQImage(true);
   };
 
-  const getChoicesImages = (img_ids) => {
+  const getChoicesImages = async (img_ids) => {
     //
     // Ensures that images in multiple choice are displayed in the correct order
     //
     img_ids.sort(function (a, b) {
       return a - b;
     });
-    setImgIds(img_ids);
-    setChoiceImgIdx(0);
+    for (let id of img_ids) {
+      let qImgData = await asyncGETAPI("api_question_image", {
+        id: id.toString(),
+        s_image: "",
+        s_type: "",
+      });
+      if (qImgData.type == "question description") {
+        setShowQImage(true);
+        setImgSrc(qImgData.image);
+        //setImgLoaded(true);
+      } else if (qImgData.type == "multiple choice") {
+        setInputs((prevInputs) => [
+          ...prevInputs,
+          <label key={qImgData.image}>
+            <input
+              type="radio"
+              value={qImgData.image}
+              name="img_option"
+              defaultChecked={qImgData.image == selectedOption}
+            />
+            <img src={qImgData.image} />
+          </label>,
+        ]);
+      }
+    }
+    setInputsLoaded(true);
   };
 
-  const getCorrectAnswer = () => {
+  const setTextChoiceInputs = (options) => {
+    setInputs(
+      options.map((option) => (
+        <label key={option}>
+          <input
+            type="radio"
+            value={option}
+            name="txt_option"
+            defaultChecked={option == selectedOption}
+          />
+          {<MathJaxRender text={option} />}
+        </label>
+      ))
+    );
+    setInputsLoaded(true);
+  };
+  const getCorrectAnswer = async () => {
     //
     // Gets only the correct solution
     //
-    axios
-      .get("http://127.0.0.1:8000/api_questions/", {
-        params: { id: props.id.toString(), s_official_solution: "" },
-        headers: { Authorization: `token ${getAuthInfo().token}` },
-      })
-      .then((response) => {
-        if (showOptionsImages) {
-          setCorrectAnswer(<img src={response.data.official_solution} />);
-        } else {
-          setCorrectAnswer(
-            <MathJaxRender text={response.data.official_solution} />
-          );
-        }
-        handleSubmit(response.data.official_solution);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const correctRes = await asyncGETAPI("api_questions", {
+      id: props.id.toString(),
+      s_official_solution: "",
+    });
+    if (showOptionsImages) {
+      setCorrectAnswer(<img src={correctRes.official_solution} />);
+    } else {
+      setCorrectAnswer(<MathJaxRender text={correctRes.official_solution} />);
+    }
+    handleSubmit(correctRes.official_solution);
   };
 
-  const getTags = () => {
-    axios
-      .get("http://127.0.0.1:8000/api_questions/", {
-        params: {
-          id: props.id.toString(),
-          s_exam_board: "",
-          s_difficulty: "",
-          s_exam_type: "",
-        },
-        headers: { Authorization: `token ${getAuthInfo().token}` },
-      })
-      .then((response) => {
-        props.updateTags(
-          response.data.exam_board,
-          response.data.difficulty,
-          response.data.exam_type
-        );
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  const getTags = async () => {
+    const tagParams = {
+      id: props.id.toString(),
+      s_exam_board: "",
+      s_difficulty: "",
+      s_exam_type: "",
+    };
+    const tags = await asyncGETAPI("api_questions", tagParams);
+    props.updateTags(tags.exam_board, tags.difficulty, tags.exam_type);
   };
 
   const addCompletedQ = (correct_answer) => {
     //
     // Adds question attempt to session data stored in database
     //
-    axios
-      .post(
-        "http://127.0.0.1:8000/api_questions_in_session/",
-        {
-          username: username,
-          question_id: props.id,
-          question_description: questionDescription.props.text,
-          solution: correct_answer,
-          selected_option: selectedOption,
-          q_image: imgSrc,
-          img_options: showOptionsImages,
-        },
-        { headers: { Authorization: `token ${getAuthInfo().token}` } }
-      )
-      .catch((error) => console.log(error));
+    const completedData = {
+      user_profile: "",
+      question_id: props.id,
+      question_description: questionDescription.props.text,
+      solution: correct_answer,
+      selected_option: selectedOption,
+      q_image: imgSrc,
+      img_options: showOptionsImages,
+    };
+    const res = asyncPOSTAPI("api_questions_in_session", completedData);
+    return res;
   };
 
   const handleSubmit = (correct_answer) => {
@@ -145,113 +142,30 @@ function DoQuestion(props) {
     // Retrieves user id to pass to post request
     // Adds user's attempt to attempted questions
     //
-
-    axios
-      .post(
-        "http://127.0.0.1:8000/api_solutions/",
-        {
-          username: username,
-          question: props.id,
-          solution: selectedOption,
-          is_correct: selectedOption == correct_answer ? true : false,
-          session_id: props.sessionID,
-          question_num: parseInt(localStorage.getItem("currentIdx")) + 1,
-        },
-        { headers: { Authorization: `token ${getAuthInfo().token}` } }
-      )
-      .catch((error) => {
-        console.error(error.response.data);
-      });
-
-    //
-    // Adds to completed_qs DTO for future use
-    //
+    const userQData = {
+      user_profile: "",
+      question: props.id,
+      solution: selectedOption,
+      is_correct: selectedOption == correct_answer ? true : false,
+      session_id: props.sessionID,
+      question_num: parseInt(localStorage.getItem("currentIdx")) + 1,
+    };
+    const res = asyncPOSTAPI("api_solutions", userQData);
     addCompletedQ(correct_answer);
-
     setShowSubmit(false);
+    return res;
   };
 
-  useEffect(() => {
-    if (choiceImgIdx != null) {
-      axios
-        .get("http://127.0.0.1:8000/api_question_image/", {
-          params: {
-            id: imgIds[choiceImgIdx].toString(),
-            s_image: "",
-            s_type: "",
-          },
-          headers: { Authorization: `token ${getAuthInfo().token}` },
-        })
-        .then((response) => {
-          //
-          // question description image must be added first to database
-          // then multiple choice images should be added sequentially
-          //
-          if (response.data.type == "question description") {
-            setShowQImage(true);
-            setImgSrc(response.data.image);
-            setImgLoaded(true);
-          } else if (response.data.type == "multiple choice") {
-            setChoiceImgSrc((prevSrc) => [...prevSrc, response.data.image]);
-          }
-          if (choiceImgIdx != imgIds.length - 1) {
-            setChoiceImgIdx(choiceImgIdx + 1);
-          }
-        });
-    }
-  }, [choiceImgIdx]);
-
-  useEffect(() => {
-    if (choiceImgSrc.length > 0) {
-      //
-      // imgIds includes the id of the image in the question description
-      // So the sources for the multiple choice images are one less than the length of imgIds
-      //
-      if (showQImage) {
-        if (choiceImgSrc.length == imgIds.length - 1) {
-          setOptions(choiceImgSrc);
-        }
-      } else {
-        if (choiceImgSrc.length == imgIds.length) {
-          setOptions(choiceImgSrc);
-        }
-      }
-    }
-  }, [choiceImgSrc]);
-
-  useEffect(() => {
-    setIsCorrect(true);
-    if (showOptionsImages) {
-      setInputs(
-        options.map((option) => (
-          <label key={option}>
-            <input
-              type="radio"
-              value={option}
-              name="img_option"
-              defaultChecked={option == selectedOption}
-            />
-            <img src={option} />
-          </label>
-        ))
-      );
-    } else {
-      setInputs(
-        options.map((option) => (
-          <label key={option}>
-            <input
-              type="radio"
-              value={option}
-              name="txt_option"
-              defaultChecked={option == selectedOption}
-            />
-            {<MathJaxRender text={option} />}
-          </label>
-        ))
-      );
-    }
-    setOptionsLoaded(true);
-  }, [options]);
+  const getQData = async () => {
+    const qParams = {
+      id: props.id.toString(),
+      s_multiple_choices: "",
+      s_question_description: "",
+      s_question_images: "",
+    };
+    const qData = await asyncGETAPI("api_questions", qParams);
+    return qData;
+  };
 
   useEffect(() => {
     //
@@ -262,73 +176,74 @@ function DoQuestion(props) {
     // Retrieves info on question
     // MVP includes only multiple choice questions
     //
-    axios
-      .get("http://127.0.0.1:8000/api_questions/", {
-        params: {
-          id: props.id.toString(),
-          s_multiple_choices: "",
-          s_question_description: "",
-          s_question_images: "",
-        },
-        headers: { Authorization: `token ${getAuthInfo().token}` },
-      })
-      .then((response) => {
-        setQuestionDescription(
-          <MathJaxRender text={response.data.question_description} />
-        );
-        setShowQImage(false);
-        setShowOptionsImages(false);
-        if (response.data.question_images.length == 1) {
-          setShowQImage(true);
-          getQImage();
-          setOptions(response.data.multiple_choices.split(","));
-        } else if (response.data.question_images.length > 1) {
-          setShowOptionsImages(true);
-          getChoicesImages(response.data.question_images);
-        } else if (response.data.question_images.length == 0) {
-          setOptions(response.data.multiple_choices.split(","));
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    (async () => {
+      const qData = await getQData();
+      setQuestionDescription(
+        <MathJaxRender text={qData.question_description} />
+      );
 
-    setSelectedOption("");
-    setIsLoaded(true);
-    getTags();
+      let qImages = qData.question_images;
+      if (qImages.length == 0) {
+        //
+        // When there are no images in the question
+        //
+        setTextChoiceInputs(qData.multiple_choices.split(","));
+      } else if (qImages.length == 1) {
+        //
+        // When there is one image in the question
+        // In the question description, only one image is allowed
+        //
+        getQImage();
+        setTextChoiceInputs(qData.multiple_choices.split(","));
+      } else {
+        //
+        // When there are multiple image in a question
+        //
+        setShowOptionsImages(true);
+        getChoicesImages(qData.question_images);
+      }
+
+      setSelectedOption("");
+      setIsLoaded(true);
+      getTags();
+    })();
 
     return () => {
-      setChoiceImgSrc([]);
-      setOptionsLoaded(false);
-      setImgLoaded(false);
+      setShowQImage(false);
+      setShowOptionsImages(false);
+      setSelectedOption("");
       setImgSrc("");
+      setInputs([]);
     };
   }, [props.id]);
 
-  if (!(isLoaded && optionsLoaded)) {
+  if (!(isLoaded && inputsLoaded)) {
     return <h2>Loading...</h2>;
   } else {
     return (
       <>
         {questionDescription}
-        {showQImage && imgLoaded && <img src={imgSrc}></img>}
+        {showQImage && <img src={imgSrc}></img>}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             getCorrectAnswer();
           }}
           onChange={(e) => {
+            console.log(e.target.value);
             setSelectedOption(e.target.value);
           }}
         >
-          {optionsLoaded && inputs}
+          {inputs}
           {showSubmit && (
             <button data-html2canvas-ignore type="Submit">
               Submit
             </button>
           )}
         </form>
-        {!isCorrect && <h2>The correct answer is {correctAnswer}</h2>}
+        {!showSubmit && !isCorrect && (
+          <h2>The correct answer is {correctAnswer}</h2>
+        )}
       </>
     );
   }
@@ -336,7 +251,7 @@ function DoQuestion(props) {
 
 DoQuestion.propTypes = {
   showResult: PropTypes.func,
-  id: PropTypes.number,
+  id: PropTypes.string,
   updateTags: PropTypes.func,
   sessionID: PropTypes.string,
 };
