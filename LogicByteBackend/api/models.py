@@ -54,6 +54,7 @@ class Question(models.Model):
 
 
 class QuestionImage(models.Model):
+    user_profile = models.ForeignKey(UserProfile, related_name="question_images", on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name="question_images", on_delete=models.CASCADE)
     type = models.CharField(max_length=20, blank=True)
     image = models.ImageField(upload_to=question_img_directory)
@@ -123,6 +124,8 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 @receiver(post_save, sender=User)
 def encrypt_password(sender, instance=None, created=False, **kwargs):
     instance.password = make_password(instance.password)
+    if created:
+        UserProfile.objects.create(user=instance)
 
 
 def delete_file_on_delete(file):

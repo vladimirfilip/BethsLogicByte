@@ -1,98 +1,11 @@
-import threading
-from time import time, sleep
-from rest_framework import generics, mixins, status
-from rest_framework.response import Response
-from .serializers import *
-from django.contrib.auth.models import User
-from django.http import JsonResponse
-from django.contrib.auth.hashers import make_password
+from rest_framework import generics, mixins
 from django.db.models.query import QuerySet
-from rest_framework.authtoken.models import Token
 from random import shuffle
-from threading import Thread
+from .utility import *
 
 rank_calculation_started = False
-rank_calculation_delay = 10
 
-
-def start_rank_calculation():
-    thread = Thread(target=calculate_ranks)
-    thread.start()
-
-
-def calculate_ranks():
-    print("STARTED RANK CALCULATION LOOP")
-    main_thread = threading.enumerate()[0]
-    start_time = None
-    while main_thread.is_alive():
-        sleep(1)
-        if start_time and time() - start_time < rank_calculation_delay:
-            continue
-        start_time = time()
-        print("STARTED RANK CALCULATION AT {}".format(time()))
-        id_to_points = {}
-        for model in UserProfile.objects.all():
-            id_to_points[model.id] = model.num_points
-        point_order = sorted(id_to_points.keys(), key=lambda k: id_to_points[k], reverse=True)
-        for i in range(1, len(point_order) + 1):
-            UserProfile.objects.filter(id=point_order[i - 1]).update(rank=i)
-
-
-def check_password(request):
-    password = request.GET.get('password', '')
-    username = request.GET.get('username', '')
-    user = User.objects.get(username=username)
-    if user.check_password(password):
-        return JsonResponse({"result": "good"})
-    return JsonResponse({"result": "bad"})
-
-
-def get_username(request):
-    token = request.GET.get('token', '')
-    if not token:
-        return JsonResponse({"error": "required token missing"})
-    user_instance = User.objects.filter(auth_token=token)
-    if not user_instance:
-        return JsonResponse({"error": "token invalid"})
-    user_instance = user_instance.first()
-    user_data = UserSerializer(user_instance).data
-    return JsonResponse({"username": user_data['username']})
-
-
-def check_if_question_completed(request):
-    user_profile_token = request.GET.get('user_profile', '')
-    if not user_profile_token:
-        return JsonResponse({"error": "user_profile missing from params"})
-    question_id = request.GET.get('question_id', '')
-    if not question_id:
-        return JsonResponse({"error": "question id missing from params"})
-    user_profile = get_user_profile_with_token(user_profile_token)
-    if user_profile == UserProfile.objects.none():
-        return JsonResponse({"error": "user_profile token invalid"})
-    question_in_session = QuestionInSession.objects.filter(user_profile=user_profile, question_id=question_id)
-    if not question_in_session:
-        return JsonResponse({"data": "false"})
-    return JsonResponse({"data": "true"})
-
-
-def get_user_with_token(token):
-    valid_token = Token.objects.filter(key=token).first()
-    return valid_token.user if valid_token else None
-
-
-def get_user_profile_with_token(token):
-    user = get_user_with_token(token)
-    return UserProfile.objects.filter(user=user).first() if user else None
-
-
-def filter_by_user_with_token(queryset, token):
-    user = get_user_with_token(token)
-    return queryset.filter(user=user) if user else UserProfile.objects.none()
-
-
-def filter_by_user_profile_with_token(queryset, token):
-    user_profile = get_user_profile_with_token(token)
-    return queryset.filter(user_profile=user_profile) if user_profile else UserProfile.objects.none()
+PASSWORD_INSECURE_RESPONSE = {"error": "Password sent is not secure"}
 
 
 class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin,
@@ -106,13 +19,12 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
     def get_params(request):
         return {key: value[0] for key, value in dict(request.GET).items()}
 
-    @staticmethod
-    def get_specific_fields_from_params(request, model_data):
+    def get_specific_fields_from_params(self, request):
         #
-        # Returns all param keys that are also model fields
+        # Returns all param keys with prefix "s_" that represent model fields
         #
         param_keys = [key[2:] for key in dict(request.GET).keys() if key[:2] == "s_"]
-        model_keys = set(model_data.keys())
+        model_keys = set(self.queryset.filter().first().__dict__.keys())
         model_keys_in_headers = list(model_keys.intersection(param_keys))
         return model_keys_in_headers
 
@@ -148,28 +60,39 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
             queryset = arguments[key](queryset, value)
         return queryset
 
-    def get(self, request):
-        model_instances = self.filter(request)
-        if model_instances.count() < 2:
-            status_code = status.HTTP_200_OK if model_instances.count() == 1 else status.HTTP_400_BAD_REQUEST
-            serialized_data = self.get_serializer(model_instances.first()).data
-            specific_fields = self.get_specific_fields_from_params(request, serialized_data)
-            if specific_fields:
-                serialized_data = {key: serialized_data[key] for key in specific_fields}
-        else:
-            status_code = status.HTTP_200_OK
-            serialized_data = self.get_serializer(model_instances, many=True).data
-            specific_fields = self.get_specific_fields_from_params(request, serialized_data[0])
-            if specific_fields:
-                serialized_data = [{key: fragment[key] for key in specific_fields} for fragment in serialized_data]
-        return Response(serialized_data, status_code)
-
-    def post(self, request):
-        request_data = request.data
+    @staticmethod
+    def replace_tokens_with_ids(request_data):
         user_profile_token = request_data.pop("user_profile", None)
+        user_token = request_data.pop("user", None)
         if user_profile_token:
             user_profile = get_user_profile_with_token(user_profile_token)
             request_data['user_profile'] = user_profile.id if user_profile else None
+        if user_token:
+            user = get_user_with_token(user_token)
+            request_data['user'] = user.id if user else None
+
+    def get(self, request):
+        model_instances = self.filter(request)
+        if model_instances.count() == 0:
+            return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+        data = model_instances.first() if model_instances.count() == 1 else model_instances
+        many = model_instances.count() > 1
+        serialized_data = self.get_serializer(data, many=many).data
+        specific_fields = self.get_specific_fields_from_params(request)
+        if specific_fields:
+            if many:
+                serialized_data = [{key: fragment[key] for key in specific_fields} for fragment in serialized_data]
+            else:
+                serialized_data = {key: serialized_data[key] for key in specific_fields}
+        return Response(serialized_data, status=status.HTTP_200_OK)
+
+    @check_client_staff_or_creator
+    def post(self, request):
+        request_data = request.data
+        self.replace_tokens_with_ids(request_data)
+        password = request_data.get("password", None)
+        if password and not is_password_secure(password):
+            return Response(data=PASSWORD_INSECURE_RESPONSE)
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -184,20 +107,19 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
                 data_point = make_password(data_point)
             old_data[key] = data_point
 
+    @check_client_staff_or_creator
     def put(self, request):
         model_instances = self.filter(request)
         request_data = request.data
-        user_profile_token = request_data.pop("user_profile", None)
-        if user_profile_token:
-            user_profile = get_user_profile_with_token(user_profile_token)
-            request_data['user_profile'] = user_profile.id if user_profile else None
+        self.replace_tokens_with_ids(request_data)
         if model_instances.count() > 1:
             return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
-
         model_instance = model_instances.first()
         record = self.get_serializer(model_instance).data.copy()
         self.replace_record_with_new_data(record, request_data)
-
+        password = request_data.get("password", None)
+        if password and not is_password_secure(password):
+            return Response(data=PASSWORD_INSECURE_RESPONSE, status=status.HTTP_400_BAD_REQUEST)
         serializer = self.get_serializer(model_instance, record)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -206,6 +128,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
 
         return Response(self.get_serializer(saved_model).data)
 
+    @check_client_staff_or_creator
     def delete(self, request):
         model_instances = self.filter(request)
         if model_instances.count() == 1:
