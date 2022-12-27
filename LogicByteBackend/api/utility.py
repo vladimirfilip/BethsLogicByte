@@ -115,15 +115,19 @@ def check_client_staff_or_creator(func):
                 fields = model_instance.__dict__
                 user_referenced = None
                 user_profile_referenced = None
+                user_profile_referenced_by_id = None
                 if fields.get('user_profile', None):
                     user_profile_referenced = get_user_profile_with_token(fields['user_profile'])
                 if fields.get('user', None):
                     user_referenced = get_user_with_token(fields['user'])
+                if fields.get('user_profile_id', None):
+                    user_profile_referenced_by_id = UserProfile.objects.get(id=fields['user_profile_id'])
                 conditions = [
                     user == model_instance,
                     user_profile == model_instance,
                     user_profile == user_profile_referenced,
-                    user == user_referenced
+                    user == user_referenced,
+                    user_profile == user_profile_referenced_by_id,
                 ]
                 if True not in conditions:
                     return UNAUTHORIZED_RESPONSE
