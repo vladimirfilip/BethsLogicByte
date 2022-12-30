@@ -1,4 +1,5 @@
 from rest_framework import generics, mixins
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.db.models.query import QuerySet
 from random import shuffle
 from .utility import *
@@ -10,6 +11,8 @@ PASSWORD_INSECURE_RESPONSE = {"error": "Password sent is not secure"}
 
 class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin,
                   mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
     def __init__(self, queryset, serializer_class, **kwargs):
         super().__init__(**kwargs)
         self.queryset = queryset

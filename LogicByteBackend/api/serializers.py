@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, ImageField
 from .models import *
 from django.contrib.auth.models import User
 
@@ -41,6 +41,8 @@ class UserSerializer(ModelSerializer):
 
 
 class ProfilePictureSerializer(ModelSerializer):
+    image = ImageField(required=True)
+
     class Meta:
         model = ProfilePicture
         fields = "__all__"
