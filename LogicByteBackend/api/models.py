@@ -9,8 +9,7 @@ from django.contrib.auth.hashers import make_password
 
 
 def user_profile_pic_directory(instance, filename):
-    filename, file_extension = os.path.splitext(filename)
-    return f"profile_pics/profile_pic_{instance.user_profile.id}{file_extension}"
+    return f"profile_pics/profile_pic_{instance.user_profile.id}.png"
 
 
 class UserProfile(models.Model):

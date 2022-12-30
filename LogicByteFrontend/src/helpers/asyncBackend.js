@@ -31,11 +31,12 @@ const asyncPOSTAPI = async (url, data) => {
 const asyncPUTAPI = async (url, params, data) => {
   if ("user_profile" in params) {
     params.user_profile = getAuthInfo().token;
+  } else if ("user" in params) {
+    params.user = getAuthInfo().token;
   }
   const res = await axios
-    .put(`http://127.0.0.1:8000/${url}/`, {
+    .put(`http://127.0.0.1:8000/${url}/`, data, {
       params: params,
-      data: data,
       headers: { Authorization: `token ${getAuthInfo().token}` },
     })
     .catch((err) => console.error(err));

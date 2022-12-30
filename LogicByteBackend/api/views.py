@@ -1,5 +1,5 @@
 from rest_framework import generics, mixins
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser, FileUploadParser
 from django.db.models.query import QuerySet
 from random import shuffle
 from .utility import *
@@ -11,7 +11,7 @@ PASSWORD_INSECURE_RESPONSE = {"error": "Password sent is not secure"}
 
 class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin,
                   mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
-    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser, FileUploadParser]
 
     def __init__(self, queryset, serializer_class, **kwargs):
         super().__init__(**kwargs)
@@ -65,12 +65,12 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
 
     @staticmethod
     def replace_tokens_with_ids(request_data):
-        user_profile_token = request_data.pop("user_profile", None)
-        user_token = request_data.pop("user", None)
-        if user_profile_token:
+        if request_data.get("user_profile", None):
+            user_profile_token = request_data["user_profile"]
             user_profile = get_user_profile_with_token(user_profile_token)
             request_data['user_profile'] = user_profile.id if user_profile else None
-        if user_token:
+        if request_data.get("user", None):
+            user_token = request_data["user"]
             user = get_user_with_token(user_token)
             request_data['user'] = user.id if user else None
 
@@ -91,7 +91,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
 
     @check_client_staff_or_creator
     def post(self, request):
-        request_data = dict(request.data)
+        request_data = request.data
         self.replace_tokens_with_ids(request_data)
         password = request_data.get("password", None)
         if password and not is_password_secure(password):
