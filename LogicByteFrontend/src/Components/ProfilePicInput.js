@@ -12,24 +12,26 @@ function ProfilePicInput(props) {
   const checkImgType = (imgFile) => {
     console.log(imgFile);
     if (
-      imgFile.files[0].type != "image/png" &&
-      imgFile.files[0].type != "image/jpg"
+      imgFile.type != "image/png" &&
+      imgFile.type != "image/jpg"
     ) {
       setShowIncorrectImg(true);
     } else {
       setShowIncorrectImg(false);
-      setImgSrc(URL.createObjectURL(imgFile.files[0]));
-      console.log(imgFile.files[0]);
-      props.setProfilePic(URL.createObjectURL(imgFile.files[0]));
+      setImgSrc(URL.createObjectURL(imgFile));
+      console.log(imgFile.files);
+      props.setProfilePic(imgFile);
     }
   };
 
   useEffect(() => {
+    console.log("hello");
     if (username) {
       (async () => {
         const pic_src = await asyncGETAPI("api_profile_picture", {
           user_profile: "",
         });
+        console.log(pic_src);
         setImgSrc(pic_src.image);
       })();
     }
@@ -39,6 +41,9 @@ function ProfilePicInput(props) {
     if (imgSrc) {
       setIsLoaded(true);
     }
+    return () => {
+      setImgSrc("")
+    };
   }, [imgSrc]);
 
   if (isLoaded) {

@@ -120,7 +120,7 @@ function Settings(props) {
   // cleanup function
   //
   useEffect(() => {
-    return () => clearTimeout();
+    return (() => clearTimeout())
   }, []);
 
   return (

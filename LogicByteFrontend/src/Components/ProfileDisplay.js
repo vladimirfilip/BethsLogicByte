@@ -32,8 +32,9 @@ function ProfileDisplay(props) {
       setPoints();
       getRank();
     }
-    return () => clearTimeout();
-  }, [username]);
+    return () => {clearTimeout();
+    setPicRef("")
+  }}, [username]);
 
   if (!isLoaded) {
     return <h1>Loading...</h1>;
