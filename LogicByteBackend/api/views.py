@@ -91,12 +91,12 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
 
     @check_client_staff_or_creator
     def post(self, request):
-        request_data = request.data
+        request_data = dict(request.data)
         self.replace_tokens_with_ids(request_data)
         password = request_data.get("password", None)
         if password and not is_password_secure(password):
             return Response(data=PASSWORD_INSECURE_RESPONSE)
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request_data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
