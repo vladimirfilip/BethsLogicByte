@@ -179,7 +179,7 @@ class QuestionView(GenericView):
             for tag_name in query:
                 filtered = queryset.filter(tag_names__contains=tag_name)
                 temp_queryset = temp_queryset | filtered
-            new_queryset = new_queryset.intersection(new_queryset, temp_queryset)
+            new_queryset = new_queryset & temp_queryset
         return new_queryset
 
     @staticmethod
