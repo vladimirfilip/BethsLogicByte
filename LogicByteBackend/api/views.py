@@ -27,9 +27,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         # Returns all param keys with prefix "s_" that represent model fields
         #
         param_keys = [key[2:] for key in dict(request.GET).keys() if key[:2] == "s_"]
-        model_keys = set(self.queryset.filter().first().__dict__.keys())
-        model_keys_in_headers = list(model_keys.intersection(param_keys))
-        return model_keys_in_headers
+        return param_keys
 
     def filter(self, request, **kwargs):
         queryset = self.queryset
@@ -82,6 +80,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         many = model_instances.count() > 1
         serialized_data = self.get_serializer(data, many=many).data
         specific_fields = self.get_specific_fields_from_params(request)
+        specific_fields = list(set(serialized_data[0].keys()).intersection(set(specific_fields)))
         if specific_fields:
             if many:
                 serialized_data = [{key: fragment[key] for key in specific_fields} for fragment in serialized_data]
