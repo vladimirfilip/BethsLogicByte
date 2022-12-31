@@ -1,38 +1,21 @@
-import React, { useContext, useEffect, useState } from "react";
-import { UsernameContext } from "../router";
-import axios from "axios";
-import { getAuthInfo } from "../helpers/authHelper";
+import React, { useEffect, useState } from "react";
 import MathJaxRender from "../helpers/mathJaxRender";
 import PropTypes from "prop-types";
 import ViewQInSession from "./ViewQInSession";
+import { asyncGETAPI } from "../helpers/asyncBackend";
 
 function ViewSession(props) {
-  const username = useContext(UsernameContext);
   const sessionId = props.sessionId;
   const [questionDisplays, setQuestionDisplays] = useState([]);
 
   const getQDescription = async (q_id) => {
-    try {
-      const res = await axios.get(`http://127.0.0.1:8000/api_questions/`, {
-        params: { id: q_id },
-        headers: { Authorization: `token ${getAuthInfo().token}` },
-      });
-      return res.data;
-    } catch (error) {
-      console.log(error);
-    }
+    const res = await asyncGETAPI("api_questions", { id: q_id });
+    return res;
   };
 
   const getQImage = async (img_id) => {
-    try {
-      const res = await axios.get(`http://127.0.0.1:8000/api_question_image/`, {
-        params: { id: img_id },
-        headers: { Authorization: `token ${getAuthInfo().token}` },
-      });
-      return res.data.image;
-    } catch (error) {
-      console.log(error);
-    }
+    const res = await asyncGETAPI("api_question_image", { id: img_id });
+    return res.image;
   };
 
   const createQView = async (questionData) => {
@@ -71,28 +54,19 @@ function ViewSession(props) {
   };
 
   useEffect(() => {
-    axios
-      .get(`http://127.0.0.1:8000/api_solutions/`, {
-        params: {
-          username: username,
-          session_id: sessionId,
-        },
-        headers: { Authorization: `token ${getAuthInfo().token}` },
-      })
-      .then((response) => {
-        //
-        // Ensures that the questions are in the correct order
-        //
-        let questionData = response.data.sort(function (a, b) {
-          return a.question_num - b.question_num;
-        });
-        for (let i = 0; i < questionData.length; i++) {
-          let question = questionData[i];
-          createQView(question, i);
-        }
-      })
-      .catch((error) => console.log(error));
-
+    (async () => {
+      let questionData = await asyncGETAPI("api_solutions", {
+        user_profile: "",
+        session_id: sessionId,
+      });
+      questionData = questionData.sort(function (a, b) {
+        return a.question_num - b.question_num;
+      });
+      for (let i = 0; i < questionData.length; i++) {
+        let question = questionData[i];
+        createQView(question, i);
+      }
+    })();
     return () => {
       setQuestionDisplays([]);
     };
