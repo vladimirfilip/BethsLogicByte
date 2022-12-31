@@ -10,28 +10,23 @@ function ProfilePicInput(props) {
   const username = useContext(UsernameContext);
 
   const checkImgType = (imgFile) => {
-    console.log(imgFile);
-    if (
-      imgFile.type != "image/png" &&
-      imgFile.type != "image/jpg"
-    ) {
+    if (imgFile.type != "image/png" && imgFile.type != "image/jpeg") {
       setShowIncorrectImg(true);
     } else {
       setShowIncorrectImg(false);
-      setImgSrc(URL.createObjectURL(imgFile));
-      console.log(imgFile.files);
-      props.setProfilePic(imgFile);
+      if (URL.createObjectURL(imgFile) != imgSrc) {
+        setImgSrc(URL.createObjectURL(imgFile));
+        props.setProfilePic(imgFile);
+      }
     }
   };
 
   useEffect(() => {
-    console.log("hello");
     if (username) {
       (async () => {
         const pic_src = await asyncGETAPI("api_profile_picture", {
           user_profile: "",
         });
-        console.log(pic_src);
         setImgSrc(pic_src.image);
       })();
     }
@@ -41,9 +36,6 @@ function ProfilePicInput(props) {
     if (imgSrc) {
       setIsLoaded(true);
     }
-    return () => {
-      setImgSrc("")
-    };
   }, [imgSrc]);
 
   if (isLoaded) {
@@ -53,9 +45,8 @@ function ProfilePicInput(props) {
           <h2 color="red">Uploaded images must be PNG or JPEG</h2>
         )}
         <img src={imgSrc} />
-        <form encType="multipart/form-data">
+        <form>
           <input
-            formEncType="multipart/form-data"
             type="file"
             accept=".jpg,.png"
             onChange={(e) => {

@@ -4,7 +4,11 @@ import useForm from "../helpers/useForm";
 import MainNavBar from "../Components/MainNavBar";
 import isSecurePassword from "../helpers/passwd";
 import PropTypes from "prop-types";
-import { asyncGETAPI, asyncPUTAPI } from "../helpers/asyncBackend";
+import {
+  asyncDELETEAPI,
+  asyncGETAPI,
+  asyncPUTAPI,
+} from "../helpers/asyncBackend";
 import { UsernameContext } from "../router";
 import ProfilePicInput from "../Components/ProfilePicInput";
 import axios from "axios";
@@ -56,38 +60,42 @@ function Settings(props) {
     );
   };
 
-  const updateProfilePic = () => {
-    axios
-      .delete("http://127.0.0.1:8000/api_profile_picture/", {
-        params: { user_profile: `${getAuthInfo().token}` },
-        headers: { Authorization: `token ${getAuthInfo().token}` },
-      })
-      .then(() => {
-        axios
-          .post(
-            "http://127.0.0.1:8000/api_profile_picture/",
-            {
-              user_profile: `${getAuthInfo().token}`,
-              image: newProfilePic,
-            },
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-                Authorization: `token ${getAuthInfo().token}`,
-              },
-            }
-          )
-          .catch((err) => console.error(err));
-      })
+  const updateProfilePic = async () => {
+    await asyncDELETEAPI("api_profile_picture", { user_profile: "" });
+    await axios
+      .post(
+        "http://127.0.0.1:8000/api_profile_picture/",
+        {
+          user_profile: `${getAuthInfo().token}`,
+          image: newProfilePic,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `token ${getAuthInfo().token}`,
+          },
+        }
+      )
       .catch((err) => console.error(err));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newProfilePic != "") {
-      updateProfilePic();
+      (async () => {
+        await updateProfilePic();
+        if (
+          passwords.new_password == "" &&
+          passwords.current_password == "" &&
+          passwords.confirm_password == ""
+        ) {
+          props.changePage("home");
+        }
+      })();
     }
-    checkPassword();
+    if (passwords.current_password != "") {
+      checkPassword();
+    }
     if (isPasswordCorrect && passwords.current_password != "") {
       //
       // Receives any error messages
@@ -120,7 +128,7 @@ function Settings(props) {
   // cleanup function
   //
   useEffect(() => {
-    return (() => clearTimeout())
+    return () => clearTimeout();
   }, []);
 
   return (
