@@ -75,7 +75,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
     def get(self, request):
         model_instances = self.filter(request)
         if model_instances.count() == 0:
-            return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=None, status=status.HTTP_404_NOT_FOUND)
         data = model_instances.first() if model_instances.count() == 1 else model_instances
         many = model_instances.count() > 1
         serialized_data = self.get_serializer(data, many=many).data
