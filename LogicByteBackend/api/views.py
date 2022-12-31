@@ -161,6 +161,10 @@ class UserProfileView(GenericView):
     def filter(self, request, *args):
         return super().filter(request, secondary={'username': self.filter_by_username})
 
+    @block
+    def delete(self, request):
+        return
+
 
 class QuestionView(GenericView):
     def __init__(self):
@@ -205,6 +209,10 @@ class SolutionView(GenericView):
     def filter(self, request, *args):
         return super().filter(request, secondary={'question_id': self.get_solution_by_question_id})
 
+    @block
+    def delete(self, request):
+        return
+
 
 class SavedQuestionView(GenericView):
     def __init__(self):
@@ -234,6 +242,10 @@ class QuestionInSessionView(GenericView):
 class UserQuestionSessionView(GenericView):
     def __init__(self):
         super().__init__(UserQuestionSession.objects.all(), UserQuestionSessionSerializer)
+
+    @block
+    def delete(self, request):
+        return
 
 
 class FilterResultView(GenericView):

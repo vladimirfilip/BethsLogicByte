@@ -108,21 +108,30 @@ def check_client_staff_or_creator(func):
         user_profile = get_user_profile_with_token(request.auth.key)
         if not user:
             return UNAUTHORIZED_RESPONSE
+        if not user_profile:
+            return UNAUTHORIZED_RESPONSE
         if user.is_staff:
             return func(view, request)
+        user_referenced = None
+        user_profile_referenced = None
+        user_profile_referenced_by_id = None
         if request.method != "POST":
             model_instances = view.filter(request)
             for model_instance in model_instances:
                 fields = model_instance.__dict__
-                user_referenced = None
-                user_profile_referenced = None
-                user_profile_referenced_by_id = None
                 if fields.get('user_profile', None):
                     user_profile_referenced = get_user_profile_with_token(fields['user_profile'])
                 if fields.get('user', None):
                     user_referenced = get_user_with_token(fields['user'])
                 if fields.get('user_profile_id', None):
                     user_profile_referenced_by_id = UserProfile.objects.get(id=fields['user_profile_id'])
+                all_user_profiles = [p for p in [user_profile, user_profile_referenced_by_id, user_profile_referenced]
+                                     if p]
+                if len(set(all_user_profiles)) != 1:
+                    return UNAUTHORIZED_RESPONSE
+                all_users = [u for u in [user, user_referenced] if u]
+                if len(set(all_users)) != 1:
+                    return UNAUTHORIZED_RESPONSE
                 conditions = [
                     user == model_instance,
                     user_profile == model_instance,
@@ -134,9 +143,6 @@ def check_client_staff_or_creator(func):
                     return UNAUTHORIZED_RESPONSE
         else:
             fields = request.data
-            user_referenced = None
-            user_profile_referenced = None
-            user_profile_referenced_by_id = None
             if fields.get('user_profile', None):
                 user_profile_referenced = get_user_profile_with_token(fields['user_profile'])
             if fields.get('user', None):
@@ -148,7 +154,22 @@ def check_client_staff_or_creator(func):
                 user == user_referenced,
                 user_profile == user_profile_referenced_by_id,
             ]
+            all_user_profiles = [p for p in [user_profile, user_profile_referenced_by_id, user_profile_referenced]
+                                 if p]
+            if len(set(all_user_profiles)) != 1:
+                return UNAUTHORIZED_RESPONSE
+            all_users = [u for u in [user, user_referenced] if u]
+            if len(set(all_users)) != 1:
+                return UNAUTHORIZED_RESPONSE
             if True not in conditions:
                 return UNAUTHORIZED_RESPONSE
         return func(view, request)
+
+    return wrapper
+
+
+def block(func):
+    def wrapper(*args):
+        return UNAUTHORIZED_RESPONSE
+
     return wrapper
