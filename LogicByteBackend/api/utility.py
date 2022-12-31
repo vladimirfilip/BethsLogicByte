@@ -69,13 +69,14 @@ def get_username(request):
 
 
 def check_if_question_completed(request):
-    username = request.GET.get('username', '')
-    if not username:
-        return JsonResponse({"error": "username missing from params"})
+    token = request.GET.get('user_profile', '')
+    user_profile = get_user_profile_with_token(token)
+    if not user_profile:
+        return JsonResponse({"error": "user profile token is missing or invalid"})
     question_id = request.GET.get('question_id', '')
     if not question_id:
         return JsonResponse({"error": "question id missing from params"})
-    question_in_session = QuestionInSession.objects.filter(username=username, question_id=question_id)
+    question_in_session = QuestionInSession.objects.filter(user_profile=user_profile, question_id=question_id)
     if not question_in_session:
         return JsonResponse({"data": "false"})
     return JsonResponse({"data": "true"})
