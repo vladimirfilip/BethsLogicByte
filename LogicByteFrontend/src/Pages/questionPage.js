@@ -89,42 +89,45 @@ function QuestionPage(props) {
     //
     // Gets completed question data
     //
+
     const sessionData = await asyncGETAPI("api_questions_in_session", {
       user_profile: "",
       s_solution: "",
       s_selected_option: "",
-    }).catch(() => {
-      props.changePage("finish/0");
     });
-    let score = 0;
-    clearSessionData();
-    try {
-      let total_correct = 0;
-      let total = 0;
-      for (const entry of sessionData) {
-        if (entry.solution == entry.selected_option) {
-          total_correct += 1;
+    if (!sessionData) {
+      props.changePage("finish/0");
+    } else {
+      let score = 0;
+      clearSessionData();
+      try {
+        let total_correct = 0;
+        let total = 0;
+        for (const entry of sessionData) {
+          if (entry.solution == entry.selected_option) {
+            total_correct += 1;
+          }
+          total += 1;
         }
-        total += 1;
+        if (total == 0) {
+          score = 0;
+        } else {
+          let percent = (total_correct / total) * 100;
+          score = Math.round(percent * 10) / 10;
+        }
+      } catch (err) {
+        if (
+          sessionData.solution &&
+          sessionData.solution == sessionData.selected_option
+        ) {
+          score = 100;
+        } else {
+          score = 0;
+        }
       }
-      if (total == 0) {
-        score = 0;
-      } else {
-        let percent = (total_correct / total) * 100;
-        score = Math.round(percent * 10) / 10;
-      }
-    } catch (err) {
-      if (
-        sessionData.solution &&
-        sessionData.solution == sessionData.selected_option
-      ) {
-        score = 100;
-      } else {
-        score = 0;
-      }
+      addSessionID(score);
+      props.changePage(`finish/${score}`);
     }
-    addSessionID(score);
-    props.changePage(`finish/${score}`);
   };
 
   const showResult = (isCorrect) => {

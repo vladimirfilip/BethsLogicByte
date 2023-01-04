@@ -64,9 +64,6 @@ function Router() {
   };
 
   const onPopState = () => {
-    // let url = getURL();
-    // url = url.join("/");
-    // changePage(url);
     setPageState(getURL());
   };
 
@@ -126,7 +123,6 @@ function Router() {
   ];
   let pageNamesStandard = Object.keys(pages[0]);
   let pageNamesExtended = Object.keys(pages[1]);
-
   // if pageName provided in URL is a key in the pages object
   if (pageNamesStandard.indexOf(page[0]) != -1) {
     let PageComponent = pages[0][page[0]];

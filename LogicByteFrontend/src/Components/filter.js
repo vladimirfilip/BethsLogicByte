@@ -2,68 +2,57 @@ import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import AuxFilter from "./AuxFilter";
 import "./filter.css";
+import { SUBJECT_AUX_FILTERS } from "../helpers/subjectData";
 
 function Filter(props) {
   const prevTags = useRef([]);
-  const examBoards = ["OCR", "Edexcel", "AQA", "Eduqas", "WJEC", "UKMT"];
-  const exams = [
-    "GCSE",
-    "AS Level",
-    "A Level",
-    "JMC",
-    "IMC",
-    "SMC",
-    "BMO",
-    "TMUA",
-    "STEP",
-    "MAT",
-  ];
-
-  let boardChecks = {};
-  for (let board of examBoards) {
-    boardChecks[board] = useRef(false);
-  }
-  let examChecks = {};
-  for (let exam of exams) {
-    examChecks[exam] = useRef(false);
-  }
+  const filterChecks = useRef([]);
+  const [auxFilters, setAuxFilters] = useState([]);
 
   let update = () => {
     let arr = [];
     let tagsEqual = true;
+    //
+    // Adds the tags in filter component
+    //
+    arr.push(",");
     for (let i in tags) {
       for (let j = 0; j < tags[i].length; j++) {
-        arr.push(tags[i][j]);
-        if (!prevTags.current.includes(tags[i][j])) {
+        let currentTag = tags[i][j];
+        arr.length == 1 ? arr.push(currentTag) : arr.push("|" + currentTag);
+        if (!prevTags.current.includes(currentTag)) {
           tagsEqual = false;
         }
       }
     }
-    for (let i = 0; i < examBoards.length; i++) {
-      let currentBoard = examBoards[i];
-      if (boardChecks[currentBoard].current) {
-        arr.push(currentBoard);
-        if (!prevTags.current.includes(currentBoard)) {
-          tagsEqual = false;
+    if (arr[arr.length - 1] == ",") {
+      arr.pop();
+    }
+    //
+    // Adds all the tags in the auxiliary filters
+    //
+    for (let filterType in filterChecks.current) {
+      arr.push(",");
+      for (let tag in filterChecks.current[filterType]) {
+        if (filterChecks.current[filterType][tag]) {
+          arr[arr.length - 1] == "," ? arr.push(tag) : arr.push("|" + tag);
+          if (!prevTags.current.includes(tag)) {
+            tagsEqual = false;
+          }
         }
       }
     }
-    for (let i = 0; i < exams.length; i++) {
-      let currentExam = exams[i];
-      if (examChecks[currentExam].current) {
-        arr.push(currentExam);
-        if (!prevTags.current.includes(currentExam)) {
-          tagsEqual = false;
-        }
-      }
-    }
+    //
+    // Updates filtered questions only if new tags selected
+    //
     if (!(tagsEqual && prevTags.current.length == arr.length)) {
       prevTags.current = arr;
+
       props.callback(arr);
     }
-    if (arr.length == 0) {
-      props.callback([]);
-    }
+    // if (arr.length == 0) {
+    //   props.callback([]);
+    // }
   };
 
   let tags = {};
@@ -81,15 +70,49 @@ function Filter(props) {
     );
   });
 
+  useEffect(() => {
+    //
+    // Creates the auxiliary filters for additional filtering
+    //
+    const auxFilterData = SUBJECT_AUX_FILTERS[props.subject];
+    for (const filterType of Object.keys(auxFilterData)) {
+      filterChecks.current[filterType] = {};
+      for (const tag of auxFilterData[filterType]) {
+        filterChecks.current[filterType][tag] = false;
+      }
+      setAuxFilters((auxFilters) => [
+        ...auxFilters,
+        <AuxFilter
+          key={filterType}
+          options={auxFilterData[filterType]}
+          checks={filterChecks}
+          filterType={filterType}
+        />,
+      ]);
+    }
+    //
+    // Creates a filter for difficulty, which is common to all subjects
+    //
+    const difficulties = ["Easy", "Medium", "Hard", "Challenge"];
+    filterChecks.current["Difficulty"] = {};
+    for (const difficulty of difficulties) {
+      filterChecks.current["Difficulty"][difficulty] = false;
+    }
+    setAuxFilters((auxFilters) => [
+      ...auxFilters,
+      <AuxFilter
+        key="difficulties"
+        options={difficulties}
+        checks={filterChecks}
+        filterType={"Difficulty"}
+      />,
+    ]);
+  }, []);
+
   return (
     <>
       <button onClick={update}>Apply filter</button>
-      <AuxFilter
-        options={examBoards}
-        checks={boardChecks}
-        filterType="Exam board"
-      />
-      <AuxFilter options={exams} checks={examChecks} filterType="Exam" />
+      {auxFilters}
       {children}
     </>
   );
@@ -259,6 +282,7 @@ FilterParent.propTypes = {
 Filter.propTypes = {
   data: PropTypes.array,
   callback: PropTypes.func,
+  subject: PropTypes.string,
 };
 
 export default Filter;

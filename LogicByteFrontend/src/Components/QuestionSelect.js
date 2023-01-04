@@ -27,20 +27,20 @@ function QuestionSelect(props) {
   const retrieveQuestions = async (filterData) => {
     const questions = await asyncGETAPI("api_questions" + filterData, {});
     setLoaded(true);
-    if (questions.length == undefined) {
-      setFilteredData([questions]);
+    if (questions) {
+      if (questions.length == undefined) {
+        setFilteredData([questions]);
+      } else {
+        setFilteredData(questions);
+      }
     } else {
-      setFilteredData(questions);
+      setFilteredData([]);
     }
   };
 
   useEffect(() => {
-    let filter = "/?tag_names=";
-    if (props.tags.length == 0) {
-      filter = "";
-    } else {
-      filter = filter + props.tags.join("|");
-    }
+    let filter = `/?tag_names=${props.subject}`;
+    filter = filter + props.tags.join("");
     retrieveQuestions(filter);
   }, [props.tags]);
 
@@ -90,6 +90,7 @@ function QuestionSelect(props) {
 QuestionSelect.propTypes = {
   tags: PropTypes.array,
   changePage: PropTypes.func,
+  subject: PropTypes.string,
 };
 
 export default QuestionSelect;

@@ -12,8 +12,14 @@ const asyncGETAPI = async (url, params) => {
       params: params,
       headers: { Authorization: `token ${getAuthInfo().token}` },
     })
-    .catch((err) => console.error(err));
-  return res.data;
+    .catch((err) => {
+      console.error(err);
+    });
+  if (res) {
+    return res.data;
+  } else {
+    return res;
+  }
 };
 
 const asyncPOSTAPI = async (url, data) => {
