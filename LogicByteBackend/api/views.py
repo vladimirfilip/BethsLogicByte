@@ -80,7 +80,6 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         many = model_instances.count() > 1
         serialized_data = self.get_serializer(data, many=many).data
         specific_fields = self.get_specific_fields_from_params(request)
-        print(serialized_data)
         if many:
             specific_fields = list(set(serialized_data[0].keys()).intersection(set(specific_fields)))
         else:
@@ -177,7 +176,7 @@ class QuestionView(GenericView):
         for query in queries:
             temp_queryset = Question.objects.none()
             for tag_name in query:
-                filtered = queryset.filter(tag_names__contains=tag_name)
+                filtered = queryset.filter(tag_names__contains=tag_name.rstrip("/"))
                 temp_queryset = temp_queryset | filtered
             new_queryset = new_queryset & temp_queryset
         return new_queryset
