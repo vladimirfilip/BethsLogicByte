@@ -14,8 +14,11 @@ function ViewAllSessions() {
       s_session_id: "",
       s_score: "",
     });
-    sessionData = sessionData.slice(0, 10);
-    for (const session of sessionData) {
+    console.log(sessionData);
+    if (!Array.isArray(sessionData)) {
+      sessionData = [sessionData];
+    }
+    for (let session of sessionData) {
       let day = session.session_id.slice(6, 8);
       let month = session.session_id.slice(4, 6);
       let year = session.session_id.slice(0, 4);

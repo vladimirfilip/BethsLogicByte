@@ -20,15 +20,7 @@ function SubjectPage(props) {
   return (
     <>
       <MainNavBar link={props.changePage} />
-      <ProblemOfDay
-        data={[
-          {
-            title: `${subject} Problem of the Day`,
-            description:
-              "Description for any random question for some subject.",
-          },
-        ]}
-      />
+      <ProblemOfDay subject={subject} changePage={props.changePage} />
       <ProfileDisplay link={props.changePage} />
       <QuestionPicker changePage={props.changePage} subject={subject} />
     </>

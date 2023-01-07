@@ -50,9 +50,6 @@ function Filter(props) {
 
       props.callback(arr);
     }
-    // if (arr.length == 0) {
-    //   props.callback([]);
-    // }
   };
 
   let tags = {};
