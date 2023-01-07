@@ -182,8 +182,8 @@ class QuestionView(GenericView):
         return new_queryset
 
     @staticmethod
-    def choose_randomly(queryset, n: int):
-        n = int(n)
+    def choose_randomly(queryset, n: str):
+        n = int(n.rstrip("/"))
         ids = [model.id for model in queryset]
         shuffle(ids)
         new_queryset = Question.objects.none()
