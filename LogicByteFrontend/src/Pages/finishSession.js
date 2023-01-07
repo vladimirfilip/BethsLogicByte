@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import questionIDs from "../helpers/questionIDs";
 import PropTypes from "prop-types";
+import { asyncDELETEAPI } from "../helpers/asyncBackend";
 
 function FinishSession(props) {
   //
@@ -9,7 +9,7 @@ function FinishSession(props) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    questionIDs.clear_data();
+    asyncDELETEAPI("api_filter_result", { user_profile: "" });
     setIsLoaded(true);
   }, []);
 

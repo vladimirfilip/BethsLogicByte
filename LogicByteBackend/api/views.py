@@ -1,48 +1,18 @@
-from rest_framework import generics, mixins, status
-from rest_framework.response import Response
-from .serializers import *
-from django.contrib.auth.models import User
-from django.http import JsonResponse
-from django.contrib.auth.hashers import make_password
+from rest_framework import generics, mixins
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser, FileUploadParser
 from django.db.models.query import QuerySet
+from random import shuffle
+from .utility import *
 
+rank_calculation_started = False
 
-def check_password(request):
-    password = request.GET.get('password', '')
-    username = request.GET.get('username', '')
-    user = User.objects.get(username=username)
-    if user.check_password(password):
-        return JsonResponse({"result": "good"})
-    return JsonResponse({"result": "bad"})
-
-
-def get_username(request):
-    token = request.GET.get('token', '')
-    if not token:
-        return JsonResponse({"error": "required token missing"})
-    user_instance = User.objects.filter(auth_token=token)
-    if not user_instance:
-        return JsonResponse({"error": "token invalid"})
-    user_instance = user_instance.first()
-    user_data = UserSerializer(user_instance).data
-    return JsonResponse({"username": user_data['username']})
-
-
-def check_if_question_completed(request):
-    username = request.GET.get('username', '')
-    if not username:
-        return JsonResponse({"error": "username missing from params"})
-    question_id = request.GET.get('question_id', '')
-    if not question_id:
-        return JsonResponse({"error": "question id missing from params"})
-    question_in_session = QuestionInSession.objects.filter(username=username, question_id=question_id)
-    if not question_in_session:
-        return JsonResponse({"data": "false"})
-    return JsonResponse({"data": "true"})
+PASSWORD_INSECURE_RESPONSE = {"error": "Password sent is not secure"}
 
 
 class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin,
                   mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    parser_classes = [MultiPartParser, FormParser, JSONParser, FileUploadParser]
+
     def __init__(self, queryset, serializer_class, **kwargs):
         super().__init__(**kwargs)
         self.queryset = queryset
@@ -52,53 +22,83 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
     def get_params(request):
         return {key: value[0] for key, value in dict(request.GET).items()}
 
-    @staticmethod
-    def get_specific_fields_from_params(request, model_data):
+    def get_specific_fields_from_params(self, request):
         #
-        # Returns all param keys that are also model fields
+        # Returns all param keys with prefix "s_"
         #
         param_keys = [key[2:] for key in dict(request.GET).keys() if key[:2] == "s_"]
-        model_keys = set(model_data.keys())
-        model_keys_in_headers = list(model_keys.intersection(param_keys))
-        return model_keys_in_headers
+        return param_keys
 
     def filter(self, request, **kwargs):
         queryset = self.queryset
         params = self.get_params(request)
         secondary = kwargs.pop('secondary', {})
         custom_filter = kwargs.pop('custom_filter', {})
+        default_custom_filter = {"user": filter_by_user_with_token,
+                                 "user_profile": filter_by_user_profile_with_token}
+        arguments = kwargs.pop('arguments', {})
+        for k, v in default_custom_filter.items():
+            custom_filter[k] = v
+        final_alterations = []
         for key in params.keys():
+            value = params.get(key)
             if key[:2] == "s_":
                 continue
+            if key in arguments.keys():
+                final_alterations.append(key)
+                continue
             if secondary.get(key, None):
-                primary_params = secondary[key](params[key])
+                primary_params = secondary[key](value)
                 field_name, field_value = primary_params
                 queryset = queryset.filter(**{field_name: field_value})
                 continue
             if custom_filter.get(key, None):
-                queryset = custom_filter[key](params[key])
+                queryset = custom_filter[key](queryset, value)
                 continue
-            queryset = queryset.filter(**{key: params[key]})
+            queryset = queryset.filter(**{key: value})
+        for key in final_alterations:
+            value = params.get(key)
+            queryset = arguments[key](queryset, value)
         return queryset
+
+    @staticmethod
+    def replace_tokens_with_ids(request_data):
+        if request_data.get("user_profile", None):
+            user_profile_token = request_data["user_profile"]
+            user_profile = get_user_profile_with_token(user_profile_token)
+            request_data['user_profile'] = user_profile.id if user_profile else None
+        if request_data.get("user", None):
+            user_token = request_data["user"]
+            user = get_user_with_token(user_token)
+            request_data['user'] = user.id if user else None
 
     def get(self, request):
         model_instances = self.filter(request)
-        if model_instances.count() < 2:
-            status_code = status.HTTP_200_OK if model_instances.count() == 1 else status.HTTP_400_BAD_REQUEST
-            serialized_data = self.get_serializer(model_instances.first()).data
-            specific_fields = self.get_specific_fields_from_params(request, serialized_data)
-            if specific_fields:
-                serialized_data = {key: serialized_data[key] for key in specific_fields}
+        if model_instances.count() == 0:
+            return Response(data=None, status=status.HTTP_404_NOT_FOUND)
+        data = model_instances.first() if model_instances.count() == 1 else model_instances
+        many = model_instances.count() > 1
+        serialized_data = self.get_serializer(data, many=many).data
+        specific_fields = self.get_specific_fields_from_params(request)
+        if many:
+            specific_fields = list(set(serialized_data[0].keys()).intersection(set(specific_fields)))
         else:
-            status_code = status.HTTP_200_OK
-            serialized_data = self.get_serializer(model_instances, many=True).data
-            specific_fields = self.get_specific_fields_from_params(request, serialized_data[0])
-            if specific_fields:
+            specific_fields = list(set(serialized_data.keys()).intersection(set(specific_fields)))
+        if specific_fields:
+            if many:
                 serialized_data = [{key: fragment[key] for key in specific_fields} for fragment in serialized_data]
-        return Response(serialized_data, status_code)
+            else:
+                serialized_data = {key: serialized_data[key] for key in specific_fields}
+        return Response(serialized_data, status=status.HTTP_200_OK)
 
+    @check_client_staff_or_creator
     def post(self, request):
-        serializer = self.get_serializer(data=request.data)
+        request_data = request.data
+        self.replace_tokens_with_ids(request_data)
+        password = request_data.get("password", None)
+        if password and not is_password_secure(password):
+            return Response(data=PASSWORD_INSECURE_RESPONSE)
+        serializer = self.get_serializer(data=request_data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
@@ -112,16 +112,19 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
                 data_point = make_password(data_point)
             old_data[key] = data_point
 
+    @check_client_staff_or_creator
     def put(self, request):
         model_instances = self.filter(request)
         request_data = request.data
+        self.replace_tokens_with_ids(request_data)
         if model_instances.count() > 1:
             return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
-
         model_instance = model_instances.first()
         record = self.get_serializer(model_instance).data.copy()
         self.replace_record_with_new_data(record, request_data)
-
+        password = request_data.get("password", None)
+        if password and not is_password_secure(password):
+            return Response(data=PASSWORD_INSECURE_RESPONSE, status=status.HTTP_400_BAD_REQUEST)
         serializer = self.get_serializer(model_instance, record)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -130,6 +133,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
 
         return Response(self.get_serializer(saved_model).data)
 
+    @check_client_staff_or_creator
     def delete(self, request):
         model_instances = self.filter(request)
         if model_instances.count() == 1:
@@ -142,7 +146,11 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
 
 class UserProfileView(GenericView):
     def __init__(self):
+        global rank_calculation_started
         super().__init__(UserProfile.objects.all(), UserProfileSerializer)
+        if not rank_calculation_started:
+            rank_calculation_started = True
+            start_rank_calculation()
 
     @staticmethod
     def filter_by_username(username) -> tuple:
@@ -152,25 +160,40 @@ class UserProfileView(GenericView):
     def filter(self, request, *args):
         return super().filter(request, secondary={'username': self.filter_by_username})
 
+    @block
+    def delete(self, request):
+        return
+
 
 class QuestionView(GenericView):
     def __init__(self):
         super().__init__(Question.objects.all(), QuestionSerializer)
 
-    def get_questions_with_tag_names(self, tag_names: str):
+    @staticmethod
+    def get_questions_with_tag_names(queryset, tag_names: str):
         queries = [query.split("|") for query in tag_names.split(",")]
-        queryset = self.queryset
         new_queryset = QuerySet(Question)
         for query in queries:
             temp_queryset = Question.objects.none()
             for tag_name in query:
-                filtered = queryset.filter(tag_names__contains=tag_name)
+                filtered = queryset.filter(tag_names__contains=tag_name.rstrip("/"))
                 temp_queryset = temp_queryset | filtered
-            new_queryset = new_queryset.intersection(new_queryset, temp_queryset)
+            new_queryset = new_queryset & temp_queryset
+        return new_queryset
+
+    @staticmethod
+    def choose_randomly(queryset, n: str):
+        n = int(n.rstrip("/"))
+        ids = [model.id for model in queryset]
+        shuffle(ids)
+        new_queryset = Question.objects.none()
+        for model_id in ids[:n]:
+            new_queryset = new_queryset | Question.objects.filter(id=model_id)
         return new_queryset
 
     def filter(self, request, *args):
-        return super().filter(request, custom_filter={'tag_names': self.get_questions_with_tag_names})
+        return super().filter(request, custom_filter={'tag_names': self.get_questions_with_tag_names},
+                              arguments={'number': self.choose_randomly})
 
 
 class SolutionView(GenericView):
@@ -183,7 +206,11 @@ class SolutionView(GenericView):
         return 'question', question
 
     def filter(self, request, *args):
-        return super().filter(request, secondary={'question_id': self.get_solution_by_question_id})  #
+        return super().filter(request, secondary={'question_id': self.get_solution_by_question_id})
+
+    @block
+    def delete(self, request):
+        return
 
 
 class SavedQuestionView(GenericView):
@@ -214,3 +241,12 @@ class QuestionInSessionView(GenericView):
 class UserQuestionSessionView(GenericView):
     def __init__(self):
         super().__init__(UserQuestionSession.objects.all(), UserQuestionSessionSerializer)
+
+    @block
+    def delete(self, request):
+        return
+
+
+class FilterResultView(GenericView):
+    def __init__(self):
+        super().__init__(QuestionFilterResult.objects.all(), FilterResultSerializer)

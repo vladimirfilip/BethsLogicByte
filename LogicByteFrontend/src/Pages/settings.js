@@ -1,15 +1,20 @@
 import React, { useContext } from "react";
-import axios from "axios";
 import { useState, useEffect } from "react";
 import useForm from "../helpers/useForm";
-import { getAuthInfo } from "../helpers/authHelper";
 import MainNavBar from "../Components/MainNavBar";
 import isSecurePassword from "../helpers/passwd";
 import PropTypes from "prop-types";
+import {
+  asyncDELETEAPI,
+  asyncGETAPI,
+  asyncPUTAPI,
+} from "../helpers/asyncBackend";
 import { UsernameContext } from "../router";
-function Settings(props) {
-  const username = useContext(UsernameContext);
+import ProfilePicInput from "../Components/ProfilePicInput";
+import axios from "axios";
+import { getAuthInfo } from "../helpers/authHelper";
 
+function Settings(props) {
   const [passwords, handleChange] = useForm({
     current_password: "",
     new_password: "",
@@ -20,6 +25,7 @@ function Settings(props) {
   // but ensures password is entered
   //
   const [isPasswordCorrect, setCorrect] = useState(true);
+  const username = useContext(UsernameContext);
   //
   // If new password and confirmed password are the same
   //
@@ -29,61 +35,67 @@ function Settings(props) {
   // secureMsg stores error messages passed from isSecurePassword
   //
   const [secureMsg, setSecureMsg] = useState([]);
+  const [newProfilePic, setNewProfilePic] = useState("");
 
-  const checkPassword = () => {
+  const checkPassword = async () => {
     //
     // Checks whether user correctly entered current password
     //
-    axios
-      .get(
-        `http://127.0.0.1:8000/api_check_password/`,
-        {
-          params: { username: username, password: passwords.current_password },
-        },
-        {
-          headers: {
-            Authorization: `token ${getAuthInfo().token}`,
-          },
-        }
-      )
-      .then((response) => {
-        if (response.data.result == "good") {
-          setCorrect(true);
-        } else {
-          setCorrect(false);
-        }
-      })
-      .catch((error) => {
-        console.error(error.response.data);
-      });
+    const result = await asyncGETAPI("api_check_password", {
+      username: username,
+      password: passwords.current_password,
+    });
+    if (result.result == "good") {
+      setCorrect(true);
+    } else {
+      setCorrect(false);
+    }
   };
 
-  const updatePassword = () => {
-    axios
-      .put(
-        `http://127.0.0.1:8000/api_users/`,
+  const updatePassword = async () => {
+    await asyncPUTAPI(
+      "api_users",
+      { username: username },
+      { password: passwords.new_password }
+    );
+  };
+
+  const updateProfilePic = async () => {
+    await asyncDELETEAPI("api_profile_picture", { user_profile: "" });
+    await axios
+      .post(
+        "http://127.0.0.1:8000/api_profile_picture/",
         {
-          password: passwords.new_password,
+          user_profile: `${getAuthInfo().token}`,
+          image: newProfilePic,
         },
         {
-          params: {
-            username: username,
-          },
           headers: {
+            "Content-Type": "multipart/form-data",
             Authorization: `token ${getAuthInfo().token}`,
-            "Content-Type": "application/json",
           },
         }
       )
-      .catch((error) => {
-        console.error(error.response.data);
-      });
+      .catch((err) => console.error(err));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    checkPassword();
+    if (newProfilePic != "") {
+      (async () => {
+        await updateProfilePic();
+        if (
+          passwords.new_password == "" &&
+          passwords.current_password == "" &&
+          passwords.confirm_password == ""
+        ) {
+          props.changePage("home");
+        }
+      })();
+    }
+    if (passwords.current_password != "") {
+      checkPassword();
+    }
     if (isPasswordCorrect && passwords.current_password != "") {
       //
       // Receives any error messages
@@ -123,9 +135,9 @@ function Settings(props) {
     <div>
       <MainNavBar link={props.changePage}></MainNavBar>
       <h2>{username}</h2>
-      {/* Image field not yet added to user model */}
-      <img alt="profile picture"></img>
+      <ProfilePicInput setProfilePic={setNewProfilePic} />
       <h3>Change password</h3>
+      <h4>Enter your current password</h4>
       {!isPasswordCorrect && <h2>Incorrect password</h2>}
       <form>
         <input
@@ -135,6 +147,7 @@ function Settings(props) {
           onChange={handleChange}
         ></input>
         {!isSecure && <ul>{secureMsg}</ul>}
+        <h4>Enter your new password</h4>
         <input
           name="new_password"
           type="password"
@@ -142,6 +155,7 @@ function Settings(props) {
           onChange={handleChange}
         ></input>
         {!isConfirmCorrect && <h2>Re-enter the password correctly</h2>}
+        <h4>Confirm your new password</h4>
         <input
           name="confirm_password"
           type="password"

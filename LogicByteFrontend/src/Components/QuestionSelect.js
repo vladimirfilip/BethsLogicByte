@@ -1,85 +1,51 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { getAuthInfo } from "../helpers/authHelper";
+import { asyncPOSTAPI, asyncGETAPI } from "../helpers/asyncBackend";
 import PropTypes from "prop-types";
-import MathJaxRender from "../helpers/mathJaxRender";
-import questionIDs from "../helpers/questionIDs";
+import { MathJax } from "better-react-mathjax";
 
 function QuestionSelect(props) {
   let [isLoaded, setLoaded] = useState(false);
-  // let [data, setData] = useState([]);
   let [selected, setSelected] = useState({});
   let [filteredData, setFilteredData] = useState([]);
 
-  function start() {
-    let x = [];
+  async function start() {
+    let ids = [];
     for (let i in selected) {
       if (selected[i] == true) {
-        x.push(+i);
+        ids.push(+i);
       }
     }
-    questionIDs.ids = x;
-    props.changePage("question");
+    if (ids.length > 0) {
+      await asyncPOSTAPI("api_filter_result", {
+        question_ids: ids.join(),
+        user_profile: "",
+      });
+      props.changePage("question");
+    }
   }
 
-  // function containsTags(element) {
-  //   if (props.tags.length == 0) {
-  //     return true;
-  //   }
-  //   let contains = false;
-  //   for (let i = 0; i < props.tags.length; i++) {
-  //     if (element.tag_names.includes(props.tags[i])) {
-  //       contains = true;
-  //     }
-  //   }
-  //   return contains;
-  // }
-
-  // useEffect(() => {
-  //   axios
-  //     .get("http://127.0.0.1:8000/api_questions/", {
-  //       headers: {
-  //         Authorization: `token ${getAuthInfo().token}`,
-  //       },
-  //     })
-  //     .then((response) => {
-  //       setLoaded(true);
-  //       setData(response.data);
-  //       setFilteredData(response.data);
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // }, []);
-  useEffect(() => {
-    let filter = "?tag_names=";
-    if (props.tags.length == 0) {
-      filter = "";
+  const retrieveQuestions = async (filterData) => {
+    const questions = await asyncGETAPI("api_questions" + filterData, {});
+    setLoaded(true);
+    if (questions) {
+      if (questions.length == undefined) {
+        setFilteredData([questions]);
+      } else {
+        setFilteredData(questions);
+      }
     } else {
-      filter = filter + props.tags.join("|");
+      setFilteredData([]);
     }
-    console.log(filter);
-    axios
-      .get("http://127.0.0.1:8000/api_questions/" + filter, {
-        headers: {
-          Authorization: `token ${getAuthInfo().token}`,
-        },
-      })
-      .then((response) => {
-        setLoaded(true);
-        if (response.data.length == undefined) {
-          setFilteredData([response.data]);
-        } else {
-          setFilteredData(response.data);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, [props.tags]);
+  };
 
   useEffect(() => {
-    let newSelected = JSON.parse(JSON.stringify(selected));
+    let filter = `/?tag_names=${props.subject}`;
+    filter = filter + props.tags.join("");
+    retrieveQuestions(filter);
+  }, [props.tags, props.subject]);
+
+  useEffect(() => {
+    let newSelected = Object.assign({}, selected);
     setFilteredData(filteredData);
     for (let i in selected) {
       let found = false;
@@ -108,24 +74,23 @@ function QuestionSelect(props) {
             }}
             checked={selected[x.id] != undefined ? selected[x.id] : false}
           ></input>
-
-          <MathJaxRender text={x.question_description} />
+          {x.question_description}
         </div>
       );
     });
     return (
       <>
-        {children}
+        <MathJax dynamic={true}>{children}</MathJax>
         <button onClick={() => start()}>Start</button>
       </>
     );
-    // return <p>{JSON.stringify(data)}</p>;
   }
 }
 
 QuestionSelect.propTypes = {
   tags: PropTypes.array,
   changePage: PropTypes.func,
+  subject: PropTypes.string,
 };
 
 export default QuestionSelect;
