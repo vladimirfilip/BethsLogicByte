@@ -230,7 +230,6 @@ function DoQuestion(props) {
             getCorrectAnswer();
           }}
           onChange={(e) => {
-            console.log(e.target.value);
             setSelectedOption(e.target.value);
           }}
         >

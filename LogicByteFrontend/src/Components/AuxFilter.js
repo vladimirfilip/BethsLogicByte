@@ -10,8 +10,8 @@ function AuxFilter(props) {
       <input
         type="checkbox"
         onClick={() => {
-          let preVal = props.checks[option].current;
-          props.checks[option].current = !preVal;
+          let preVal = props.checks.current[props.filterType][option];
+          props.checks.current[props.filterType][option] = !preVal;
         }}
       />
       {option}
