@@ -8,15 +8,7 @@ function Home(props) {
   return (
     <>
       <MainNavBar link={props.changePage}></MainNavBar>
-      <ProblemOfDay
-        data={[
-          {
-            title: "Problem of the day",
-            description:
-              "Description for any random question for some subject.",
-          },
-        ]}
-      />
+      <ProblemOfDay subject={""} changePage={props.changePage} />
       <ProfileDisplay link={props.changePage} />
     </>
   );

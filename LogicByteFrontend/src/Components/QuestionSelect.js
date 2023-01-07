@@ -42,7 +42,7 @@ function QuestionSelect(props) {
     let filter = `/?tag_names=${props.subject}`;
     filter = filter + props.tags.join("");
     retrieveQuestions(filter);
-  }, [props.tags]);
+  }, [props.tags, props.subject]);
 
   useEffect(() => {
     let newSelected = Object.assign({}, selected);

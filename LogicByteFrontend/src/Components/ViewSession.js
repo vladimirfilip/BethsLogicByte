@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import MathJaxRender from "../helpers/mathJaxRender";
 import PropTypes from "prop-types";
 import ViewQInSession from "./ViewQInSession";
@@ -7,6 +7,8 @@ import { asyncGETAPI } from "../helpers/asyncBackend";
 function ViewSession(props) {
   const sessionId = props.sessionId;
   const [questionDisplays, setQuestionDisplays] = useState([]);
+  const [loadMore, setLoadMore] = useState(false);
+  const questionData = useRef();
 
   const getQDescription = async (q_id) => {
     const res = await asyncGETAPI("api_questions", { id: q_id });
@@ -53,26 +55,57 @@ function ViewSession(props) {
     ]);
   };
 
+  const showNextQ = () => {
+    let nextIdx = questionDisplays.length;
+    let numLeft = questionData.current.length - questionDisplays.length;
+    if (numLeft < 10) {
+      setLoadMore(false);
+      for (let i = nextIdx; i < questionData.current.length; i++) {
+        createQView(questionData.current[i]);
+      }
+    } else {
+      for (let i = nextIdx; i < nextIdx + 10; i++) {
+        createQView(questionData.current[i]);
+      }
+    }
+  };
+
   useEffect(() => {
     (async () => {
-      let questionData = await asyncGETAPI("api_solutions", {
+      questionData.current = await asyncGETAPI("api_solutions", {
         user_profile: "",
         session_id: sessionId,
       });
-      questionData = questionData.sort(function (a, b) {
-        return a.question_num - b.question_num;
-      });
-      for (let i = 0; i < questionData.length; i++) {
-        let question = questionData[i];
-        createQView(question, i);
+      if (questionData.current.length > 1) {
+        questionData.current = questionData.current.sort(function (a, b) {
+          return a.question_num - b.question_num;
+        });
+      } else {
+        questionData.current = [questionData.current];
+      }
+      if (questionData.current.length > 10) {
+        setLoadMore(true);
+        for (let i = 0; i < 10; i++) {
+          createQView(questionData.current[i]);
+        }
+      } else {
+        for (let i = 0; i < questionData.current.length; i++) {
+          createQView(questionData.current[i]);
+        }
       }
     })();
     return () => {
       setQuestionDisplays([]);
+      setLoadMore(false);
     };
   }, [sessionId]);
 
-  return <>{questionDisplays}</>;
+  return (
+    <>
+      {questionDisplays}
+      {loadMore && <button onClick={showNextQ}>Show more questions</button>}
+    </>
+  );
 }
 
 ViewSession.propTypes = {

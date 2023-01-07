@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import "./ProblemOfDay.css";
+import { asyncGETAPI, asyncPOSTAPI } from "../helpers/asyncBackend";
+import MathJaxRender from "../helpers/mathJaxRender";
 
 function ProblemOfDay(props) {
-  let [page, setPage] = useState(0);
+  const [page, setPage] = useState(0);
+  const [qData, setQData] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
   let filledCircle = "⬤";
   let emptyCircle = "◯";
 
-  let dataLength = Object.keys(props.data).length;
+  let dataLength = 5;
 
   let progress = "";
   for (let i = 0; i < dataLength; i++) {
@@ -30,49 +35,83 @@ function ProblemOfDay(props) {
     nextClasses = "next-button flex no-select button-cursor darken";
   }
 
-  return (
-    <div className="container pt-3">
-      <div className="card text-white light_blue mb-3 shadow">
-        <div className="row">
-          <div className="col-1 flex">
-            <span
-              className={backClasses}
-              onClick={() => {
-                if (page !== 0) {
-                  setPage((page -= 1));
-                }
-              }}
-            >
-              {"<"}
-            </span>
-          </div>
-          <div className="col-10">
-            <h1 className="center">{props.data[page].title}</h1>
-            <div className="card text-white dark_blue">
-              <p className="truncated">{props.data[page].description}</p>
+  const getQData = async () => {
+    const res = await asyncGETAPI(
+      "api_questions" + `/?tag_names=${props.subject}&` + "number=5",
+      { s_question_description: "", s_id: "" }
+    );
+    setQData(res);
+  };
+
+  const start = async () => {
+    await asyncPOSTAPI("api_filter_result", {
+      question_ids: qData[page].id.toString(),
+      user_profile: "",
+    });
+    props.changePage("question");
+  };
+
+  useEffect(() => {
+    getQData();
+  }, [props.subject]);
+
+  useEffect(() => {
+    if (qData.length == 5) {
+      setIsLoaded(true);
+    }
+  }, [qData]);
+
+  if (isLoaded) {
+    return (
+      <div className="container pt-3">
+        <div className="card text-white light_blue mb-3 shadow">
+          <div className="row">
+            <div className="col-1 flex">
+              <span
+                className={backClasses}
+                onClick={() => {
+                  if (page !== 0) {
+                    setPage(page - 1);
+                  }
+                }}
+              >
+                {"<"}
+              </span>
             </div>
-            <p className="center no-select">{progress}</p>
-          </div>
-          <div className="col-1 flex right">
-            <span
-              className={nextClasses}
-              onClick={() => {
-                if (page !== dataLength - 1) {
-                  setPage((page += 1));
-                }
-              }}
-            >
-              {">"}
-            </span>
+            <div className="col-10">
+              <h1>{props.subject} Suggested Problems</h1>
+              <div className="card text-white dark_blue">
+                <p className="truncated">
+                  <MathJaxRender text={qData[page].question_description} />
+                </p>
+              </div>
+              <p className="center no-select">{progress}</p>
+              <button onClick={start}>Attempt</button>
+            </div>
+            <div className="col-1 flex right">
+              <span
+                className={nextClasses}
+                onClick={() => {
+                  if (page !== dataLength - 1) {
+                    setPage(page + 1);
+                  }
+                }}
+              >
+                {">"}
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  } else {
+    return <h1>Loading</h1>;
+  }
 }
 
 ProblemOfDay.propTypes = {
-  data: PropTypes.array,
+  subject: PropTypes.string,
+  changePage: PropTypes.func,
 };
 
 export default ProblemOfDay;

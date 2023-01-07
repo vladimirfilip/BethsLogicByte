@@ -21,20 +21,14 @@ function QuestionPicker(props) {
       break;
   }
 
-  // Stops unncecessary rerenders
-  // This doesn't allow for data to be updated but there should be no situation where that is necessary anyways
-  let [filter] = useState(
-    <Filter
-      data={subject_filter_data}
-      callback={(data) => setTags(data)}
-      subject={props.subject}
-    />
-  );
-
   return (
     <>
       <h1>Filter</h1>
-      {filter}
+      <Filter
+        data={subject_filter_data}
+        callback={(data) => setTags(data)}
+        subject={props.subject}
+      />
       <h1>Questions</h1>
       <QuestionSelect
         tags={tags}
