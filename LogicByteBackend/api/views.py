@@ -4,6 +4,7 @@ from .serializers import *
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
+from django.views.decorators.csrf import csrf_protect
 
 
 def check_password(request):
@@ -93,6 +94,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
                 serialized_data = [{key: fragment[key] for key in specific_fields} for fragment in serialized_data]
         return Response(serialized_data, status_code)
 
+    @csrf_protect # protects POST, PUT and DELETE requests
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
@@ -108,6 +110,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
                 data_point = make_password(data_point)
             old_data[key] = data_point
 
+    @csrf_protect
     def put(self, request):
         model_instances = self.filter(request)
         request_data = request.data
@@ -126,6 +129,7 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
 
         return Response(self.get_serializer(saved_model).data)
 
+    @csrf_protect
     def delete(self, request):
         model_instances = self.filter(request)
         if model_instances.count() == 1:
