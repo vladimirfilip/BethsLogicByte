@@ -3,7 +3,6 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser, File
 from django.db.models.query import QuerySet
 from random import shuffle
 from .utility import *
-from django.views.decorators.csrf import csrf_protect
 
 
 rank_calculation_started = False
@@ -93,7 +92,6 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
                 serialized_data = {key: serialized_data[key] for key in specific_fields}
         return Response(serialized_data, status=status.HTTP_200_OK)
 
-    @csrf_protect # protects POST, PUT and DELETE requests
     @check_client_staff_or_creator
     def post(self, request):
         request_data = request.data
@@ -115,7 +113,6 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
                 data_point = make_password(data_point)
             old_data[key] = data_point
 
-    @csrf_protect
     @check_client_staff_or_creator
     def put(self, request):
         model_instances = self.filter(request)
@@ -137,7 +134,6 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
 
         return Response(self.get_serializer(saved_model).data)
 
-    @csrf_protect
     @check_client_staff_or_creator
     def delete(self, request):
         model_instances = self.filter(request)
