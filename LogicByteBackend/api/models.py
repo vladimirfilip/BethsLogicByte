@@ -5,9 +5,10 @@ from django.conf import settings
 from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from django.contrib.auth.hashers import make_password
 
 
-def user_profile_pic_directory(instance, *args):
+def user_profile_pic_directory(instance, filename):
     return f"profile_pics/profile_pic_{instance.user_profile.id}.png"
 
 
@@ -17,6 +18,7 @@ class UserProfile(models.Model):
     year_group = models.CharField(max_length=10)
     class_name = models.CharField(max_length=100)
     email_address = models.EmailField(max_length=50, null=True)
+    rank = models.IntegerField(default=0)
 
     def __str__(self):
         return self.user.username
@@ -25,6 +27,9 @@ class UserProfile(models.Model):
 class ProfilePicture(models.Model):
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
     image = models.ImageField(upload_to=user_profile_pic_directory)
+    
+    def __str__(self):
+        return "{}'s profile pic".format(self.user_profile)
 
 
 def question_img_directory(instance, *args):
@@ -32,7 +37,7 @@ def question_img_directory(instance, *args):
 
 
 class Question(models.Model):
-    creator = models.ForeignKey(UserProfile, related_name="created_questions", on_delete=models.CASCADE)
+    user_profile = models.ForeignKey(UserProfile, related_name="created_questions", on_delete=models.CASCADE)
     question_description = models.TextField()
     tag_names = models.CharField(max_length=150, blank=True)
     exam_board = models.CharField(max_length=15, blank=True)
@@ -44,15 +49,22 @@ class Question(models.Model):
     multiple_choices = models.TextField(blank=True)
     has_images = models.BooleanField(default=False)
 
+    def __str__(self):
+        return "Question created by {}, difficulty {}, points {}".format(self.user_profile, self.difficulty, self.num_points)
+
 
 class QuestionImage(models.Model):
+    user_profile = models.ForeignKey(UserProfile, related_name="question_images", on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name="question_images", on_delete=models.CASCADE)
     type = models.CharField(max_length=20, blank=True)
     image = models.ImageField(upload_to=question_img_directory)
 
+    def __str__(self):
+        return "Image for question of id {}, type {}".format(self.question, self.type)
+
 
 class QuestionInSession(models.Model):
-    username = models.TextField()
+    user_profile = models.ForeignKey(UserProfile, related_name="questions_in_session", on_delete=models.CASCADE)
     question_id = models.IntegerField()
     question_description = models.TextField(blank=True)
     solution = models.TextField(blank=True)
@@ -60,10 +72,16 @@ class QuestionInSession(models.Model):
     q_image = models.TextField(blank=True)
     img_options = models.BooleanField(default=False)
 
+    def __str__(self):
+        return "QuestionInSession of {}, question id {}".format(self.user_profile, self.question_id)
+
 
 class SavedQuestion(models.Model):
     user_profile = models.ForeignKey(UserProfile, related_name="saved_questions", on_delete=models.CASCADE)
     question = models.OneToOneField(Question, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "Saved Question user {} question id {}".format(self.user_profile, self.question)
 
 
 def solution_img_directory(instance, *args):
@@ -71,26 +89,43 @@ def solution_img_directory(instance, *args):
 
 
 class SolutionAttempt(models.Model):
-    creator = models.ForeignKey(UserProfile, related_name="solutions", on_delete=models.CASCADE)
+    user_profile = models.ForeignKey(UserProfile, related_name="solutions", on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name="solutions", on_delete=models.CASCADE)
     solution = models.TextField()
     date_modified = models.DateTimeField(auto_now_add=True)
     is_correct = models.BooleanField(default=False)
     session_id = models.TextField(null=True)
+    question_num = models.IntegerField(null=True)
 
     def __str__(self):
-        return f"[SOL] {self.creator}/{self.question}/{self.date_modified.strftime('%Y/%m/%d %H:%M:%S')}"
+        return f"Solution {self.user_profile}/{self.question}/{self.date_modified.strftime('%Y/%m/%d %H:%M:%S')}"
 
 
 class UserQuestionSession(models.Model):
     session_id = models.TextField(null=True)
     user_profile = models.ForeignKey(UserProfile, related_name="question_sessions", on_delete=models.CASCADE)
+    score = models.FloatField(null=True)
+
+    def __str__(self):
+        return "QuestionSession of {} id {}".format(self.user_profile, self.session_id)
+
+
+class QuestionFilterResult(models.Model):
+    user_profile = models.ForeignKey(UserProfile, related_name="filter_results", on_delete=models.CASCADE)
+    question_ids = models.TextField(null=True)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def encrypt_password(sender, instance=None, created=False, **kwargs):
+    instance.password = make_password(instance.password)
+    if created:
+        UserProfile.objects.create(user=instance)
 
 
 def delete_file_on_delete(file):

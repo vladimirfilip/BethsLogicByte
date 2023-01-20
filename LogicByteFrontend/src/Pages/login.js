@@ -1,17 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import useForm from "../helpers/useForm";
 import axios from "axios";
 import PropTypes from "prop-types";
 
 function Login(props) {
   const [values, handleChange] = useForm({ username: "", password: "" });
+  const [showIncorrectDetails, setShowIncorrectDetails] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     getToken(values.username, values.password);
   };
 
-  const getToken = (username, password) => {
+  const getToken = async (username, password) => {
     axios
       .post("http://127.0.0.1:8000/api_token_auth/", {
         username: username,
@@ -20,14 +21,15 @@ function Login(props) {
       .then((response) => {
         props.logIn(username, response.data.token);
       })
-      .catch((error) => {
-        console.error(error.response.data);
+      .catch(() => {
+        setShowIncorrectDetails(true);
       });
   };
 
   return (
     <>
       <h1>Login</h1>
+      {showIncorrectDetails && <h2>Incorrect username and/or password</h2>}
       <form>
         <input
           name="username"

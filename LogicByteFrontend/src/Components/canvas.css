@@ -1,0 +1,47 @@
+svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: #ffffff;
+  touch-action: none;
+  z-index: -1;
+}
+
+body {
+  user-select: none;
+}
+
+.pen {
+  cursor: url("../../public/pen.png") 0 32, auto;
+}
+
+.eraser {
+  cursor: url("../../public/eraser.png") 0 32, auto;
+}
+
+.filter-green {
+  filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg)
+    brightness(118%) contrast(119%);
+}
+
+.filter-black {
+  filter: invert(0%) sepia(100%) saturate(7440%) hue-rotate(178deg)
+    brightness(85%) contrast(115%);
+}
+
+.filter-blue {
+  filter: invert(8%) sepia(91%) saturate(7488%) hue-rotate(248deg)
+    brightness(99%) contrast(145%);
+}
+
+.filter-red {
+  filter: invert(12%) sepia(77%) saturate(7333%) hue-rotate(1deg)
+    brightness(96%) contrast(112%);
+}
+
+.filter-yellow {
+  filter: invert(94%) sepia(100%) saturate(3255%) hue-rotate(358deg)
+    brightness(104%) contrast(104%);
+}

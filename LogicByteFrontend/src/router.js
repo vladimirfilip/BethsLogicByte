@@ -13,6 +13,8 @@ import {
   getAuthInfo,
 } from "./helpers/authHelper";
 import axios from "axios";
+import SubjectPage from "./Pages/subjectPage";
+import MyQPage from "./Pages/myQPage";
 
 function getURL() {
   let url = window.location.href;
@@ -62,9 +64,6 @@ function Router() {
   };
 
   const onPopState = () => {
-    // let url = getURL();
-    // url = url.join("/");
-    // changePage(url);
     setPageState(getURL());
   };
 
@@ -109,16 +108,21 @@ function Router() {
     {
       home: Home,
       settings: Settings,
+      mathematics: SubjectPage,
+      physics: SubjectPage,
+      chemistry: SubjectPage,
+      biology: SubjectPage,
+      informatics: SubjectPage,
+      my_questions: MyQPage,
+      question: QuestionPage,
     },
     {
       user: User,
-      question: QuestionPage,
       finish: FinishSession,
     },
   ];
   let pageNamesStandard = Object.keys(pages[0]);
   let pageNamesExtended = Object.keys(pages[1]);
-
   // if pageName provided in URL is a key in the pages object
   if (pageNamesStandard.indexOf(page[0]) != -1) {
     let PageComponent = pages[0][page[0]];

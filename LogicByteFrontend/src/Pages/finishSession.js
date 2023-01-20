@@ -1,29 +1,15 @@
-import React, { useContext, useEffect, useState } from "react";
-import questionIDs from "../helpers/questionIDs";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { UsernameContext } from "../router";
-import axios from "axios";
-import { getAuthInfo } from "../helpers/authHelper";
+import { asyncDELETEAPI } from "../helpers/asyncBackend";
 
 function FinishSession(props) {
-  const username = useContext(UsernameContext);
   //
   // score is calculated as percentage and only from completed questions
   //
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const clearSessionData = () => {
-    axios
-      .delete("http://127.0.0.1:8000/api_questions_in_session/", {
-        params: { username: username },
-        headers: { Authorization: `token ${getAuthInfo().token}` },
-      })
-      .catch((error) => console.log(error));
-  };
-
   useEffect(() => {
-    questionIDs.clear_data();
-    clearSessionData();
+    asyncDELETEAPI("api_filter_result", { user_profile: "" });
     setIsLoaded(true);
   }, []);
 
