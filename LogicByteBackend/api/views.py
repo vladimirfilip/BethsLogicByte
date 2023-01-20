@@ -4,6 +4,7 @@ from django.db.models.query import QuerySet
 from random import shuffle
 from .utility import *
 
+
 rank_calculation_started = False
 
 PASSWORD_INSECURE_RESPONSE = {"error": "Password sent is not secure"}
