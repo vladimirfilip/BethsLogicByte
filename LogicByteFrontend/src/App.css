@@ -1,0 +1,69 @@
+.login-card {
+    max-width: 650px;
+    padding: 15px 40px 40px 40px;
+    background-color: #fdfdfd;
+    margin: 0 auto 25px;
+    margin-top: 50px;
+    border-radius: 10px;
+    box-shadow: 0px 15px 35px rgba(0, 0, 0, 0.2);
+    align-content: center;
+}
+
+.form-signin {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.form-entry {
+    height: 44px;
+    font-size: 16px;
+    width: 100%;
+    display: block;
+    margin-bottom: 10px;
+    position: relative;
+    box-sizing: border-box;
+    border: 1px solid #e9e9e9;
+    border-radius: 5px;
+    outline: 0;
+    padding-left: 10px;
+}
+
+.btn-signin {
+    margin-top: 10px;
+    color: #fff;
+    background-color: #006dAA;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+    height: 36px;
+    line-height: 36px;
+    font-size: 16px;
+    text-align: center;
+    align-self: center;
+}
+
+.btn-signin:hover {
+    background-color: #003559;
+}
+
+.btn-signin:active {
+    background-color: #061A40;
+}
+
+.btn-signin:focus, .btn-signin:focus-visible, .btn-signin:focus-within {
+    border: none;
+}
+
+.p-signin-error {
+    color: red;
+    font-size: 16px;
+    text-align: center;
+    vertical-align: center;
+    margin-top: 15px;
+}
+
+.h2-signin-heading {
+    text-align: center;
+    padding: 5px 5px 15px 5px;
+    font-size: 32px;
+}
