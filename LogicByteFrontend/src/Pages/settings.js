@@ -134,36 +134,48 @@ function Settings(props) {
   return (
     <div>
       <MainNavBar link={props.changePage}></MainNavBar>
-      <h2>{username}</h2>
-      <ProfilePicInput setProfilePic={setNewProfilePic} />
-      <h3>Change password</h3>
-      <h4>Enter your current password</h4>
-      {!isPasswordCorrect && <h2>Incorrect password</h2>}
-      <form>
-        <input
-          name="current_password"
-          type="password"
-          value={passwords.current_password}
-          onChange={handleChange}
-        ></input>
-        {!isSecure && <ul>{secureMsg}</ul>}
-        <h4>Enter your new password</h4>
-        <input
-          name="new_password"
-          type="password"
-          value={passwords.new_password}
-          onChange={handleChange}
-        ></input>
-        {!isConfirmCorrect && <h2>Re-enter the password correctly</h2>}
-        <h4>Confirm your new password</h4>
-        <input
-          name="confirm_password"
-          type="password"
-          value={passwords.confirm_password}
-          onChange={handleChange}
-        ></input>
-        <button onClick={handleSubmit}>Save</button>
-      </form>
+      <div className="container container-fluid container-sm">
+        <div className="row">
+          <div className="col-md-4 col-sm-4">
+            <div className="card round-border">
+              <h2 className="h2 settings-h2 centre-text">{username}</h2>
+              <ProfilePicInput setProfilePic={setNewProfilePic} />
+            </div>
+          </div>
+          <div className="col-md-8 col-sm-8">
+            <div className="card change-password-card round-border">
+              <h3>Change password</h3>
+              <p>Enter your current password</p>
+              {!isPasswordCorrect && <p className="p-signin-error">Incorrect password</p>}
+              <form>
+                <input
+                  name="current_password"
+                  type="password"
+                  value={passwords.current_password}
+                  onChange={handleChange}
+                />
+                {!isSecure && <p className="signin-error">{secureMsg}</p>}
+                <p>Enter your new password</p>
+                <input
+                  name="new_password"
+                  type="password"
+                  value={passwords.new_password}
+                  onChange={handleChange}
+                />
+                {!isConfirmCorrect && <p className="p-signin-error">Re-enter the password correctly</p>}
+                <p>Confirm your new password</p>
+                <input
+                  name="confirm_password"
+                  type="password"
+                  value={passwords.confirm_password}
+                  onChange={handleChange}
+                />
+                <button onClick={handleSubmit}>Save</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

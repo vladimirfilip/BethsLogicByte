@@ -26,7 +26,7 @@ class UserProfile(models.Model):
 
 class ProfilePicture(models.Model):
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=user_profile_pic_directory)
+    image = models.ImageField(upload_to=user_profile_pic_directory, default="profile_pics/default_profile_pic.png")
     
     def __str__(self):
         return "{}'s profile pic".format(self.user_profile)
@@ -125,7 +125,8 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 def encrypt_password(sender, instance=None, created=False, **kwargs):
     instance.password = make_password(instance.password)
     if created:
-        UserProfile.objects.create(user=instance)
+        user_profile = UserProfile.objects.create(user=instance)
+        ProfilePicture.objects.create(user_profile=user_profile)
 
 
 def delete_file_on_delete(file):

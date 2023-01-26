@@ -41,19 +41,21 @@ function ProfilePicInput(props) {
   if (isLoaded) {
     return (
       <>
-        {showIncorrectImg && (
-          <h2 color="red">Uploaded images must be PNG or JPEG</h2>
-        )}
-        <img src={imgSrc} />
-        <form>
-          <input
-            type="file"
-            accept=".jpg,.png"
-            onChange={(e) => {
-              checkImgType(e.target.files[0]);
-            }}
-          />
-        </form>
+        <div className="pfp-input round-border">
+          {showIncorrectImg && (
+            <h2 color="red">Uploaded images must be PNG or JPEG</h2>
+          )}
+          <img src={imgSrc} className="pfp-image"/>
+          <form className="pfp-change-form">
+            <input
+              type="file"
+              accept=".jpg,.png"
+              onChange={(e) => {
+                checkImgType(e.target.files[0]);
+              }}
+            />
+          </form>
+        </div>
       </>
     );
   } else {

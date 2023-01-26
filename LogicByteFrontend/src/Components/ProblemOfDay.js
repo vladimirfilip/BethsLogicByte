@@ -64,7 +64,7 @@ function ProblemOfDay(props) {
   if (isLoaded) {
     return (
       <div className="container pt-3">
-        <div className="card text-white light_blue mb-3 shadow">
+        <div className="problem-of-day-card text-white light_blue mb-3 shadow">
           <div className="row">
             <div className="col-1 flex">
               <span
@@ -80,12 +80,12 @@ function ProblemOfDay(props) {
             </div>
             <div className="col-10">
               <h1>{props.subject} Suggested Problems</h1>
-              <div className="card text-white dark_blue">
+              <div className="problem-of-day-card text-white dark_blue">
                 <p className="truncated">
                   <MathJaxRender text={qData[page].question_description} />
                 </p>
               </div>
-              <p className="center no-select">{progress}</p>
+              <p className="centre-text no-select">{progress}</p>
               <button onClick={start}>Attempt</button>
             </div>
             <div className="col-1 flex right">

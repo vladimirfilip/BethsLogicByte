@@ -35,7 +35,7 @@ function Login(props) {
       <div className="container container-fluid">
         <div className="row">
           <div className="col">
-            <div className="login-card">
+            <div className="card login-card round-border">
               <h1 className="h2-signin-heading">Login</h1>
               <form className="form-signin">
                 <input
@@ -57,7 +57,7 @@ function Login(props) {
                   className="form-entry"
                   placeholder="Password"
                 ></input>
-                <button type="submit" className="btn-signin" onClick={handleSubmit}>
+                <button type="submit" className="btn-signin round-border" onClick={handleSubmit}>
                   Submit
                 </button>
                 {showIncorrectDetails && <p className="p-signin-error">Incorrect username or password</p>}
