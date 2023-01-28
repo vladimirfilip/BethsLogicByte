@@ -136,18 +136,18 @@ function Settings(props) {
       <MainNavBar link={props.changePage}></MainNavBar>
       <div className="container container-fluid container-sm">
         <div className="row">
-          <div className="col-md-4 col-sm-4">
+          <div className="col-lg-4">
             <div className="card round-border">
               <h2 className="h2 settings-h2 centre-text">{username}</h2>
               <ProfilePicInput setProfilePic={setNewProfilePic} />
             </div>
           </div>
-          <div className="col-md-8 col-sm-8">
+          <div className="col-lg-8">
             <div className="card change-password-card round-border">
               <h3>Change password</h3>
-              <p>Enter your current password</p>
               {!isPasswordCorrect && <p className="p-signin-error">Incorrect password</p>}
               <form>
+                <p className="change-password-lbl">Enter your current password</p>
                 <input
                   name="current_password"
                   type="password"
@@ -155,7 +155,7 @@ function Settings(props) {
                   onChange={handleChange}
                 />
                 {!isSecure && <p className="signin-error">{secureMsg}</p>}
-                <p>Enter your new password</p>
+                <p className="change-password-lbl">Enter your new password</p>
                 <input
                   name="new_password"
                   type="password"
@@ -163,7 +163,7 @@ function Settings(props) {
                   onChange={handleChange}
                 />
                 {!isConfirmCorrect && <p className="p-signin-error">Re-enter the password correctly</p>}
-                <p>Confirm your new password</p>
+                <p className="change-password-lbl">Confirm your new password</p>
                 <input
                   name="confirm_password"
                   type="password"
