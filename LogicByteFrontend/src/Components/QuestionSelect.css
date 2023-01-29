@@ -1,0 +1,12 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.start_btn {
+  width: 150px;
+}
+
+.generated_questions {
+  margin-top: 10px;
+}

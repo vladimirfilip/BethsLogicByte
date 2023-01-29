@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import "./filter.css";
 
 function AuxFilter(props) {
   const options = props.options;
@@ -14,20 +15,21 @@ function AuxFilter(props) {
           props.checks.current[props.filterType][option] = !preVal;
         }}
       />
-      {option}
+      <span className="filter_tag">{option}</span>
     </p>
   ));
 
   return (
     <>
       <button
+        className="btn btn-outline-secondary"
         onClick={() => {
           setShowDropdown(!showDropdown);
         }}
       >
         {props.filterType}
       </button>
-      {showDropdown && optionsInputs}
+      <div className={"aux_tags"}>{showDropdown && optionsInputs}</div>
     </>
   );
 }

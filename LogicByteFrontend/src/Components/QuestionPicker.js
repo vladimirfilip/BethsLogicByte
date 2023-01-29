@@ -22,20 +22,26 @@ function QuestionPicker(props) {
   }
 
   return (
-    <>
-      <h1>Filter</h1>
-      <Filter
-        data={subject_filter_data}
-        callback={(data) => setTags(data)}
-        subject={props.subject}
-      />
-      <h1>Questions</h1>
-      <QuestionSelect
-        tags={tags}
-        changePage={props.changePage}
-        subject={props.subject}
-      />
-    </>
+    <div className={"row"}>
+      <div className={"col-md-3 justify-content-center"}>
+        <h1 className="row justify-content-center">Filter</h1>
+        <Filter
+          className="row"
+          data={subject_filter_data}
+          callback={(data) => setTags(data)}
+          subject={props.subject}
+        />
+      </div>
+      <div className={"col-md-9"}>
+        <h1 className="row justify-content-center">Questions</h1>
+        <QuestionSelect
+          className="row"
+          tags={tags}
+          changePage={props.changePage}
+          subject={props.subject}
+        />
+      </div>
+    </div>
   );
 }
 

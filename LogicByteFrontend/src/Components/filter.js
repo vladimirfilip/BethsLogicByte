@@ -7,19 +7,23 @@ import { SUBJECT_AUX_FILTERS } from "../helpers/subjectData";
 function Filter(props) {
   const prevTags = useRef([]);
   const filterChecks = useRef([]);
+  const tags = useRef({});
   const [auxFilters, setAuxFilters] = useState([]);
+  const [children, setChildren] = useState([]);
 
   let update = () => {
     let arr = [];
     let tagsEqual = true;
+    let new_tags = [];
     //
     // Adds the tags in filter component
     //
     arr.push(",");
-    for (let i in tags) {
-      for (let j = 0; j < tags[i].length; j++) {
-        let currentTag = tags[i][j];
+    for (let i in tags.current) {
+      for (let j = 0; j < tags.current[i].length; j++) {
+        let currentTag = tags.current[i][j];
         arr.length == 1 ? arr.push(currentTag) : arr.push("|" + currentTag);
+        new_tags.push(currentTag);
         if (!prevTags.current.includes(currentTag)) {
           tagsEqual = false;
         }
@@ -36,6 +40,7 @@ function Filter(props) {
       for (let tag in filterChecks.current[filterType]) {
         if (filterChecks.current[filterType][tag]) {
           arr[arr.length - 1] == "," ? arr.push(tag) : arr.push("|" + tag);
+          new_tags.push(tag);
           if (!prevTags.current.includes(tag)) {
             tagsEqual = false;
           }
@@ -45,27 +50,33 @@ function Filter(props) {
     //
     // Updates filtered questions only if new tags selected
     //
-    if (!(tagsEqual && prevTags.current.length == arr.length)) {
-      prevTags.current = arr;
-
+    if (!(tagsEqual && prevTags.current.length == new_tags.length)) {
+      prevTags.current = new_tags;
       props.callback(arr);
     }
   };
 
-  let tags = {};
-  let children = props.data.map((x) => {
-    tags[x.name] = [];
-    let callback = (arr) => {
-      if (arr !== undefined) {
-        tags[x.name] = arr;
-      } else if (arr === undefined) {
-        tags[x.name] = [];
-      }
-    };
-    return (
-      <FilterParent key={x.name} data={x} callback={(arr) => callback(arr)} />
+  useEffect(() => {
+    setChildren(
+      props.data.map((x) => {
+        tags.current[x.name] = [];
+        let callback = (arr) => {
+          if (arr !== undefined) {
+            tags.current[x.name] = arr;
+          } else if (arr === undefined) {
+            tags.current[x.name] = [];
+          }
+        };
+        return (
+          <FilterParent
+            key={x.name}
+            data={x}
+            callback={(arr) => callback(arr)}
+          />
+        );
+      })
     );
-  });
+  }, []);
 
   useEffect(() => {
     //
@@ -107,11 +118,13 @@ function Filter(props) {
   }, []);
 
   return (
-    <>
-      <button onClick={update}>Apply filter</button>
-      {auxFilters}
-      {children}
-    </>
+    <div className="filter">
+      <button onClick={update} className="btn btn-primary">
+        Apply filter
+      </button>
+      <span className="filter_tree">{children}</span>
+      <span className="aux_filters">{auxFilters}</span>
+    </div>
   );
 }
 
@@ -226,7 +239,7 @@ function FilterNode(props) {
 
   if (props.depth !== undefined) {
     for (let i = 0; i < props.depth * 3; i++) {
-      indentString += "\u00A0";
+      indentString += "\u00A0\u00A0";
     }
   }
 
@@ -246,19 +259,24 @@ function FilterNode(props) {
 
   return (
     <>
-      <p>
+      <p className="filter_node">
         {indentString}
         {props.data.subcategories !== undefined ? (
           <span onClick={() => setHidden(!hidden)}>{hidden ? "▲ " : "▼ "}</span>
         ) : (
           "\u00A0\u00A0\u00A0\u00A0"
         )}
-        <input
-          type={"checkbox"}
-          checked={props.data.checked}
-          onChange={() => props.callback(props.data.name)}
-        ></input>
-        {props.data.name}
+        <span>
+          <input
+            type={"checkbox"}
+            checked={props.data.checked}
+            onChange={() => {
+              props.callback(props.data.name);
+            }}
+            className="filter_input"
+          ></input>
+          <span className="filter_tag">{props.data.name}</span>
+        </span>
       </p>
       <div className={hidden ? "hidden" : ""}>{children}</div>
     </>

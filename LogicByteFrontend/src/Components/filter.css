@@ -5,3 +5,32 @@
 .pointer {
   cursor: pointer;
 }
+
+.filter_tag {
+  padding-left: 5px;
+}
+
+.filter {
+  padding-left: 20px;
+  padding-right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.filter_tree {
+  margin-top: 10px;
+  font-size: 1.15rem;
+}
+
+.aux_filters {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.aux_tags {
+  margin-left: 19px;
+  margin-top: 12px;
+}

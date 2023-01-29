@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { asyncPOSTAPI, asyncGETAPI } from "../helpers/asyncBackend";
 import PropTypes from "prop-types";
 import { MathJax } from "better-react-mathjax";
+import GenerateQuestion from "./GeneratedQuestion";
+import "./QuestionSelect.css";
 
 function QuestionSelect(props) {
   let [isLoaded, setLoaded] = useState(false);
@@ -66,23 +68,26 @@ function QuestionSelect(props) {
   } else {
     let children = filteredData.map((x) => {
       return (
-        <div key={x.id}>
-          <input
-            type={"checkbox"}
-            onChange={() => {
-              setSelected({ ...selected, [x.id]: !selected[x.id] });
-            }}
-            checked={selected[x.id] != undefined ? selected[x.id] : false}
-          ></input>
-          {x.question_description}
-        </div>
+        <GenerateQuestion
+          key={x.id}
+          id={x.id}
+          updateSelected={(id) =>
+            setSelected({ ...selected, [id]: !selected[id] })
+          }
+          selected={selected}
+          question_data={x}
+        />
       );
     });
     return (
-      <>
-        <MathJax dynamic={true}>{children}</MathJax>
-        <button onClick={() => start()}>Start</button>
-      </>
+      <div className="container">
+        <button onClick={() => start()} className="btn btn-secondary start_btn">
+          Start
+        </button>
+        <div className="generated_questions">
+          <MathJax dynamic={true}>{children}</MathJax>
+        </div>
+      </div>
     );
   }
 }
