@@ -57,6 +57,7 @@ function Filter(props) {
   };
 
   useEffect(() => {
+    tags.current = {};
     setChildren(
       props.data.map((x) => {
         tags.current[x.name] = [];
@@ -76,7 +77,7 @@ function Filter(props) {
         );
       })
     );
-  }, []);
+  }, [props.data]);
 
   useEffect(() => {
     //
@@ -115,7 +116,11 @@ function Filter(props) {
         filterType={"Difficulty"}
       />,
     ]);
-  }, []);
+
+    return () => {
+      setAuxFilters([]);
+    };
+  }, [props.subject]);
 
   return (
     <div className="filter">

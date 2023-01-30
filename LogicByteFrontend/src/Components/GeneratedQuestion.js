@@ -41,5 +41,5 @@ GenerateQuestion.propTypes = {
   updateSelected: PropTypes.func,
   selected: PropTypes.object,
   question_data: PropTypes.object,
-  id: PropTypes.string,
+  id: PropTypes.number,
 };

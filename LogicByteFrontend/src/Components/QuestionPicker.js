@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Filter from "./filter";
 import QuestionSelect from "./QuestionSelect";
 import PropTypes from "prop-types";
@@ -20,6 +20,11 @@ function QuestionPicker(props) {
       subject_filter_data = PHYSICS_FILTER;
       break;
   }
+
+  useEffect(() => {
+    setTags([]);
+    console.log(props.subject);
+  }, [props.subject]);
 
   return (
     <div className={"row"}>
