@@ -2,14 +2,21 @@
   background-color: #b9d6f2;
 }
 .dark_blue {
-  background-color: #8dbdea;
+  background-color: #012085;
+}
+
+.bg-blue-primary {
+  background-color: #0353A4;
 }
 
 .next-button {
   color: black;
-  height: 50%;
-  background: white;
+  height: 100%;
+  padding-left: 10%;
+  padding-right: 10%;
+  text-align: center;
   font-size: x-large;
+  border-radius: 0.25rem;
 }
 
 .flex {
@@ -27,10 +34,11 @@
   word-wrap: break-word;
   border: 0px solid rgba(0, 0, 0, 0.125);
   border-radius: 0.25rem;
+
 }
 
 .shadow {
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2) !important;
 }
 
 .padding {
@@ -42,17 +50,12 @@
   opacity: 1;
   transition: 0.3s;
 }
-
-.darken {
-  background-color: white;
-}
-
 .darken:hover {
-  background-color: rgb(200, 200, 200);
+  background-color: #024090;
 }
 
 .disabled {
-  background-color: rgb(200, 200, 200);
+  background-color: #024090;
 }
 
 .truncated {
@@ -62,6 +65,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: normal;
+}
+
+.prob-of-day-btn {
+  border: 1px solid #012085;
+  width: 10%;
+  padding: 0.2rem;
+  border-radius: 0.25rem;
 }
 
 *,

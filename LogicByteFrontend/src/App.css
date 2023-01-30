@@ -8,7 +8,7 @@
     margin-top: 30px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
 }
 
 .flex {
@@ -193,4 +193,24 @@ h6 {
 
 .change-password-lbl {
     margin-top: 1rem;
+}
+
+.m-0 {
+    margin: 0;
+}
+
+.p-0_5 {
+    padding: 0.5rem;
+}
+
+.mb-0_75 {
+    margin-bottom: 0.75rem;
+}
+
+.mt-0_5 {
+    margin-top: 0.5rem;
+}
+
+.mb-0_5 {
+    margin-bottom: 0.5rem;
 }
