@@ -1,16 +1,4 @@
-.light_blue {
-  background-color: #b9d6f2;
-}
-.dark_blue {
-  background-color: #012085;
-}
-
-.bg-blue-primary {
-  background-color: #0353A4;
-}
-
 .next-button {
-  color: black;
   height: 100%;
   padding-left: 10%;
   padding-right: 10%;
@@ -51,11 +39,7 @@
   transition: 0.3s;
 }
 .darken:hover {
-  background-color: #024090;
-}
-
-.disabled {
-  background-color: #024090;
+  background-color: var(--secondary-4);
 }
 
 .truncated {
@@ -68,7 +52,7 @@
 }
 
 .prob-of-day-btn {
-  border: 1px solid #012085;
+  border: 1px solid var(--secondary-4);
   width: 10%;
   padding: 0.2rem;
   border-radius: 0.25rem;

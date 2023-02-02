@@ -24,9 +24,9 @@ function ProblemOfDay(props) {
   }
 
 
-  let baseClasses = "next-button bg-blue-primary text-white flex no-select ";
+  let baseClasses = "next-button bg-blue-3 text-white flex no-select ";
   let defaultClasses = baseClasses + "button-cursor darken";
-  let disabledClasses = baseClasses + "disabled";
+  let disabledClasses = baseClasses + "bg-blue-4";
 
   let backClasses = defaultClasses;
   let nextClasses = defaultClasses;
@@ -66,7 +66,7 @@ function ProblemOfDay(props) {
   if (isLoaded) {
     return (
       <div className="container pt-3 p-0">
-        <div className="problem-of-day-card text-white bg-blue-primary mb-3 shadow">
+        <div className="problem-of-day-card text-white bg-blue-3 mb-3 shadow">
           <div className="row m-0">
             <div className="col-1 flex p-0">
               <span
@@ -82,13 +82,13 @@ function ProblemOfDay(props) {
             </div>
             <div className="col-10 p-0_5">
               <h1 className="mb-0_75">{props.subject} Suggested Problems</h1>
-              <div className="problem-of-day-card text-white dark_blue p-0_5">
+              <div className="problem-of-day-card text-white bg-blue-4 p-0_5">
                 <p className="truncated">
                   <MathJaxRender text={qData[page].question_description} />
                 </p>
               </div>
               <p className="centre-text no-select mt-0_5 mb-0_5">{progress}</p>
-              <button className="bg-blue-primary darken text-white prob-of-day-btn" onClick={start}>Attempt</button>
+              <button className="darken bg-blue-3 text-white prob-of-day-btn" onClick={start}>Attempt</button>
             </div>
             <div className="col-1 flex right p-0">
               <span
