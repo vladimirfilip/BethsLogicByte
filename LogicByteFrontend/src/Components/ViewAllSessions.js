@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { UsernameContext } from "../router";
 import ViewSession from "./ViewSession";
 import { asyncGETAPI } from "../helpers/asyncBackend";
+import "./ViewAllSessions.css";
 
 function ViewAllSessions() {
   const username = useContext(UsernameContext);
@@ -26,6 +27,7 @@ function ViewAllSessions() {
       setPrevSessions((a) => [
         ...a,
         <button
+          className="session-card"
           key={session.session_id}
           onClick={() => setCurrentSession(session.session_id)}
         >{`You attempted some questions on ${sessionDate} and got ${session.score}%`}</button>,
@@ -41,8 +43,16 @@ function ViewAllSessions() {
 
   return (
     <>
-      <div>{prevSessions}</div>
-      {currentSession && <ViewSession sessionId={currentSession} />}
+      <div className="container container-fluid">
+        <div className="row">
+          <div className="card col-md-6 my-questions-list">
+            {prevSessions}
+          </div>
+          <div className="card col-md-6 my-questions-view">
+            {currentSession && <ViewSession sessionId={currentSession} />}
+          </div>
+        </div>
+      </div>
     </>
   );
 }

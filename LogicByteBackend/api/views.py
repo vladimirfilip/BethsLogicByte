@@ -226,6 +226,11 @@ class UserView(GenericView):
 class ProfilePictureView(GenericView):
     def __init__(self):
         super().__init__(ProfilePicture.objects.all(), ProfilePictureSerializer)
+        
+    def get(self, request):
+        response = super().get(request)
+        response['Cache-Control'] = 'no-store'
+        return response
 
 
 class QuestionImageView(GenericView):

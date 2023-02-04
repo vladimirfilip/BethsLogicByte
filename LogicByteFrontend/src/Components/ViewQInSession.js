@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import "./ViewQInSession.css";
 
 function ViewQInSession(props) {
   const { question, result, user_answer, correct_answer, question_image } =
@@ -13,9 +14,11 @@ function ViewQInSession(props) {
 
   return (
     <div>
-      <button onClick={() => toggleQuestion(showQuestion)}>
+      <button 
+        onClick={() => toggleQuestion(showQuestion)}
+        className="qinsession-btn">
         {question.props.text.slice(0, 50) +
-          "\t" +
+          (question.props.text.length > 50 ? "...\t" : "\t") +
           (result ? "Correct!" : "Incorrect")}
       </button>
       {showQuestion && (

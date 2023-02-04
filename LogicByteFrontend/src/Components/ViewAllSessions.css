@@ -1,0 +1,24 @@
+.session-card {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-left: 8px;
+    padding-right: 8px;
+    height: auto;
+    border-bottom: 2px solid;
+    background-color: #fdfdfd;
+    border-image: linear-gradient(to right, white, gray, white) 1;
+}
+
+.session-card:hover {
+    background-color: #f0f3f5;
+    cursor: pointer;
+}
+
+@media (min-width: 990px) {
+    .my-questions-list {
+        margin-right: 1rem;
+    }
+    .my-questions-view {
+        margin-left: 1rem;
+    }
+}

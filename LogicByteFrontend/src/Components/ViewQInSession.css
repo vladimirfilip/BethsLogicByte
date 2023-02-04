@@ -1,0 +1,13 @@
+.qinsession-btn {
+    background-color: #fdfdfd;
+    border: 1px solid #999;
+    border-radius: 0.3rem;
+    width: 100%;
+    margin-top: 0.2rem;
+    margin-bottom: 0.5rem;
+    min-height: 35px;
+}
+
+.qinsession-btn:hover {
+    background-color: #ddd;
+}
