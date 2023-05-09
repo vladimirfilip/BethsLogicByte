@@ -10,6 +10,7 @@ import {
   asyncDELETEAPI,
   asyncPOSTAPI,
 } from "../helpers/asyncBackend";
+import "./questionPage.css";
 
 function QuestionPage(props) {
   const questionIDs = useRef(null);
@@ -220,12 +221,15 @@ function QuestionPage(props) {
     return (
       <>
         {/*-Header-*/}
-        <div>
-          <h1>
+
+        <nav className="navbar justify-content-center question_navbar">
+          <div className="col-xs-1"></div>
+          <h1 className="col-xs-10 question_num">
             {"Question " +
               (parseInt(localStorage.getItem("currentIdx")) + 1).toString()}
           </h1>
           <button
+            className="col-xs-1 close_btn"
             data-html2canvas-ignore
             onClick={() => {
               localStorage.removeItem("currentIdx");
@@ -234,15 +238,36 @@ function QuestionPage(props) {
           >
             X
           </button>
+        </nav>
+        {showResultHead &&
+          (result == "Correct!" ? (
+            <h2 className="correct">{result}</h2>
+          ) : (
+            <h2 className="incorrect">{result}</h2>
+          ))}
+        <div className="tag_header">
+          <p data-html2canvas-ignore className="col-lg-4 q_tag">
+            {tags.exam_board}
+          </p>
+          <p data-html2canvas-ignore className="col-lg-4 q_tag">
+            {tags.difficulty}
+          </p>
+          <p data-html2canvas-ignore className="col-lg-4 q_tag">
+            {tags.exam_type}
+          </p>
         </div>
-        <div>
-          <p data-html2canvas-ignore>{tags.exam_board}</p>
-          <p data-html2canvas-ignore>{tags.difficulty}</p>
-          <p data-html2canvas-ignore>{tags.exam_type}</p>
-        </div>
+
         {/*--------*/}
-        {showResultHead && <h2>{result}</h2>}
+
         {/*-DoQuestion or ViewQuestion-*/}
+        <Canvas />
+
+        <button
+          data-html2canvas-ignore
+          onClick={() => exportAsImage(document.body, "sketch")}
+        >
+          Save sketch
+        </button>
         {QuestionComponent}
         {/*----------------------------*/}
         {/*-Displayed when not the last question and when question completed-*/}
@@ -275,13 +300,6 @@ function QuestionPage(props) {
               : "Next"}
           </button>
         </div>
-        <Canvas />
-        <button
-          data-html2canvas-ignore
-          onClick={() => exportAsImage(document.body, "sketch")}
-        >
-          Save sketch
-        </button>
       </>
     );
   }

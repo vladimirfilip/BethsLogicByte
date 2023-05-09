@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import MathJaxRender from "../helpers/mathJaxRender";
 import { asyncGETAPI } from "../helpers/asyncBackend";
+import "./DoQuestion.css";
 
 function ViewQuestion(props) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -89,12 +90,12 @@ function ViewQuestion(props) {
     return <h2>Loading...</h2>;
   } else {
     return (
-      <>
-        <p>{questionDescription}</p>
-        {showImg && img}
+      <div className="question-card">
+        <p className="row question-description">{questionDescription}</p>
+        <span className="row img-fluid">{showImg && img}</span>
         <h2>Your answer: {userAnswer}</h2>
         {!isCorrect && <h2>The correct answer is {correctAnswer}</h2>}
-      </>
+      </div>
     );
   }
 }

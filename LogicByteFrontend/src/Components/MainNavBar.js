@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./MainNavBar.css";
+import "../App.css";
 import logo from "./beths_logo.png";
 import PropTypes from "prop-types";
 

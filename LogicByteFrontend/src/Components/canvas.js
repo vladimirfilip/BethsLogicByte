@@ -3,6 +3,10 @@ import { getStroke } from "perfect-freehand";
 import "./canvas.css";
 import MultiSelect from "./multiSelect";
 import PropTypes from "prop-types";
+import pen from "./pen.png";
+import eraser from "./eraser.png";
+import undo_img from "./undo.png";
+import clear from "./clear.png";
 
 function getSvgPathFromStroke(stroke) {
   if (!stroke.length) return "";
@@ -201,8 +205,10 @@ function Canvas() {
         selectedValue={colour}
         setSelectedValue={setColour}
       />
-      <button
-        data-html2canvas-ignore
+      <img
+        src={pen}
+        alt={"Pen"}
+        className={`option-icon ${isDrawing ? "selected-icon" : ""}`}
         onClick={() => {
           if (isDrawing) {
             setIsDrawing(false);
@@ -211,11 +217,12 @@ function Canvas() {
             setIsErasing(false);
           }
         }}
-      >
-        {isDrawing ? "Stop Drawing" : "Start Drawing"}
-      </button>
-      <button
         data-html2canvas-ignore
+      />
+      <img
+        src={eraser}
+        alt={"Eraser"}
+        className={`option-icon ${isErasing ? "selected-icon" : ""}`}
         onClick={() => {
           if (isErasing) {
             setIsErasing(false);
@@ -224,18 +231,22 @@ function Canvas() {
             setIsDrawing(false);
           }
         }}
-      >
-        {isErasing ? "Stop Erasing" : "Start Erasing"}
-      </button>
-
-      <button data-html2canvas-ignore onClick={clearCanvas}>
-        {" "}
-        Clear
-      </button>
-      <button data-html2canvas-ignore onClick={undo}>
-        {" "}
-        Undo
-      </button>
+        data-html2canvas-ignore
+      />
+      <img
+        src={clear}
+        alt="Clear"
+        className={`option-icon`}
+        data-html2canvas-ignore
+        onClick={clearCanvas}
+      />
+      <img
+        src={undo_img}
+        alt="Clear"
+        className={`option-icon`}
+        data-html2canvas-ignore
+        onClick={undo}
+      />
       <svg>
         {otherStrokes}
         <CurrentLine

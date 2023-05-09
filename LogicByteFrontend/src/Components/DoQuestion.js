@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import MathJaxRender from "../helpers/mathJaxRender";
+import "../App.css";
+import "./DoQuestion.css";
 import { asyncGETAPI, asyncPOSTAPI } from "../helpers/asyncBackend";
+import "./DoQuestion.css";
 
 function DoQuestion(props) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -24,10 +27,19 @@ function DoQuestion(props) {
   const [inputsLoaded, setInputsLoaded] = useState(false);
   const [showOptionsImages, setShowOptionsImages] = useState(false);
 
+  const [imgDimensions, setImgDimensions] = useState("");
+
   const getQImage = async () => {
     const imageData = await asyncGETAPI("api_question_image", {
       question: props.id.toString(),
     });
+    const img = new Image();
+    img.src = imageData.image;
+    if (img.height > img.width) {
+      setImgDimensions("tall_img");
+    } else {
+      setImgDimensions("short_img");
+    }
     setImgSrc(imageData.image);
     setShowQImage(true);
   };
@@ -45,21 +57,33 @@ function DoQuestion(props) {
         s_image: "",
         s_type: "",
       });
+      const img = new Image();
+      img.src = qImgData.image;
       if (qImgData.type == "question description") {
+        if (img.height > img.width) {
+          setImgDimensions("tall_img");
+        } else {
+          setImgDimensions("short_img");
+        }
         setShowQImage(true);
         setImgSrc(qImgData.image);
-        //setImgLoaded(true);
       } else if (qImgData.type == "multiple choice") {
+        let option_class = "";
+        if (img.height > img.width) {
+          option_class = "option_tall";
+        } else {
+          option_class = "option_short";
+        }
         setInputs((prevInputs) => [
           ...prevInputs,
-          <label key={qImgData.image}>
+          <label key={qImgData.image} className="input ">
             <input
               type="radio"
               value={qImgData.image}
               name="img_option"
               defaultChecked={qImgData.image == selectedOption}
             />
-            <img src={qImgData.image} />
+            <img src={qImgData.image} className={option_class} />
           </label>,
         ]);
       }
@@ -70,15 +94,18 @@ function DoQuestion(props) {
   const setTextChoiceInputs = (options) => {
     setInputs(
       options.map((option) => (
-        <label key={option}>
+        <span key={option} className={"input"}>
           <input
             type="radio"
             value={option}
             name="txt_option"
+            className=""
             defaultChecked={option == selectedOption}
           />
-          {<MathJaxRender text={option} />}
-        </label>
+          <span className={"txt_option"}>
+            {<MathJaxRender text={"\t\t\t\t\t" + option} />}
+          </span>
+        </span>
       ))
     );
     setInputsLoaded(true);
@@ -221,9 +248,16 @@ function DoQuestion(props) {
     return <h2>Loading...</h2>;
   } else {
     return (
-      <>
-        {questionDescription}
-        {showQImage && <img src={imgSrc}></img>}
+      <div className="question-card">
+        <span className="row question_description">{questionDescription}</span>
+        {showQImage && (
+          <div className="container justify-content-center justify-self-center">
+            <img
+              src={imgSrc}
+              className={"row img-fluid " + imgDimensions}
+            ></img>
+          </div>
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -233,7 +267,7 @@ function DoQuestion(props) {
             setSelectedOption(e.target.value);
           }}
         >
-          {inputs}
+          <span className="row inputs">{inputs}</span>
           {showSubmit && (
             <button data-html2canvas-ignore type="Submit">
               Submit
@@ -243,7 +277,7 @@ function DoQuestion(props) {
         {!showSubmit && !isCorrect && (
           <h2>The correct answer is {correctAnswer}</h2>
         )}
-      </>
+      </div>
     );
   }
 }

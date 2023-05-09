@@ -45,3 +45,17 @@ body {
   filter: invert(94%) sepia(100%) saturate(3255%) hue-rotate(358deg)
     brightness(104%) contrast(104%);
 }
+.option-icon {
+  width: 35px;
+  height: 35px;
+  border-radius: 5px;
+  background: none;
+  padding: none;
+}
+.option-icon:hover {
+  cursor: pointer;
+}
+.selected-icon {
+  border-style: solid;
+  border-color: black;
+}
