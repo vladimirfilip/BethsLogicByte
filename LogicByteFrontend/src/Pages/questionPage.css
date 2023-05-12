@@ -4,12 +4,12 @@
   display: flex;
   justify-content: center;
 }
-
 .question_navbar {
   padding-top: 10px;
   padding-bottom: 10px;
   background-color: var(--secondary-5);
-  color: white;
+  color: rgb(255, 255, 255);
+  z-index: 3;
 }
 .close_btn {
   border: none;
@@ -29,10 +29,22 @@
   max-width: none;
   justify-content: center;
   padding-top: 10px;
-  padding-bottom: 10px;
+  padding-bottom: 5px;
+  background: rgb(255, 255, 255);
   font-size: 1.2rem;
+  z-index: 3;
 }
 .q_tag {
   display: flex;
   justify-content: center;
+}
+.question_page {
+  display: flex;
+  flex-direction: column;
+}
+.control_btns {
+  z-index: 3;
+}
+Canvas {
+  z-index: 2;
 }

@@ -4,13 +4,13 @@ import ViewQuestion from "../Components/ViewQuestion";
 import PropTypes from "prop-types";
 import moment from "moment";
 import Canvas from "../Components/canvas";
-import exportAsImage from "../helpers/exportAsImage";
 import {
   asyncGETAPI,
   asyncDELETEAPI,
   asyncPOSTAPI,
 } from "../helpers/asyncBackend";
 import "./questionPage.css";
+import "../Components/canvas.css";
 
 function QuestionPage(props) {
   const questionIDs = useRef(null);
@@ -37,6 +37,7 @@ function QuestionPage(props) {
     difficulty: "",
     exam_type: "",
   });
+  const [canvasSvg, setCanvasSvg] = useState(null);
   //
   // Prevents user from by passing filter component
   //
@@ -69,6 +70,7 @@ function QuestionPage(props) {
           id={questionIDs.current[parseInt(localStorage.getItem("currentIdx"))]}
           showResult={showResult}
           updateTags={updateTags}
+          className="question-component"
         ></ViewQuestion>
       );
     } else {
@@ -80,6 +82,8 @@ function QuestionPage(props) {
           showResult={showResult}
           updateTags={updateTags}
           sessionID={session_id.current}
+          className="question-component"
+          canvas={canvasSvg}
         ></DoQuestion>
       );
     }
@@ -90,7 +94,6 @@ function QuestionPage(props) {
     //
     // Gets completed question data
     //
-
     const sessionData = await asyncGETAPI("api_questions_in_session", {
       user_profile: "",
       s_solution: "",
@@ -219,7 +222,7 @@ function QuestionPage(props) {
     return <h2>Loading...</h2>;
   } else {
     return (
-      <>
+      <div className="question_page">
         {/*-Header-*/}
 
         <nav className="navbar justify-content-center question_navbar">
@@ -246,61 +249,50 @@ function QuestionPage(props) {
             <h2 className="incorrect">{result}</h2>
           ))}
         <div className="tag_header">
-          <p data-html2canvas-ignore className="col-lg-4 q_tag">
-            {tags.exam_board}
-          </p>
-          <p data-html2canvas-ignore className="col-lg-4 q_tag">
-            {tags.difficulty}
-          </p>
-          <p data-html2canvas-ignore className="col-lg-4 q_tag">
-            {tags.exam_type}
-          </p>
+          <p className="col-lg-4 q_tag">{tags.exam_board}</p>
+          <p className="col-lg-4 q_tag">{tags.difficulty}</p>
+          <p className="col-lg-4 q_tag">{tags.exam_type}</p>
         </div>
-
         {/*--------*/}
-
         {/*-DoQuestion or ViewQuestion-*/}
-        <Canvas />
-
-        <button
-          data-html2canvas-ignore
-          onClick={() => exportAsImage(document.body, "sketch")}
-        >
-          Save sketch
-        </button>
-        {QuestionComponent}
+        <Canvas
+          questionComponent={QuestionComponent}
+          setCanvasSvg={setCanvasSvg}
+        />
         {/*----------------------------*/}
         {/*-Displayed when not the last question and when question completed-*/}
-        {!qCompleted &&
-          parseInt(localStorage.getItem("currentIdx")) <
-            questionIDs.current.length - 1 && (
+        <div className="control_btns">
+          {!qCompleted &&
+            parseInt(localStorage.getItem("currentIdx")) <
+              questionIDs.current.length - 1 && (
+              <button
+                data-html2canvas-ignore
+                onClick={() => {
+                  calculateScore();
+                  localStorage.removeItem("currentIdx");
+                }}
+              >
+                Finish
+              </button>
+            )}
+          {/*------------------------------------------------------------------*/}
+          <div>
             <button
               data-html2canvas-ignore
-              onClick={() => {
-                calculateScore();
-                localStorage.removeItem("currentIdx");
-              }}
+              onClick={handle_previous}
+              disabled={parseInt(localStorage.getItem("currentIdx")) == 0}
             >
-              Finish
+              Previous
             </button>
-          )}
-        {/*------------------------------------------------------------------*/}
-        <div>
-          <button
-            data-html2canvas-ignore
-            onClick={handle_previous}
-            disabled={parseInt(localStorage.getItem("currentIdx")) == 0}
-          >
-            Previous
-          </button>
-          <button data-html2canvas-ignore onClick={handle_next}>
-            {parseInt(localStorage.getItem("currentIdx")) ==
-            questionIDs.current.length - 1
-              ? "Finish"
-              : "Next"}
-          </button>
+            <button data-html2canvas-ignore onClick={handle_next}>
+              {parseInt(localStorage.getItem("currentIdx")) ==
+              questionIDs.current.length - 1
+                ? "Finish"
+                : "Next"}
+            </button>
+          </div>
         </div>
-      </>
+      </div>
     );
   }
 }

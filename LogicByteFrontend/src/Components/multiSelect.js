@@ -1,69 +1,70 @@
-import React, { useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import "./multiSelect.css";
 
 function MultiSelect(props) {
   //let options = props.values.map((x) => <option key={x}>{x}</option>);
-  const colours = ["red", "black", "yellow", "green", "blue"];
-  const [selected, setSelected] = useState({});
-
-  const updateSelected = (colour) => {
-    let newSelected = {};
-    for (let c of colours) {
-      if (c == colour) {
-        newSelected[c] = true;
-      } else {
-        newSelected[c] = false;
-      }
-    }
-    setSelected(newSelected);
-  };
 
   return (
-    <div className="colour-picker">
+    <div className="colour-picker" data-html2canvas-ignore>
       <div
         className={`col-xs-1 black colour-pick ${
-          selected["black"] ? "white-selected" : ""
+          props.selectedValue == "Black" ? "white-selected" : ""
         }`}
         onClick={() => {
-          props.setSelectedValue("Black");
-          updateSelected("black");
+          if (props.selectedValue == "Black") {
+            props.setSelectedValue(null);
+          } else {
+            props.setSelectedValue("Black");
+          }
         }}
       />
       <div
         className={`col-xs-1 blue colour-pick ${
-          selected["blue"] ? "white-selected" : ""
+          props.selectedValue == "Blue" ? "white-selected" : ""
         }`}
         onClick={() => {
-          props.setSelectedValue("Blue");
-          updateSelected("blue");
+          if (props.selectedValue == "Blue") {
+            props.setSelectedValue(null);
+          } else {
+            props.setSelectedValue("Blue");
+          }
         }}
       />
       <div
         className={`col-xs-1 red colour-pick ${
-          selected["red"] ? "selected" : ""
+          props.selectedValue == "Red" ? "selected" : ""
         }`}
         onClick={() => {
-          props.setSelectedValue("Red");
-          updateSelected("red");
+          if (props.selectedValue == "Red") {
+            props.setSelectedValue(null);
+          } else {
+            props.setSelectedValue("Red");
+          }
         }}
       />
       <div
         className={`col-xs-1 green colour-pick ${
-          selected["green"] ? "selected" : ""
+          props.selectedValue == "Green" ? "white-selected" : ""
         }`}
         onClick={() => {
-          props.setSelectedValue("Green");
-          updateSelected("green");
+          if (props.selectedValue == "Green") {
+            props.setSelectedValue(null);
+          } else {
+            props.setSelectedValue("Green");
+          }
         }}
       />
       <div
         className={`col-xs-1 yellow colour-pick ${
-          selected["yellow"] ? "selected" : ""
+          props.selectedValue == "Yellow" ? "selected" : ""
         }`}
         onClick={() => {
-          props.setSelectedValue("Yellow");
-          updateSelected("yellow");
+          if (props.selectedValue == "Yellow") {
+            props.setSelectedValue(null);
+          } else {
+            props.setSelectedValue("Yellow");
+          }
         }}
       />
     </div>

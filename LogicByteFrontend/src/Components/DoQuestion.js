@@ -8,7 +8,6 @@ import "./DoQuestion.css";
 
 function DoQuestion(props) {
   const [isLoaded, setIsLoaded] = useState(false);
-
   const [isCorrect, setIsCorrect] = useState(true);
   const [showSubmit, setShowSubmit] = useState(true);
   const [questionDescription, setQuestionDescription] = useState(null);
@@ -249,6 +248,7 @@ function DoQuestion(props) {
   } else {
     return (
       <div className="question-card">
+        {props.canvas}
         <span className="row question_description">{questionDescription}</span>
         {showQImage && (
           <div className="container justify-content-center justify-self-center">
@@ -287,6 +287,7 @@ DoQuestion.propTypes = {
   id: PropTypes.string,
   updateTags: PropTypes.func,
   sessionID: PropTypes.string,
+  canvas: PropTypes.object,
 };
 
 export default DoQuestion;

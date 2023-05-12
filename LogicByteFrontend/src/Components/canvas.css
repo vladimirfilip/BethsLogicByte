@@ -49,6 +49,8 @@ body {
   width: 35px;
   height: 35px;
   border-radius: 5px;
+  margin-left: 2px;
+  margin-right: 2px;
   background: none;
   padding: none;
 }
@@ -58,4 +60,32 @@ body {
 .selected-icon {
   border-style: solid;
   border-color: black;
+}
+.canvas-select {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  background: white;
+  margin-top: 0px;
+  padding-bottom: 5px;
+  z-index: 5;
+}
+.canvas_container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  z-index: 2;
+}
+.question {
+  grid-column: 1 / 1;
+  grid-row: 1 / 1;
+  z-index: 1;
+}
+.path {
+  grid-column: 1 / 1;
+  grid-row: 1 / 1;
+  z-index: 2;
+}
+svg {
+  background: none;
 }
