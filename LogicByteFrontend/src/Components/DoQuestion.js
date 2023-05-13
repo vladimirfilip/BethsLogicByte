@@ -248,13 +248,12 @@ function DoQuestion(props) {
   } else {
     return (
       <div className="question-card">
-        {props.canvas}
         <span className="row question_description">{questionDescription}</span>
         {showQImage && (
           <div className="container justify-content-center justify-self-center">
             <img
               src={imgSrc}
-              className={"row img-fluid " + imgDimensions}
+              className={"row img-fluid question_img " + imgDimensions}
             ></img>
           </div>
         )}
@@ -269,7 +268,11 @@ function DoQuestion(props) {
         >
           <span className="row inputs">{inputs}</span>
           {showSubmit && (
-            <button data-html2canvas-ignore type="Submit">
+            <button
+              data-html2canvas-ignore
+              type="Submit"
+              className="btn btn-outline-info"
+            >
               Submit
             </button>
           )}
@@ -287,7 +290,6 @@ DoQuestion.propTypes = {
   id: PropTypes.string,
   updateTags: PropTypes.func,
   sessionID: PropTypes.string,
-  canvas: PropTypes.object,
 };
 
 export default DoQuestion;

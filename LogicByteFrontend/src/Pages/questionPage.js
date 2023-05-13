@@ -19,7 +19,6 @@ function QuestionPage(props) {
   //
   // Whether question submitted
   //
-  const [qCompleted, setQCompleted] = useState(false);
   //
   // result used to display Correct! or Incorrect in Result header
   //
@@ -74,8 +73,6 @@ function QuestionPage(props) {
         ></ViewQuestion>
       );
     } else {
-      setQCompleted(false);
-
       setQuestionComponent(
         <DoQuestion
           id={questionIDs.current[parseInt(localStorage.getItem("currentIdx"))]}
@@ -144,7 +141,6 @@ function QuestionPage(props) {
     // To display the result
     //
     setShowResultHead(true);
-    setQCompleted(true);
   };
 
   const updateTags = (exam_board, difficulty, exam_type) => {
@@ -212,7 +208,6 @@ function QuestionPage(props) {
       checkCompleted(questionIDs.current[currentIdx]);
     })();
     return () => {
-      setQCompleted(false);
       setResult("");
       setShowResultHead(false);
     };
@@ -261,34 +256,42 @@ function QuestionPage(props) {
         />
         {/*----------------------------*/}
         {/*-Displayed when not the last question and when question completed-*/}
-        <div className="control_btns">
-          {!qCompleted &&
-            parseInt(localStorage.getItem("currentIdx")) <
-              questionIDs.current.length - 1 && (
-              <button
-                data-html2canvas-ignore
-                onClick={() => {
-                  calculateScore();
-                  localStorage.removeItem("currentIdx");
-                }}
-              >
-                Finish
-              </button>
-            )}
+        <div className="spacer"></div>
+
+        <div className="control_btns container">
           {/*------------------------------------------------------------------*/}
-          <div>
+          <div className="row">
             <button
+              className="col-sm-2 btn btn-outline-secondary"
               data-html2canvas-ignore
               onClick={handle_previous}
               disabled={parseInt(localStorage.getItem("currentIdx")) == 0}
             >
               Previous
             </button>
-            <button data-html2canvas-ignore onClick={handle_next}>
-              {parseInt(localStorage.getItem("currentIdx")) ==
-              questionIDs.current.length - 1
-                ? "Finish"
-                : "Next"}
+            <span className="col-sm-3" />
+            <button
+              data-html2canvas-ignore
+              className="col-sm-2 btn btn-outline-danger"
+              onClick={() => {
+                calculateScore();
+                localStorage.removeItem("currentIdx");
+              }}
+            >
+              Finish
+            </button>
+            <span className="col-sm-3" />
+            <button
+              data-html2canvas-ignore
+              onClick={handle_next}
+              className={
+                parseInt(localStorage.getItem("currentIdx")) ==
+                questionIDs.current.length - 1
+                  ? "hide_btn"
+                  : "col-sm-2 btn btn-outline-secondary"
+              }
+            >
+              Next
             </button>
           </div>
         </div>
