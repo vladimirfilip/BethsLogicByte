@@ -1,0 +1,28 @@
+.profile_display {
+  margin-left: 0px;
+  padding-left: 0px;
+  width: 20%;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 7px;
+}
+.username {
+  text-align: center;
+  margin-right: 0px;
+  width: 100%;
+}
+.profile_pic {
+  max-width: 100%;
+}
+h3 {
+  text-align: center;
+}
+.profile_display {
+  font-size: 1.2rem;
+  text-align: center;
+}
+.btn {
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
