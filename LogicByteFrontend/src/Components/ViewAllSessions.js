@@ -43,12 +43,10 @@ function ViewAllSessions() {
 
   return (
     <>
-      <div className="container container-fluid">
+      <div className="container container-fluid my_questions">
         <div className="row">
-          <div className="card col-md-6 my-questions-list">
-            {prevSessions}
-          </div>
-          <div className="card col-md-6 my-questions-view">
+          <div className="card col-md-4 my-questions-list">{prevSessions}</div>
+          <div className="card col-md-8 my-questions-view">
             {currentSession && <ViewSession sessionId={currentSession} />}
           </div>
         </div>

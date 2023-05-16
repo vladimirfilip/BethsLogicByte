@@ -1,10 +1,11 @@
 .profile_display {
   margin-left: 0px;
+  max-width: 100%;
   padding-left: 0px;
-  width: 20%;
   justify-content: center;
   align-items: center;
   padding-bottom: 7px;
+  flex-grow: 1;
 }
 .username {
   text-align: center;

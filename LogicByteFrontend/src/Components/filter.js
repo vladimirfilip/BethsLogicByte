@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import AuxFilter from "./AuxFilter";
 import "./filter.css";
 import { SUBJECT_AUX_FILTERS } from "../helpers/subjectData";
+import Loading from "../helpers/loading";
 
 function Filter(props) {
   const prevTags = useRef([]);
@@ -10,6 +11,7 @@ function Filter(props) {
   const tags = useRef({});
   const [auxFilters, setAuxFilters] = useState([]);
   const [children, setChildren] = useState([]);
+  const [currentSubject, setCurrentSubject] = useState(null);
 
   let update = () => {
     let arr = [];
@@ -122,15 +124,23 @@ function Filter(props) {
     };
   }, [props.subject]);
 
-  return (
-    <div className="filter">
-      <button onClick={update} className="btn btn-primary">
-        Apply filter
-      </button>
-      <span className="filter_tree">{children}</span>
-      <span className="aux_filters">{auxFilters}</span>
-    </div>
-  );
+  useEffect(() => {
+    setCurrentSubject(props.subject);
+  }, [children, auxFilters]);
+
+  if (currentSubject == props.subject) {
+    return (
+      <div className="filter">
+        <button onClick={update} className="btn btn-primary">
+          Apply filter
+        </button>
+        <span className="filter_tree">{children}</span>
+        <span className="aux_filters">{auxFilters}</span>
+      </div>
+    );
+  } else {
+    return <Loading />;
+  }
 }
 
 function FilterParent(props) {
@@ -303,6 +313,7 @@ Filter.propTypes = {
   data: PropTypes.array,
   callback: PropTypes.func,
   subject: PropTypes.string,
+  setLoaded: PropTypes.func,
 };
 
 export default Filter;

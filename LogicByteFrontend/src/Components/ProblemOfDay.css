@@ -22,7 +22,6 @@
   word-wrap: break-word;
   border: 0px solid rgba(0, 0, 0, 0.125);
   border-radius: 0.25rem;
-
 }
 
 .shadow {
@@ -53,7 +52,7 @@
 
 .prob-of-day-btn {
   border: 1px solid var(--secondary-4);
-  width: 10%;
+  width: 15%;
   padding: 0.2rem;
   border-radius: 0.25rem;
 }
@@ -67,4 +66,6 @@
 .pt-3 {
   padding-top: 1rem !important;
 }
-
+.problem_of_day {
+  max-width: 90%;
+}

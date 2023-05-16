@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { UsernameContext } from "../router";
 import { asyncGETAPI } from "../helpers/asyncBackend";
 import "./ProfileDisplay.css";
+import Loading from "../helpers/loading";
 
 function ProfileDisplay(props) {
   const [picRef, setPicRef] = useState("");
@@ -40,10 +41,10 @@ function ProfileDisplay(props) {
   }, [username]);
 
   if (!isLoaded) {
-    return <h1>Loading...</h1>;
+    return <Loading />;
   } else {
     return (
-      <div className="container profile_display">
+      <div className="container profile_display col-md-3">
         <div className="col-sm-12">
           <h1 className="username">{username}</h1>
           <img src={picRef} alt="Profile picture" className="profile_pic"></img>

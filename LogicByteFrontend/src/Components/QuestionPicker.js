@@ -20,7 +20,6 @@ function QuestionPicker(props) {
       subject_filter_data = PHYSICS_FILTER;
       break;
   }
-
   useEffect(() => {
     setTags([]);
     console.log(props.subject);

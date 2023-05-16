@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import "./ProblemOfDay.css";
 import { asyncGETAPI, asyncPOSTAPI } from "../helpers/asyncBackend";
 import MathJaxRender from "../helpers/mathJaxRender";
+import Loading from "../helpers/loading";
 
 function ProblemOfDay(props) {
   const [page, setPage] = useState(0);
@@ -22,7 +23,6 @@ function ProblemOfDay(props) {
       progress = progress + emptyCircle;
     }
   }
-
 
   let baseClasses = "next-button bg-blue-3 text-white flex no-select ";
   let defaultClasses = baseClasses + "button-cursor darken";
@@ -65,7 +65,7 @@ function ProblemOfDay(props) {
 
   if (isLoaded) {
     return (
-      <div className="container pt-3 p-0">
+      <div className="container pt-3 p-0 problem_of_day">
         <div className="problem-of-day-card text-white bg-blue-3 mb-3 shadow">
           <div className="row m-0">
             <div className="col-1 flex p-0">
@@ -88,7 +88,12 @@ function ProblemOfDay(props) {
                 </p>
               </div>
               <p className="centre-text no-select mt-0_5 mb-0_5">{progress}</p>
-              <button className="darken bg-blue-3 text-white prob-of-day-btn" onClick={start}>Attempt</button>
+              <button
+                className="darken bg-blue-3 text-white prob-of-day-btn"
+                onClick={start}
+              >
+                Attempt
+              </button>
             </div>
             <div className="col-1 flex right p-0">
               <span
@@ -107,7 +112,7 @@ function ProblemOfDay(props) {
       </div>
     );
   } else {
-    return <h1>Loading</h1>;
+    return <Loading />;
   }
 }
 
