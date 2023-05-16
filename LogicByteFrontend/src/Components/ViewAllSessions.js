@@ -43,6 +43,24 @@ function ViewAllSessions() {
     }
   };
 
+  const currentSessionSelected = (
+    <>
+      <div className="col-sm-12 col-md-8 px-4 my-questions-view">
+        <div className="card questions-card">
+          {currentSession && <ViewSession sessionId={currentSession} />}
+        </div>
+      </div>
+    </>
+  );
+
+  const noCurrentSessionSelected = (
+    <>
+      <div className="col-sm-12 col-md-8 px-4 my-questions-view">
+        <div className="card questions-card height-fill" />
+      </div>
+    </>
+  );
+
   useEffect(() => {
     if (username) {
       showPrevSessions();
@@ -50,16 +68,12 @@ function ViewAllSessions() {
   }, [username]);
   const sessionView = (
     <>
-      <div className="col-sm-12 col-md-4 my-questions-list">
+      <div className="col-sm-12 col-md-4 px-4 my-questions-list">
         <div className="card questions-card">
           {prevSessions}
         </div>
       </div>
-      <div className="col-sm-12 col-md-8 my-questions-view">
-        <div className="card questions-card">
-          {currentSession && <ViewSession sessionId={currentSession} />}
-        </div>
-      </div>
+      {currentSession ? currentSessionSelected : noCurrentSessionSelected}
     </>
   );
 
@@ -75,8 +89,8 @@ function ViewAllSessions() {
     <>
       <div className="container container-fluid my-questions-container">
         {prevSessions.length > 0 && 
-        <div className="row justify-center">  
-          <div className="col stats-card">
+        <div className="row px-4 justify-center">  
+          <div className="col px-0 stats-card">
             <div className="card">
               <svg viewBox="0 0 500 100" width="500px" height="100px" xmlns="http://www.w3.org/2000/svg" id="graph-svg">
                 <path
@@ -89,7 +103,7 @@ function ViewAllSessions() {
           </div>
         </div>
         }
-        <div className="row">
+        <div className="row py-2">
           {prevSessions.length > 0 ? sessionView : noSessionView}        
         </div>
       </div>

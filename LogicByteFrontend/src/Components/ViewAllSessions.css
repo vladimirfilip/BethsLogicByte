@@ -51,5 +51,8 @@
 
 .questions-card {
     margin: 0;
-    height: calc(100% - 0rem);
+}
+
+.height-fill {
+    height: 100%;
 }
