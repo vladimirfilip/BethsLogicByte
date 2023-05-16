@@ -17,6 +17,7 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 8px;
+  height: 90vh;
 }
 
 .filter_tree {

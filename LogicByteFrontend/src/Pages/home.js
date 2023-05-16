@@ -8,11 +8,13 @@ import "./home.css";
 
 function Home(props) {
   return (
-    <>
+    <div className="home">
       <MainNavBar link={props.changePage}></MainNavBar>
-      <div className="home_content container">
+      <div className="container container-fluid home_content">
         <div className="row">
-          <ProfileDisplay link={props.changePage} />
+          <div className="col-md-3">
+            <ProfileDisplay link={props.changePage} />
+          </div>
           <div className="home_sub_content col-md-9">
             <ProblemOfDay subject={""} changePage={props.changePage} />
             <InfoCard
@@ -33,7 +35,7 @@ function Home(props) {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

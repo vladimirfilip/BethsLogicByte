@@ -7,7 +7,6 @@ import "./QuestionSelect.css";
 import Loading from "../helpers/loading";
 
 function QuestionSelect(props) {
-  //let [isLoaded, setLoaded] = useState(false);
   let [selected, setSelected] = useState({});
   let [filteredData, setFilteredData] = useState([]);
   let [children, setChildren] = useState([]);
@@ -94,7 +93,7 @@ function QuestionSelect(props) {
         <button onClick={() => start()} className="btn btn-secondary start_btn">
           Start
         </button>
-        <div className="generated_questions">
+        <div className="generated_questions" style={{ height: props.height }}>
           <MathJax dynamic={true}>{children}</MathJax>
         </div>
       </div>
@@ -106,6 +105,7 @@ QuestionSelect.propTypes = {
   tags: PropTypes.array,
   changePage: PropTypes.func,
   subject: PropTypes.string,
+  height: PropTypes.number,
 };
 
 export default QuestionSelect;

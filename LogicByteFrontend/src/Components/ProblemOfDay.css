@@ -67,5 +67,6 @@
   padding-top: 1rem !important;
 }
 .problem_of_day {
-  max-width: 90%;
+  width: 90% !important;
+  margin-left: 5%;
 }

@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import "./GeneratedQuestion.css";
 
 function GenerateQuestion(props) {
   const [selected, setSelected] = useState(false);
-
-  useEffect(() => {
-    console.log(props.selected[props.id]);
-  }, [props.selected]);
 
   return (
     <div

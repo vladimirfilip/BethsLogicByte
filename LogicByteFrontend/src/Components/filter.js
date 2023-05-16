@@ -12,6 +12,7 @@ function Filter(props) {
   const [auxFilters, setAuxFilters] = useState([]);
   const [children, setChildren] = useState([]);
   const [currentSubject, setCurrentSubject] = useState(null);
+  let height = useRef(1);
 
   let update = () => {
     let arr = [];
@@ -129,13 +130,16 @@ function Filter(props) {
   }, [children, auxFilters]);
 
   if (currentSubject == props.subject) {
+    props.setFilterLoaded(true);
     return (
-      <div className="filter">
+      <div className="filter" ref={height}>
         <button onClick={update} className="btn btn-primary">
           Apply filter
         </button>
-        <span className="filter_tree">{children}</span>
-        <span className="aux_filters">{auxFilters}</span>
+        <div>
+          <span className="filter_tree">{children}</span>
+          <span className="aux_filters">{auxFilters}</span>
+        </div>
       </div>
     );
   } else {
@@ -314,6 +318,7 @@ Filter.propTypes = {
   callback: PropTypes.func,
   subject: PropTypes.string,
   setLoaded: PropTypes.func,
+  setFilterLoaded: PropTypes.func,
 };
 
 export default Filter;

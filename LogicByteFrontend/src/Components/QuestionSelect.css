@@ -9,4 +9,5 @@
 
 .generated_questions {
   margin-top: 10px;
+  overflow-y: scroll;
 }
