@@ -7,7 +7,7 @@
   --secondary-1: #b9d6f2;
   --secondary-2: #006daa;
   --secondary-3: #0353a4;
-  --secondary-4: #003559;
+  --secondary-4: #002c59;
   --secondary-5: #061a40;
 }
 
@@ -35,7 +35,6 @@
   padding: 25px;
   background-color: #fdfdfd;
   border: none;
-  max-width: 350px;
   margin: auto;
   margin-bottom: 15px;
   margin-top: 30px;
@@ -248,4 +247,14 @@ h6 {
 
 .mb-0_5 {
   margin-bottom: 0.5rem;
+}
+
+.good {
+  color: var(--primary-3);
+}
+.medium {
+  color: #f5ad3b;
+}
+.poor {
+  color: var(--primary-5);
 }

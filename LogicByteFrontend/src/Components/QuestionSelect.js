@@ -90,7 +90,7 @@ function QuestionSelect(props) {
     return <Loading />;
   } else {
     return (
-      <div className="container">
+      <div className="container question-select-container">
         <button onClick={() => start()} className="btn btn-secondary start_btn">
           Start
         </button>

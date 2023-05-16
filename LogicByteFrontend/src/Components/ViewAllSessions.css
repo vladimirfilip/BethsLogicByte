@@ -4,6 +4,7 @@
   padding-left: 8px;
   padding-right: 8px;
   height: auto;
+  margin: 0;
   border-bottom: 2px solid;
   background-color: #fdfdfd;
   border-image: linear-gradient(to right, white, gray, white) 1;
@@ -14,15 +15,41 @@
   cursor: pointer;
 }
 
-@media (min-width: 990px) {
-  .my-questions-list {
-    margin-right: 1rem;
-  }
-  .my-questions-view {
-    margin-left: 1rem;
-  }
+.my-questions-list, .my-questions-view {
+    max-height: 900px;
+    overflow-y: auto;
+    padding-bottom: 2rem;
 }
 
-.my_questions {
-  max-width: 100%;
+.good {
+    background-color: var(--primary-3);
+}
+.medium {
+    background-color: #f5ad3b;
+} 
+.poor {
+    background-color: var(--primary-5);
+}
+
+.session-score {
+    padding: 2px;
+    color: white;
+}
+
+#graph-svg {
+    z-index: 1000;
+}
+
+.demo {
+    background-color: gray;
+    border: 1px solid black;
+}
+ 
+.my-questions-container {
+    max-width: 1500px;
+}
+
+.questions-card {
+    margin: 0;
+    height: calc(100% - 0rem);
 }

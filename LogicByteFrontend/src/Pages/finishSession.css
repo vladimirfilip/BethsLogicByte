@@ -36,15 +36,6 @@
   padding-bottom: 2%;
   text-align: center;
 }
-.good {
-  color: var(--primary-3);
-}
-.medium {
-  color: #f5ad3b;
-}
-.poor {
-  color: var(--primary-5);
-}
 .result {
   text-align: center;
   font-size: 3.3rem;

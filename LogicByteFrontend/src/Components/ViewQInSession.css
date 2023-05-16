@@ -1,6 +1,6 @@
 .qinsession-btn {
     background-color: #fdfdfd;
-    border: 1px solid #999;
+    border: 1px solid #ddd;
     border-radius: 0.3rem;
     width: 100%;
     margin-top: 0.2rem;
@@ -10,4 +10,19 @@
 
 .qinsession-btn:hover {
     background-color: #ddd;
+}
+
+.q-in-session-img {
+    display: block;
+}
+
+.center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.q-button-img {
+    width: 15px;
+    margin: 1rem;
 }
