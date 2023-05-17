@@ -55,6 +55,7 @@
   width: 15%;
   padding: 0.2rem;
   border-radius: 0.25rem;
+  margin-bottom: 10px;
 }
 
 *,
@@ -68,5 +69,6 @@
 }
 .problem_of_day {
   width: 90% !important;
+  max-width: 90% !important;
   margin-left: 5%;
 }

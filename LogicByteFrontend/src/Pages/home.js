@@ -10,8 +10,8 @@ function Home(props) {
   return (
     <div className="home">
       <MainNavBar link={props.changePage}></MainNavBar>
-      <div className="container container-fluid home_content">
-        <div className="row">
+      <div className="container home_content">
+        <div className="row home">
           <div className="col-md-3">
             <ProfileDisplay link={props.changePage} />
           </div>
