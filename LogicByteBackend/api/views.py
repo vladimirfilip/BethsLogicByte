@@ -35,7 +35,8 @@ class GenericView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListM
         secondary = kwargs.pop('secondary', {})
         custom_filter = kwargs.pop('custom_filter', {})
         default_custom_filter = {"user": filter_by_user_with_token,
-                                 "user_profile": filter_by_user_profile_with_token}
+                                 "user_profile": filter_by_user_profile_with_token,
+                                 "ids": filter_by_multiple_ids}
         arguments = kwargs.pop('arguments', {})
         for k, v in default_custom_filter.items():
             custom_filter[k] = v
