@@ -3,6 +3,7 @@ import { UsernameContext } from "../router";
 import ViewSession from "./ViewSession";
 import { asyncGETAPI } from "../helpers/asyncBackend";
 import "./ViewAllSessions.css";
+import QuestionStats from "./QuestionStats";
 
 function ViewAllSessions() {
   const username = useContext(UsernameContext);
@@ -38,7 +39,12 @@ function ViewAllSessions() {
           className="session-card"
           key={session.session_id}
           onClick={() => setCurrentSession(session.session_id)}
-        >{`${sessionDate} session: `}<span className={scoreClasses}><strong>{`${score}%`}</strong></span></button>,
+        >
+          {`${sessionDate} session: `}
+          <span className={scoreClasses}>
+            <strong>{`${score}%`}</strong>
+          </span>
+        </button>,
       ]);
     }
   };
@@ -69,9 +75,7 @@ function ViewAllSessions() {
   const sessionView = (
     <>
       <div className="col-sm-12 col-md-4 px-4 my-questions-list">
-        <div className="card questions-card">
-          {prevSessions}
-        </div>
+        <div className="card questions-card">{prevSessions}</div>
       </div>
       {currentSession ? currentSessionSelected : noCurrentSessionSelected}
     </>
@@ -88,23 +92,25 @@ function ViewAllSessions() {
   return (
     <>
       <div className="container container-fluid my-questions-container">
-        {prevSessions.length > 0 && 
-        <div className="row px-4 justify-center">  
-          <div className="col px-0 stats-card">
-            <div className="card">
-              <svg viewBox="0 0 500 100" width="500px" height="100px" xmlns="http://www.w3.org/2000/svg" id="graph-svg">
+        {prevSessions.length > 0 && (
+          <div className="row px-4 justify-center">
+            <div className="col px-0 stats-card">
+              <div className="card">
+                <QuestionStats />
+
+                {/* <svg viewBox="0 0 500 100" width="500px" height="100px" xmlns="http://www.w3.org/2000/svg" id="graph-svg">
                 <path
                   fill="none"
                   stroke="red"
                   d="" 
                 />
-              </svg>
+              </svg> */}
+              </div>
             </div>
           </div>
-        </div>
-        }
+        )}
         <div className="row py-2">
-          {prevSessions.length > 0 ? sessionView : noSessionView}        
+          {prevSessions.length > 0 ? sessionView : noSessionView}
         </div>
       </div>
     </>
