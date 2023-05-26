@@ -148,7 +148,7 @@ function QuestionStats() {
       date.getMonth() + 1
     }-${date.getDate()}`;
     //
-    //
+    // Heatmap that shows activity over past four months
     //
     setActivityStat(
       <div>
@@ -189,6 +189,10 @@ function QuestionStats() {
     );
   };
 
+  useEffect(() => {
+    console.log(difficultyGraph);
+  }, [difficultyGraph]);
+
   const createCompleteStat = (numCorrect, totalCorrect) => {
     //
     // Calculate percentage of correct answers to 2dp
@@ -208,16 +212,20 @@ function QuestionStats() {
 
   return (
     <div className="graph_container">
-      <div className="row correct_stat">
-        <span className="col-md-4"></span>
-        <span className="col-md-4">{correctStat}</span>
+      <div className="correct_stat">
+        <span></span>
+        <span>{correctStat}</span>
       </div>
-      <div className="row charts">
-        <div className="col-md-6">{difficultyGraph}</div>
-        <div className="col-md-6">{examGraph}</div>
+      <div className="charts">
+        <div className="graph">{difficultyGraph}</div>
+        <div className="graph">{examGraph}</div>
       </div>
-      <h4 className="calendar_header">Number of attempted questions per day</h4>
-      <div className="activity_stat">{activityStat}</div>
+      <div>
+        <h4 className="calendar_header">
+          Number of attempted questions per day
+        </h4>
+        <div className="activity_stat">{activityStat}</div>
+      </div>
     </div>
   );
 }
