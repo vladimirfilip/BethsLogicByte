@@ -97,14 +97,6 @@ function ViewAllSessions() {
             <div className="col px-0 stats-card">
               <div className="card">
                 <QuestionStats />
-
-                {/* <svg viewBox="0 0 500 100" width="500px" height="100px" xmlns="http://www.w3.org/2000/svg" id="graph-svg">
-                <path
-                  fill="none"
-                  stroke="red"
-                  d="" 
-                />
-              </svg> */}
               </div>
             </div>
           </div>
