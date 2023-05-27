@@ -249,12 +249,12 @@ h6 {
   margin-bottom: 0.5rem;
 }
 
-.good-text {
+.good {
   color: var(--primary-3);
 }
-.medium-text {
+.medium {
   color: #f5ad3b;
 }
-.poor-text {
+.poor {
   color: var(--primary-5);
 }
