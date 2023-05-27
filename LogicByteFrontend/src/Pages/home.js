@@ -17,7 +17,6 @@ function Home(props) {
           </div>
           <div className="home_sub_content col-md-9">
             <ProblemOfDay subject={""} changePage={props.changePage} />
-            {/* Example announcement using info card */}
             <InfoCard
               date="13/05/2023"
               title="New issue of CS Uncovered released!"
