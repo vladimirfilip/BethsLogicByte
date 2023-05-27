@@ -6,7 +6,6 @@ svg.path {
   height: 100vh;
   background-color: #ffffff;
   touch-action: none;
-  z-index: -1;
 }
 
 body {
