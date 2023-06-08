@@ -4,12 +4,13 @@ import ViewQuestion from "../Components/ViewQuestion";
 import PropTypes from "prop-types";
 import moment from "moment";
 import Canvas from "../Components/canvas";
-import exportAsImage from "../helpers/exportAsImage";
 import {
   asyncGETAPI,
   asyncDELETEAPI,
   asyncPOSTAPI,
 } from "../helpers/asyncBackend";
+import "./questionPage.css";
+import "../Components/canvas.css";
 
 function QuestionPage(props) {
   const questionIDs = useRef(null);
@@ -18,7 +19,6 @@ function QuestionPage(props) {
   //
   // Whether question submitted
   //
-  const [qCompleted, setQCompleted] = useState(false);
   //
   // result used to display Correct! or Incorrect in Result header
   //
@@ -36,6 +36,7 @@ function QuestionPage(props) {
     difficulty: "",
     exam_type: "",
   });
+  const [canvasSvg, setCanvasSvg] = useState(null);
   //
   // Prevents user from by passing filter component
   //
@@ -68,17 +69,18 @@ function QuestionPage(props) {
           id={questionIDs.current[parseInt(localStorage.getItem("currentIdx"))]}
           showResult={showResult}
           updateTags={updateTags}
+          className="question-component"
         ></ViewQuestion>
       );
     } else {
-      setQCompleted(false);
-
       setQuestionComponent(
         <DoQuestion
           id={questionIDs.current[parseInt(localStorage.getItem("currentIdx"))]}
           showResult={showResult}
           updateTags={updateTags}
           sessionID={session_id.current}
+          className="question-component"
+          canvas={canvasSvg}
         ></DoQuestion>
       );
     }
@@ -89,7 +91,6 @@ function QuestionPage(props) {
     //
     // Gets completed question data
     //
-
     const sessionData = await asyncGETAPI("api_questions_in_session", {
       user_profile: "",
       s_solution: "",
@@ -140,7 +141,6 @@ function QuestionPage(props) {
     // To display the result
     //
     setShowResultHead(true);
-    setQCompleted(true);
   };
 
   const updateTags = (exam_board, difficulty, exam_type) => {
@@ -208,7 +208,6 @@ function QuestionPage(props) {
       checkCompleted(questionIDs.current[currentIdx]);
     })();
     return () => {
-      setQCompleted(false);
       setResult("");
       setShowResultHead(false);
     };
@@ -218,14 +217,17 @@ function QuestionPage(props) {
     return <h2>Loading...</h2>;
   } else {
     return (
-      <>
+      <div className="question_page">
         {/*-Header-*/}
-        <div>
-          <h1>
+
+        <nav className="navbar justify-content-center question_navbar">
+          <div className="col-xs-1"></div>
+          <h1 className="col-xs-10 question_num">
             {"Question " +
               (parseInt(localStorage.getItem("currentIdx")) + 1).toString()}
           </h1>
           <button
+            className="col-xs-1 close_btn"
             data-html2canvas-ignore
             onClick={() => {
               localStorage.removeItem("currentIdx");
@@ -234,23 +236,43 @@ function QuestionPage(props) {
           >
             X
           </button>
-        </div>
-        <div>
-          <p data-html2canvas-ignore>{tags.exam_board}</p>
-          <p data-html2canvas-ignore>{tags.difficulty}</p>
-          <p data-html2canvas-ignore>{tags.exam_type}</p>
+        </nav>
+        {showResultHead &&
+          (result == "Correct!" ? (
+            <h2 className="correct">{result}</h2>
+          ) : (
+            <h2 className="incorrect">{result}</h2>
+          ))}
+        <div className="tag_header">
+          <p className="col-lg-4 q_tag">{tags.exam_board}</p>
+          <p className="col-lg-4 q_tag">{tags.difficulty}</p>
+          <p className="col-lg-4 q_tag">{tags.exam_type}</p>
         </div>
         {/*--------*/}
-        {showResultHead && <h2>{result}</h2>}
         {/*-DoQuestion or ViewQuestion-*/}
-        {QuestionComponent}
+        <Canvas
+          questionComponent={QuestionComponent}
+          setCanvasSvg={setCanvasSvg}
+        />
         {/*----------------------------*/}
         {/*-Displayed when not the last question and when question completed-*/}
-        {!qCompleted &&
-          parseInt(localStorage.getItem("currentIdx")) <
-            questionIDs.current.length - 1 && (
+        <div className="spacer"></div>
+
+        <div className="control_btns container">
+          {/*------------------------------------------------------------------*/}
+          <div className="row">
+            <button
+              className="col-sm-2 btn btn-outline-secondary"
+              data-html2canvas-ignore
+              onClick={handle_previous}
+              disabled={parseInt(localStorage.getItem("currentIdx")) == 0}
+            >
+              Previous
+            </button>
+            <span className="col-sm-3" />
             <button
               data-html2canvas-ignore
+              className="col-sm-2 btn btn-outline-danger"
               onClick={() => {
                 calculateScore();
                 localStorage.removeItem("currentIdx");
@@ -258,31 +280,22 @@ function QuestionPage(props) {
             >
               Finish
             </button>
-          )}
-        {/*------------------------------------------------------------------*/}
-        <div>
-          <button
-            data-html2canvas-ignore
-            onClick={handle_previous}
-            disabled={parseInt(localStorage.getItem("currentIdx")) == 0}
-          >
-            Previous
-          </button>
-          <button data-html2canvas-ignore onClick={handle_next}>
-            {parseInt(localStorage.getItem("currentIdx")) ==
-            questionIDs.current.length - 1
-              ? "Finish"
-              : "Next"}
-          </button>
+            <span className="col-sm-3" />
+            <button
+              data-html2canvas-ignore
+              onClick={handle_next}
+              className={
+                parseInt(localStorage.getItem("currentIdx")) ==
+                questionIDs.current.length - 1
+                  ? "hide_btn"
+                  : "col-sm-2 btn btn-outline-secondary"
+              }
+            >
+              Next
+            </button>
+          </div>
         </div>
-        <Canvas />
-        <button
-          data-html2canvas-ignore
-          onClick={() => exportAsImage(document.body, "sketch")}
-        >
-          Save sketch
-        </button>
-      </>
+      </div>
     );
   }
 }

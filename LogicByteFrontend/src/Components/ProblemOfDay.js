@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import "./ProblemOfDay.css";
 import { asyncGETAPI, asyncPOSTAPI } from "../helpers/asyncBackend";
 import MathJaxRender from "../helpers/mathJaxRender";
+import Loading from "../helpers/loading";
 
 function ProblemOfDay(props) {
   const [page, setPage] = useState(0);
@@ -23,16 +24,17 @@ function ProblemOfDay(props) {
     }
   }
 
-  let backClasses = "next-button flex no-select button-cursor darken";
-  let nextClasses = "next-button flex no-select button-cursor darken";
+  let baseClasses = "next-button bg-blue-3 text-white flex no-select ";
+  let defaultClasses = baseClasses + "button-cursor darken";
+  let disabledClasses = baseClasses + "bg-blue-4";
+
+  let backClasses = defaultClasses;
+  let nextClasses = defaultClasses;
 
   if (page === 0) {
-    backClasses = "next-button flex no-select disabled";
+    backClasses = disabledClasses;
   } else if (page === dataLength - 1) {
-    nextClasses = "next-button flex no-select disabled";
-  } else {
-    backClasses = "next-button flex no-select button-cursor darken";
-    nextClasses = "next-button flex no-select button-cursor darken";
+    nextClasses = disabledClasses;
   }
 
   const getQData = async () => {
@@ -63,10 +65,10 @@ function ProblemOfDay(props) {
 
   if (isLoaded) {
     return (
-      <div className="container pt-3">
-        <div className="card text-white light_blue mb-3 shadow">
-          <div className="row">
-            <div className="col-1 flex">
+      <div className="container pt-3 p-0 problem_of_day">
+        <div className="problem-of-day-card text-white bg-blue-3 mb-3 shadow">
+          <div className="row m-0">
+            <div className="col-1 flex p-0">
               <span
                 className={backClasses}
                 onClick={() => {
@@ -78,17 +80,22 @@ function ProblemOfDay(props) {
                 {"<"}
               </span>
             </div>
-            <div className="col-10">
-              <h1>{props.subject} Suggested Problems</h1>
-              <div className="card text-white dark_blue">
+            <div className="col-10 p-0_5">
+              <h1 className="mb-0_75">{props.subject} Suggested Problems</h1>
+              <div className="problem-of-day-card text-white bg-blue-4 p-0_5">
                 <p className="truncated">
                   <MathJaxRender text={qData[page].question_description} />
                 </p>
               </div>
-              <p className="center no-select">{progress}</p>
-              <button onClick={start}>Attempt</button>
+              <p className="centre-text no-select mt-0_5 mb-0_5">{progress}</p>
+              <button
+                className="darken bg-blue-3 text-white prob-of-day-btn"
+                onClick={start}
+              >
+                Attempt
+              </button>
             </div>
-            <div className="col-1 flex right">
+            <div className="col-1 flex right p-0">
               <span
                 className={nextClasses}
                 onClick={() => {
@@ -105,7 +112,7 @@ function ProblemOfDay(props) {
       </div>
     );
   } else {
-    return <h1>Loading</h1>;
+    return <Loading />;
   }
 }
 

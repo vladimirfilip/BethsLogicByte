@@ -30,7 +30,7 @@ function ViewSession(props) {
     let question_image = {};
     if (full_question.has_images) {
       question_image = await getQImage(full_question.question_images[0]);
-      question_image = <img src={question_image} />;
+      question_image = <img className="q-in-session-img" src={question_image} />;
     }
     //
     // Checks if any answers are text or images

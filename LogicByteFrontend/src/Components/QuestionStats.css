@@ -1,0 +1,65 @@
+:root {
+  --cell-color: #0776e6;
+}
+.react-calendar-heatmap rect:hover {
+  stroke: #555;
+  stroke-width: 1px;
+}
+
+.react-calendar-heatmap .color-empty {
+  fill: white;
+}
+.react-calendar-heatmap .scale-1 {
+  fill: var(--cell-color);
+  opacity: 0.2;
+}
+.react-calendar-heatmap .scale-2 {
+  fill: var(--cell-color);
+  opacity: 0.4;
+}
+.react-calendar-heatmap .scale-3 {
+  fill: var(--cell-color);
+  opacity: 0.6;
+}
+.react-calendar-heatmap .scale-4 {
+  fill: var(--cell-color);
+  opacity: 0.8;
+}
+.react-calendar-heatmap .scale-5 {
+  fill: var(--cell-color);
+  opacity: 1;
+}
+.activity_stat {
+  width: 40%;
+  margin-left: 30%;
+  height: 100%;
+  margin-top: 10px;
+}
+.correct_stat {
+  width: 100%;
+  text-align: center;
+}
+.react-calendar-heatmap {
+  padding-top: 10px;
+  font-size: 0.6rem !important;
+}
+.calendar_header {
+  text-align: center !important;
+  margin-top: 15px;
+}
+.charts {
+  padding-top: 15px;
+  height: 30vh;
+  display: flex;
+  flex-direction: row;
+}
+.percentage_stat {
+  font-size: 3.5rem;
+}
+.graph_container {
+  display: flex;
+  flex-direction: column;
+}
+.graph {
+  width: 100%;
+}

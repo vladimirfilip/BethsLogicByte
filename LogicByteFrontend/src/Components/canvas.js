@@ -3,6 +3,12 @@ import { getStroke } from "perfect-freehand";
 import "./canvas.css";
 import MultiSelect from "./multiSelect";
 import PropTypes from "prop-types";
+import pen from "./pen.png";
+import eraser from "./eraser.png";
+import undo_img from "./undo.png";
+import clear from "./clear.png";
+import save_icon from "../Components/save.png";
+import exportAsImage from "../helpers/exportAsImage";
 
 function getSvgPathFromStroke(stroke) {
   if (!stroke.length) return "";
@@ -107,7 +113,7 @@ CurrentLine.propTypes = {
   setStrokes: PropTypes.func,
 };
 
-function Canvas() {
+function Canvas(props) {
   const colours = ["Black", "Blue", "Green", "Red", "Yellow"];
 
   // Strokes contains all of the lines that the user has drawn
@@ -116,7 +122,7 @@ function Canvas() {
   const [isErasing, setIsErasing] = useState(false);
   // The slider returns a string, this keeps types consistent
   const [thickness, setThickness] = useState("4");
-  const [colour, setColour] = useState(colours[0]);
+  const [colour, setColour] = useState(null);
 
   function clearCanvas() {
     setStrokes([]);
@@ -171,6 +177,15 @@ function Canvas() {
     // I don't know why strokes has to be here but it is
   }, [isErasing, strokes]);
 
+  useEffect(() => {
+    if (colour == null) {
+      setIsDrawing(false);
+    } else {
+      setIsDrawing(true);
+      setIsErasing(false);
+    }
+  }, [colour]);
+
   let i = 0;
   const otherStrokes = strokes.map((x) => {
     i++;
@@ -180,73 +195,106 @@ function Canvas() {
     let className = getClassNameForColour(x.colour);
 
     let pathData = getSvgPathFromStroke(stroke);
-    return <path key={i - 1} d={pathData} className={className}></path>;
+    return <path key={i - 1} d={pathData} className={`${className}`}></path>;
   });
 
   return (
     <>
-      <input
-        data-html2canvas-ignore
-        type="range"
-        min="1"
-        max="20"
-        value={thickness}
-        onChange={(e) => {
-          setThickness(e.target.value);
-          setIsDrawing(false);
-        }}
-      ></input>
-      <MultiSelect
-        values={colours}
-        selectedValue={colour}
-        setSelectedValue={setColour}
-      />
-      <button
-        data-html2canvas-ignore
-        onClick={() => {
-          if (isDrawing) {
-            setIsDrawing(false);
-          } else {
-            setIsDrawing(true);
-            setIsErasing(false);
-          }
-        }}
-      >
-        {isDrawing ? "Stop Drawing" : "Start Drawing"}
-      </button>
-      <button
-        data-html2canvas-ignore
-        onClick={() => {
-          if (isErasing) {
-            setIsErasing(false);
-          } else {
-            setIsErasing(true);
-            setIsDrawing(false);
-          }
-        }}
-      >
-        {isErasing ? "Stop Erasing" : "Start Erasing"}
-      </button>
-
-      <button data-html2canvas-ignore onClick={clearCanvas}>
-        {" "}
-        Clear
-      </button>
-      <button data-html2canvas-ignore onClick={undo}>
-        {" "}
-        Undo
-      </button>
-      <svg>
-        {otherStrokes}
-        <CurrentLine
-          isDrawing={isDrawing}
-          colour={colour}
-          thickness={thickness}
-          setStrokes={handleSetStrokes}
+      <span className="canvas-select">
+        <div>
+          <input
+            data-html2canvas-ignore
+            type="range"
+            min="1"
+            max="20"
+            value={thickness}
+            onChange={(e) => {
+              setThickness(e.target.value);
+            }}
+          ></input>
+        </div>
+        <img
+          src={pen}
+          alt={"Pen"}
+          className={`option-icon ${isDrawing ? "selected-icon" : ""}`}
+          onClick={() => {
+            if (isDrawing) {
+              setIsDrawing(false);
+            } else {
+              if (colour == null) {
+                setColour("Black");
+              }
+              setIsDrawing(true);
+              setIsErasing(false);
+            }
+          }}
+          data-html2canvas-ignore
         />
-      </svg>
+        <MultiSelect
+          values={colours}
+          selectedValue={colour}
+          setSelectedValue={setColour}
+        />
+        <img
+          src={eraser}
+          alt={"Eraser"}
+          className={`option-icon ${isErasing ? "selected-icon" : ""}`}
+          onClick={() => {
+            if (isErasing) {
+              setIsErasing(false);
+            } else {
+              setIsErasing(true);
+              setIsDrawing(false);
+            }
+          }}
+          data-html2canvas-ignore
+        />
+        <img
+          src={clear}
+          alt="Clear"
+          className={`option-icon`}
+          data-html2canvas-ignore
+          onClick={() => {
+            clearCanvas();
+            setIsDrawing(false);
+            setIsErasing(false);
+          }}
+        />
+        <img
+          src={undo_img}
+          alt="Undo"
+          className={`option-icon`}
+          data-html2canvas-ignore
+          onClick={undo}
+        />
+        <img
+          src={save_icon}
+          className="option-icon"
+          data-html2canvas-ignore
+          onClick={() => exportAsImage(document.body, "sketch")}
+        />
+      </span>
+      <div className="canvas_container">
+        <div className="question">{props.questionComponent}</div>
+        {(isDrawing || isErasing) && (
+          <svg className="path">
+            {otherStrokes}
+            <CurrentLine
+              isDrawing={isDrawing}
+              colour={colour}
+              thickness={thickness}
+              setStrokes={handleSetStrokes}
+            />
+          </svg>
+        )}
+      </div>
     </>
   );
 }
+
+Canvas.propTypes = {
+  questionComponent: PropTypes.object,
+  setCanvasSvg: PropTypes.func,
+};
 
 export default Canvas;

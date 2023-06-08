@@ -1,0 +1,37 @@
+.red {
+  background-color: red;
+}
+.black {
+  background-color: black;
+}
+.blue {
+  background-color: blue;
+}
+.yellow {
+  background-color: yellow;
+}
+.green {
+  background-color: green;
+}
+.colour-picker {
+  display: flex;
+  flex-direction: row;
+}
+.colour-pick {
+  width: 35px;
+  height: 35px;
+  border-radius: 5px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+.colour-pick:hover {
+  cursor: pointer;
+}
+.selected {
+  border-style: solid;
+  border-color: black;
+}
+.white-selected {
+  border-style: solid;
+  border-color: white;
+}

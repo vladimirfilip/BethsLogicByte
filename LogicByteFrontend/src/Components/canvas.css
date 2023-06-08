@@ -1,4 +1,4 @@
-svg {
+svg.path {
   position: absolute;
   top: 0;
   left: 0;
@@ -6,7 +6,6 @@ svg {
   height: 100vh;
   background-color: #ffffff;
   touch-action: none;
-  z-index: -1;
 }
 
 body {
@@ -44,4 +43,48 @@ body {
 .filter-yellow {
   filter: invert(94%) sepia(100%) saturate(3255%) hue-rotate(358deg)
     brightness(104%) contrast(104%);
+}
+.option-icon {
+  width: 35px;
+  height: 35px;
+  border-radius: 5px;
+  margin-left: 2px;
+  margin-right: 2px;
+  background: none;
+  padding: none;
+}
+.option-icon:hover {
+  cursor: pointer;
+}
+.selected-icon {
+  border-style: solid;
+  border-color: black;
+}
+.canvas-select {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  background: white;
+  margin-top: 0px;
+  padding-bottom: 5px;
+  z-index: 5;
+}
+.canvas_container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  z-index: 2;
+}
+.question {
+  grid-column: 1 / 1;
+  grid-row: 1 / 1;
+  z-index: 1;
+}
+.path {
+  grid-column: 1 / 1;
+  grid-row: 1 / 1;
+  z-index: 2;
+}
+svg.path {
+  background: none;
 }

@@ -1,0 +1,56 @@
+.question_card {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-left: 8px;
+  padding-right: 8px;
+  height: 10%;
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to right, white, gray, white) 1;
+}
+
+.question_card:hover {
+  background-color: #f0f3f5;
+  cursor: pointer;
+}
+
+.question_check {
+  padding-left: 3px;
+}
+
+.question_text {
+  padding-left: 8px;
+  font-weight: 500;
+}
+
+.question_header {
+  display: flex;
+}
+
+.tag {
+  margin: 10px;
+  font-weight: 400;
+  padding-left: 3px;
+  padding-right: 3px;
+  padding-bottom: 2px;
+  padding-top: 2px;
+}
+
+.Easy {
+  color: white;
+  background-color: green;
+}
+
+.Medium {
+  color: black;
+  background-color: yellow;
+}
+
+.Hard {
+  color: white;
+  background-color: red;
+}
+
+.Challenge {
+  color: white;
+  background-color: black;
+}

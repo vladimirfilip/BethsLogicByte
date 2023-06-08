@@ -98,9 +98,9 @@ function Router() {
     if (page == "login") {
       return <Login logIn={logIn} />;
     } else {
-      return <h1>Please login to view this page</h1>;
+      setPageState("login");
     }
-  } else if (page == "login") {
+  } else if (page == "") {
     changePage("home");
   }
 

@@ -102,6 +102,15 @@ def filter_by_user_profile_with_token(queryset, token):
     return queryset.filter(user_profile=user_profile) if user_profile else UserProfile.objects.none()
 
 
+def filter_by_multiple_ids(queryset, value):
+    ids: list[str] = value.split(",")
+    model = queryset.model
+    new_queryset = model.objects.none()
+    for id in ids:
+        new_queryset |= model.objects.filter(id=id)
+    return queryset & new_queryset
+
+
 def check_client_staff_or_creator(func):
     def wrapper(view, request):
         user = get_user_with_token(request.auth.key)

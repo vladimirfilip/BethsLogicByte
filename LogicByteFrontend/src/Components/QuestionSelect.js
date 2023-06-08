@@ -2,11 +2,15 @@ import React, { useState, useEffect } from "react";
 import { asyncPOSTAPI, asyncGETAPI } from "../helpers/asyncBackend";
 import PropTypes from "prop-types";
 import { MathJax } from "better-react-mathjax";
+import GenerateQuestion from "./GeneratedQuestion";
+import "./QuestionSelect.css";
+import Loading from "../helpers/loading";
 
 function QuestionSelect(props) {
-  let [isLoaded, setLoaded] = useState(false);
   let [selected, setSelected] = useState({});
   let [filteredData, setFilteredData] = useState([]);
+  let [children, setChildren] = useState([]);
+  let [currentSubject, setCurrentSubject] = useState(null);
 
   async function start() {
     let ids = [];
@@ -26,7 +30,6 @@ function QuestionSelect(props) {
 
   const retrieveQuestions = async (filterData) => {
     const questions = await asyncGETAPI("api_questions" + filterData, {});
-    setLoaded(true);
     if (questions) {
       if (questions.length == undefined) {
         setFilteredData([questions]);
@@ -46,7 +49,24 @@ function QuestionSelect(props) {
 
   useEffect(() => {
     let newSelected = Object.assign({}, selected);
-    setFilteredData(filteredData);
+    setChildren(
+      filteredData.map((x) => {
+        return (
+          <GenerateQuestion
+            key={x.id}
+            id={x.id}
+            updateSelected={(id) =>
+              setSelected((selected) => ({
+                ...selected,
+                [id]: !selected[id],
+              }))
+            }
+            selected={selected}
+            question_data={x}
+          />
+        );
+      })
+    );
     for (let i in selected) {
       let found = false;
       for (let j = 0; j < filteredData.length; j++) {
@@ -61,28 +81,22 @@ function QuestionSelect(props) {
     setSelected(newSelected);
   }, [filteredData]);
 
-  if (!isLoaded) {
-    return <p>Loading</p>;
+  useEffect(() => {
+    setCurrentSubject(props.subject);
+  }, [children]);
+
+  if (props.subject != currentSubject) {
+    return <Loading />;
   } else {
-    let children = filteredData.map((x) => {
-      return (
-        <div key={x.id}>
-          <input
-            type={"checkbox"}
-            onChange={() => {
-              setSelected({ ...selected, [x.id]: !selected[x.id] });
-            }}
-            checked={selected[x.id] != undefined ? selected[x.id] : false}
-          ></input>
-          {x.question_description}
-        </div>
-      );
-    });
     return (
-      <>
-        <MathJax dynamic={true}>{children}</MathJax>
-        <button onClick={() => start()}>Start</button>
-      </>
+      <div className="container question-select-container">
+        <button onClick={() => start()} className="btn btn-secondary start_btn">
+          Start
+        </button>
+        <div className="generated_questions" style={{ height: props.height }}>
+          <MathJax dynamic={true}>{children}</MathJax>
+        </div>
+      </div>
     );
   }
 }
@@ -91,6 +105,7 @@ QuestionSelect.propTypes = {
   tags: PropTypes.array,
   changePage: PropTypes.func,
   subject: PropTypes.string,
+  height: PropTypes.number,
 };
 
 export default QuestionSelect;

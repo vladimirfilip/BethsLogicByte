@@ -1,0 +1,61 @@
+.session-card {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-left: 10%;
+  padding-right: 8px;
+  text-align: left;
+  height: auto;
+  margin: 0;
+  border-bottom: 2px solid;
+  background-color: #fdfdfd;
+  border-image: linear-gradient(to right, white, gray, white) 1;
+}
+
+.session-card:hover {
+  background-color: #f0f3f5;
+  cursor: pointer;
+}
+
+.my-questions-list,
+.my-questions-view {
+  max-height: 900px;
+  overflow-y: auto;
+  padding-bottom: 2rem;
+}
+
+.good {
+  background-color: var(--primary-3);
+}
+.medium {
+  background-color: #f5ad3b;
+}
+.poor {
+  background-color: var(--primary-5);
+}
+
+.session-score {
+  padding: 2px;
+  color: white;
+}
+
+#graph-svg {
+  z-index: 1000;
+}
+
+.demo {
+  background-color: gray;
+  border: 1px solid black;
+}
+
+.my-questions-container {
+  max-width: 1500px;
+  width: 75%;
+}
+
+.questions-card {
+  margin: 0;
+}
+
+.height-fill {
+  height: 100%;
+}
