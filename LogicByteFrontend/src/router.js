@@ -33,7 +33,7 @@ function changeURL(url) {
     // with prefix byte/cool -> byte/nice
     url = "/" + url;
   }
-  let data = {
+  const data = {
     title: "LogicByte",
   };
   history.pushState(data, "", url);
@@ -121,18 +121,18 @@ function Router() {
       finish: FinishSession,
     },
   ];
-  let pageNamesStandard = Object.keys(pages[0]);
-  let pageNamesExtended = Object.keys(pages[1]);
+  const pageNamesStandard = Object.keys(pages[0]);
+  const pageNamesExtended = Object.keys(pages[1]);
   // if pageName provided in URL is a key in the pages object
   if (pageNamesStandard.indexOf(page[0]) != -1) {
-    let PageComponent = pages[0][page[0]];
+    const PageComponent = pages[0][page[0]];
     return (
       <UsernameContext.Provider value={username}>
         <PageComponent changePage={changePage} username={username} />
       </UsernameContext.Provider>
     );
   } else if (pageNamesExtended.indexOf(page[0]) != -1 && page.length == 2) {
-    let PageComponent = pages[1][page[0]];
+    const PageComponent = pages[1][page[0]];
     return (
       <UsernameContext.Provider value={username}>
         <PageComponent
@@ -144,6 +144,7 @@ function Router() {
     );
   } else if (page == "logoff") {
     logOff();
+    return <p></p>;
   } else {
     return <h1>Page cannot be found</h1>;
   }
