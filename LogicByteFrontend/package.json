@@ -1,51 +1,38 @@
 {
-  "name": "my-app",
-  "version": "0.1.0",
+  "name": "logicbytefrontend",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.1",
-    "@testing-library/react": "^12.1.2",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^0.27.2",
-    "better-react-mathjax": "^2.0.0",
+    "axios": "^1.4.0",
+    "better-react-mathjax": "^2.0.2",
     "html2canvas": "^1.4.1",
     "moment": "^2.29.4",
-    "perfect-freehand": "^1.1.0",
-    "react": "^17.0.2",
+    "perfect-freehand": "^1.2.0",
+    "react": "^18.2.0",
     "react-calendar-heatmap": "^1.9.0",
-    "react-dom": "^17.0.2",
+    "react-dom": "^18.2.0",
     "react-google-charts": "^4.0.0",
     "react-latex": "^2.0.0",
-    "react-scripts": "5.0.0",
-    "react-tooltip": "^5.13.1",
-    "use-deep-compare-effect": "^1.8.1",
-    "web-vitals": "^2.1.2"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "react-tooltip": "^5.14.0",
+    "use-deep-compare-effect": "^1.8.1"
   },
   "devDependencies": {
-    "react-router-dom": "^6.2.1"
+    "@types/react": "^18.0.37",
+    "@types/react-dom": "^18.0.11",
+    "@typescript-eslint/eslint-plugin": "^5.59.0",
+    "@typescript-eslint/parser": "^5.59.0",
+    "@vitejs/plugin-react-swc": "^3.0.0",
+    "eslint": "^8.38.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.3.4",
+    "typescript": "^5.0.2",
+    "vite": "^4.3.9"
   }
 }
