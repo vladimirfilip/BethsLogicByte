@@ -55,6 +55,7 @@ function Router() {
     storeAuthInfo({ token: token });
     setUsername(entered_username);
     setLoggedIn(true);
+    changePage("home");
   };
 
   const logOff = () => {
