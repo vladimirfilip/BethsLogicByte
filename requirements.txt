@@ -2,4 +2,4 @@ django>=3.2.16
 djangorestframework>=3.12.2
 django-cors-headers==3.13.0
 pillow>=8.3.1
-mysqlclient>=2.2.0
+mysqlclient>=2.0.0
