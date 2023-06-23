@@ -57,10 +57,18 @@ function Login(props) {
                   className="form-entry"
                   placeholder="Password"
                 ></input>
-                <button type="submit" className="btn-signin round-border" onClick={handleSubmit}>
+                <button
+                  type="submit"
+                  className="btn-signin round-border"
+                  onClick={handleSubmit}
+                >
                   Submit
                 </button>
-                {showIncorrectDetails && <p className="p-signin-error">Incorrect username or password</p>}
+                {showIncorrectDetails && (
+                  <p className="p-signin-error">
+                    Incorrect username or password
+                  </p>
+                )}
               </form>
             </div>
           </div>

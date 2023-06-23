@@ -13,11 +13,11 @@ body {
 }
 
 .pen {
-  cursor: url("../../public/pen.png") 0 32, auto;
+  cursor: url("/pen.png") 0 32, auto;
 }
 
 .eraser {
-  cursor: url("../../public/eraser.png") 0 32, auto;
+  cursor: url("/eraser.png") 0 32, auto;
 }
 
 .filter-green {
