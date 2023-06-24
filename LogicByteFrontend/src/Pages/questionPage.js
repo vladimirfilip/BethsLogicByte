@@ -205,6 +205,7 @@ function QuestionPage(props) {
       //
       // checks whether question is completed and then displays question completed
       //
+      console.log("ok");
       checkCompleted(questionIDs.current[currentIdx]);
     })();
     return () => {

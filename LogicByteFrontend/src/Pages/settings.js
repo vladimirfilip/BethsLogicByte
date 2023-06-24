@@ -145,9 +145,13 @@ function Settings(props) {
           <div className="col-lg-8">
             <div className="card change-password-card round-border">
               <h3>Change password</h3>
-              {!isPasswordCorrect && <p className="p-signin-error">Incorrect password</p>}
+              {!isPasswordCorrect && (
+                <p className="p-signin-error">Incorrect password</p>
+              )}
               <form>
-                <p className="change-password-lbl">Enter your current password</p>
+                <p className="change-password-lbl">
+                  Enter your current password
+                </p>
                 <input
                   name="current_password"
                   type="password"
@@ -162,7 +166,11 @@ function Settings(props) {
                   value={passwords.new_password}
                   onChange={handleChange}
                 />
-                {!isConfirmCorrect && <p className="p-signin-error">Re-enter the password correctly</p>}
+                {!isConfirmCorrect && (
+                  <p className="p-signin-error">
+                    Re-enter the password correctly
+                  </p>
+                )}
                 <p className="change-password-lbl">Confirm your new password</p>
                 <input
                   name="confirm_password"
@@ -170,9 +178,11 @@ function Settings(props) {
                   value={passwords.confirm_password}
                   onChange={handleChange}
                 />
-                <button onClick={handleSubmit}>Save</button>
               </form>
             </div>
+            <button onClick={handleSubmit} className="btn btn-outline-success">
+              Save
+            </button>
           </div>
         </div>
       </div>

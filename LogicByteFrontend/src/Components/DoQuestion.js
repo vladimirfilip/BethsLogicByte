@@ -50,7 +50,9 @@ function DoQuestion(props) {
     img_ids.sort(function (a, b) {
       return a - b;
     });
+    let all_inputs = [];
     for (let id of img_ids) {
+      console.log(id);
       let qImgData = await asyncGETAPI("api_question_image", {
         id: id.toString(),
         s_image: "",
@@ -73,8 +75,7 @@ function DoQuestion(props) {
         } else {
           option_class = "option_short";
         }
-        setInputs((prevInputs) => [
-          ...prevInputs,
+        all_inputs.push(
           <label key={qImgData.image} className="input ">
             <input
               type="radio"
@@ -83,10 +84,11 @@ function DoQuestion(props) {
               defaultChecked={qImgData.image == selectedOption}
             />
             <img src={qImgData.image} className={option_class} />
-          </label>,
-        ]);
+          </label>
+        );
       }
     }
+    setInputs(all_inputs);
     setInputsLoaded(true);
   };
 
@@ -194,6 +196,7 @@ function DoQuestion(props) {
   };
 
   useEffect(() => {
+    setInputs([]);
     //
     // Re-renders as id passed through props changes
     //
@@ -202,6 +205,9 @@ function DoQuestion(props) {
     // Retrieves info on question
     // MVP includes only multiple choice questions
     //
+    console.log("Inputs: ", inputs);
+
+    console.log("mounting");
     (async () => {
       const qData = await getQData();
       setQuestionDescription(
@@ -209,6 +215,8 @@ function DoQuestion(props) {
       );
 
       let qImages = qData.question_images;
+      console.log("Image ids:", qImages);
+
       if (qImages.length == 0) {
         //
         // When there are no images in the question
@@ -235,11 +243,13 @@ function DoQuestion(props) {
     })();
 
     return () => {
+      console.log("unmounting");
       setShowQImage(false);
       setShowOptionsImages(false);
       setSelectedOption("");
       setImgSrc("");
       setInputs([]);
+      setIsLoaded(false);
     };
   }, [props.id]);
 

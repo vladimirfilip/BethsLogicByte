@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { asyncDELETEAPI } from "../helpers/asyncBackend";
 import "./finishSession.css";
+import "../App.css";
 
 function FinishSession(props) {
   //
@@ -36,7 +37,9 @@ function FinishSession(props) {
         </div>
         <div className="session_results">
           <h2 className="msg_title">You got</h2>
-          <h1 className={`result ${resultLevel}`}>{props.argument + "%"}</h1>
+          <h1 className={`result ${resultLevel}-text`}>
+            {props.argument + "%"}
+          </h1>
           <button
             onClick={() => props.changePage("home")}
             className="exit_btn btn btn-outline-secondary"
