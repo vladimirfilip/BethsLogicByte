@@ -65,7 +65,7 @@ function CurrentLine(props) {
       setPoints({
         colour: props.colour,
         thickness: props.thickness,
-        points: [[e.clientX, e.clientY, e.pressure]],
+        points: [[e.clientX, e.clientY + window.scrollY, e.pressure]],
       });
     }
   }
@@ -74,7 +74,7 @@ function CurrentLine(props) {
     setPoints({
       colour: props.colour,
       thickness: props.thickness,
-      points: [...points.points, [e.clientX, e.clientY]],
+      points: [...points.points, [e.clientX, e.clientY + window.scrollY]],
     });
   }
 
@@ -141,7 +141,7 @@ function Canvas(props) {
       for (let i = 0; i < strokes.length; i++) {
         for (let j = 0; j < strokes[i].points.length; j++) {
           let dx = strokes[i].points[j][0] - e.clientX;
-          let dy = strokes[i].points[j][1] - e.clientY;
+          let dy = strokes[i].points[j][1] - (e.clientY + window.scrollY);
 
           let dist = Math.sqrt(dx * dx + dy * dy);
           if (strokes[i].thickness < 4) {
