@@ -91,6 +91,8 @@ function QuestionPage(props) {
     //
     // Gets completed question data
     //
+    document.body.classList.remove("pen");
+    document.body.classList.remove("eraser");
     const sessionData = await asyncGETAPI("api_questions_in_session", {
       user_profile: "",
       s_solution: "",

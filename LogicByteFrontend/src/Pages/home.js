@@ -38,28 +38,34 @@ function Home(props) {
               date="14/06/2023"
               title="The inaugral Beths Computing Trivia Contest"
               description={
-                <p>
-                  Today, the Beths Computing Society hosted the Trivia Contest,
-                  a nail-biting contest between the best computer scientists at
-                  Beths, who fought tooth-and-nail to be crowned the Trivia
-                  Content champions. The winning pair was the incredible,
-                  spectacular and majestic team Lil G's FC, captained by Vlad
-                  Filip, followed by the magnificent, amazing, world-class pair
-                  The Europeans, led by Alex Litchev. Vlad and Alex will have
-                  the privilege of representing Beths at the inter-school
-                  contest, where they will mercilessly obliterate whatever
-                  feeble opposition dares to stand in the way of their
-                  greatness.
-                  <img
-                    style={{
-                      marginLeft: "25%",
-                      width: "50%",
-                      marginTop: "10px",
-                    }}
-                    src={triviaContest}
-                    alt={"totally the Beths Trivia Contest"}
-                  />
-                </p>
+                <div className="container">
+                  <div className="row flex-nowrap">
+                    <p clasSName="col-xs-8">
+                      Today, the Beths Computing Society hosted the Trivia
+                      Contest, a nail-biting contest between the best computer
+                      scientists at Beths, who fought tooth-and-nail to be
+                      crowned the Trivia Content champions. The winning pair was
+                      the incredible, spectacular and majestic team Lil G's FC,
+                      captained by Vlad Filip, followed by the magnificent,
+                      amazing, world-class pair The Europeans, led by Alex
+                      Litchev. Vlad and Alex will have the privilege of
+                      representing Beths at the inter-school contest, where they
+                      will mercilessly obliterate whatever feeble opposition
+                      dares to stand in the way of their greatness.
+                    </p>
+                    <img
+                      style={{
+                        marginTop: "10px",
+                        height: "60%",
+                        width: "30%",
+                        marginLeft: "15px",
+                      }}
+                      src={triviaContest}
+                      alt={"totally the Beths Trivia Contest"}
+                      className="col-xs-4"
+                    />
+                  </div>
+                </div>
               }
             />
           </div>

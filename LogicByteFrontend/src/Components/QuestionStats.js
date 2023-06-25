@@ -97,7 +97,7 @@ function QuestionStats() {
         height="100%"
         options={{
           legend: { position: "none" },
-          title: "Subjects of attempted questions",
+          title: "Exam types of attempted questions",
         }}
       />
     );

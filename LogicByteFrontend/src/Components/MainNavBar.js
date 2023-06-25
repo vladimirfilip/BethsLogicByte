@@ -18,7 +18,13 @@ function MainNavBar(props) {
       }`}
     >
       <a className="navbar-brand col-lg-1 flex-grow-1">
-        <img alt="Beths logo" className={"nav__logo"} src={logo} />
+        <img
+          alt="Beths logo"
+          className={"nav__logo"}
+          src={logo}
+          style={{ cursor: "pointer" }}
+          onClick={() => props.link("home")}
+        />
       </a>
 
       <button

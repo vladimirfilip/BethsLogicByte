@@ -205,9 +205,7 @@ function DoQuestion(props) {
     // Retrieves info on question
     // MVP includes only multiple choice questions
     //
-    console.log("Inputs: ", inputs);
 
-    console.log("mounting");
     (async () => {
       const qData = await getQData();
       setQuestionDescription(
@@ -215,7 +213,6 @@ function DoQuestion(props) {
       );
 
       let qImages = qData.question_images;
-      console.log("Image ids:", qImages);
 
       if (qImages.length == 0) {
         //
@@ -243,7 +240,6 @@ function DoQuestion(props) {
     })();
 
     return () => {
-      console.log("unmounting");
       setShowQImage(false);
       setShowOptionsImages(false);
       setSelectedOption("");
