@@ -40,7 +40,7 @@ function Home(props) {
               description={
                 <div className="container">
                   <div className="row flex-nowrap">
-                    <p clasSName="col-xs-8">
+                    <p className="col-xs-8">
                       Today, the Beths Computing Society hosted the Trivia
                       Contest, a nail-biting contest between the best computer
                       scientists at Beths, who fought tooth-and-nail to be
