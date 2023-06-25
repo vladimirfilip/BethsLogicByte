@@ -130,14 +130,18 @@ def encrypt_password(sender, instance=None, created=False, **kwargs):
 
 
 def delete_file_on_delete(file):
+    filepath = file.path
+    filename = filepath[filepath.rindex("\\") + 1:]
     if file:
-        if os.path.isfile(file.path):
+        if os.path.isfile(file.path) and filename != "default_profile_pic.png":
             os.remove(file.path)
 
 
 def delete_file_on_change(new_file, old_file):
+    filepath = old_file.path
+    filename = filepath[filepath.rindex("\\") + 1:]
     if not old_file == new_file:
-        if os.path.isfile(old_file.path):
+        if os.path.isfile(old_file.path) and filename != "default_profile_pic.png":
             os.remove(old_file.path)
 
 
