@@ -71,6 +71,10 @@ function ViewAllSessions() {
     if (username) {
       showPrevSessions();
     }
+
+    return () => {
+      setPrevSessions([]);
+    };
   }, [username]);
   const sessionView = (
     <>
