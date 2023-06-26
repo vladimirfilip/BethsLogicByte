@@ -41,7 +41,10 @@ function QuestionPage(props) {
   //
   // Prevents user from by passing filter component
   //
-  let session_id = useRef(moment().format("YYYYMMDDHHmmss"));
+  if (!localStorage.getItem("session_id")) {
+    let session_id = moment().format("YYYYMMDDHHmmss");
+    localStorage.setItem("session_id", session_id);
+  }
 
   const checkCompleted = async (question_id) => {
     //
@@ -56,10 +59,11 @@ function QuestionPage(props) {
 
   const addSessionID = (score) => {
     const res = asyncPOSTAPI("api_user_question_session", {
-      session_id: session_id.current,
+      session_id: localStorage.getItem("session_id"),
       score: score,
       user_profile: "",
     });
+    localStorage.removeItem("session_id");
     return res;
   };
 
@@ -79,7 +83,7 @@ function QuestionPage(props) {
           id={questionIDs.current[parseInt(localStorage.getItem("currentIdx"))]}
           showResult={showResult}
           updateTags={updateTags}
-          sessionID={session_id.current}
+          sessionID={localStorage.getItem("session_id")}
           className="question-component"
           canvas={canvasSvg}
         ></DoQuestion>

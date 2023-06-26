@@ -30,7 +30,9 @@ function ViewSession(props) {
     let question_image = {};
     if (full_question.has_images) {
       question_image = await getQImage(full_question.question_images[0]);
-      question_image = <img className="q-in-session-img" src={question_image} />;
+      question_image = (
+        <img className="q-in-session-img" src={question_image} />
+      );
     }
     //
     // Checks if any answers are text or images
@@ -76,6 +78,7 @@ function ViewSession(props) {
         user_profile: "",
         session_id: sessionId,
       });
+      console.log(questionData);
       if (questionData.current.length > 1) {
         questionData.current = questionData.current.sort(function (a, b) {
           return a.question_num - b.question_num;
