@@ -5,6 +5,7 @@ import "./finishSession.css";
 import "../App.css";
 
 function FinishSession(props) {
+  document.title = "LogicByte | Finish";
   //
   // score is calculated as percentage and only from completed questions
   //

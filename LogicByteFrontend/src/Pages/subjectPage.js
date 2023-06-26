@@ -9,12 +9,17 @@ import "./subjectPage.css";
 function SubjectPage(props) {
   let subject = window.location.pathname.slice(1);
   subject = subject[0].toUpperCase() + subject.slice(1);
-
-  if (subject == "Informatics") {
+  document.title = `LogicByte | ${subject}`;
+  if (subject == "Chemistry" || subject == "Biology") {
     return (
       <>
         <MainNavBar link={props.changePage} />
-        <h1>Coming soon!</h1>
+        <div style={{ textAlign: "center", marginTop: "10vh" }}>
+          <h1>Coming soon!</h1>
+
+          <h2>The LogicByte team is working hard to deliver this content.</h2>
+          <h2>Keep an eye out on this page for updates.</h2>
+        </div>
       </>
     );
   }

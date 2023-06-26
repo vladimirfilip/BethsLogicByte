@@ -13,6 +13,7 @@ import "./questionPage.css";
 import "../Components/canvas.css";
 
 function QuestionPage(props) {
+  document.title = `LogicByte | Do questions`;
   const questionIDs = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [buttonCounter, setButtonCounter] = useState(0);
@@ -188,7 +189,15 @@ function QuestionPage(props) {
 
   const getQuestionIDS = async () => {
     const res = await asyncGETAPI("api_filter_result", { user_profile: "" });
-    return res.question_ids.split(",");
+    let ids = null;
+    try {
+      ids = res.question_ids.split(",");
+    } catch (err) {
+      ids = res[1].question_ids.split(",");
+      await asyncDELETEAPI("api_filter_result", { user_profile: "" });
+    } finally {
+      return ids;
+    }
   };
 
   useEffect(() => {
@@ -198,7 +207,11 @@ function QuestionPage(props) {
     (async () => {
       if (!questionIDs.current) {
         questionIDs.current = await getQuestionIDS();
+        if (!questionIDs.current) {
+          props.changePage("/home");
+        }
       }
+
       if (!localStorage.getItem("currentIdx")) {
         localStorage.setItem("currentIdx", 0);
       }
@@ -207,7 +220,6 @@ function QuestionPage(props) {
       //
       // checks whether question is completed and then displays question completed
       //
-      console.log("ok");
       checkCompleted(questionIDs.current[currentIdx]);
     })();
     return () => {

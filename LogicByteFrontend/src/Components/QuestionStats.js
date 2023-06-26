@@ -6,6 +6,8 @@ import "./QuestionStats.css";
 import { Tooltip } from "react-tooltip";
 
 function QuestionStats() {
+  document.title = "LogicByte | My Questions";
+
   const [difficultyGraph, setDifficultyGraph] = useState(null);
   const [examGraph, setExamGraph] = useState(null);
   const [correctStat, setCorrectStat] = useState(null);
@@ -188,10 +190,6 @@ function QuestionStats() {
       </div>
     );
   };
-
-  useEffect(() => {
-    console.log(difficultyGraph);
-  }, [difficultyGraph]);
 
   const createCompleteStat = (numCorrect, totalCorrect) => {
     //

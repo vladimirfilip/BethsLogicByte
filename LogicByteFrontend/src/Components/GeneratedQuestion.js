@@ -22,7 +22,7 @@ function GenerateQuestion(props) {
         <p className={`tag`}>{props.question_data.exam_type}</p>
       </div>
       <div>
-        <input type="checkbox" checked={selected}></input>
+        <input type="checkbox" checked={selected} readOnly={true}></input>
         <span className="question_text">
           {props.question_data.question_description}
         </span>

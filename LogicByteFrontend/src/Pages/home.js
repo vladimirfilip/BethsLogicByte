@@ -8,6 +8,7 @@ import triviaContest from "../Components/trivia contest.png";
 import "./home.css";
 
 function Home(props) {
+  document.title = "LogicByte";
   return (
     <div className="home">
       <MainNavBar link={props.changePage}></MainNavBar>
@@ -36,11 +37,18 @@ function Home(props) {
             />
             <InfoCard
               date="14/06/2023"
-              title="The inaugral Beths Computing Trivia Contest"
+              title="The inaugural Beths Computing Trivia Contest"
               description={
                 <div className="container">
                   <div className="row flex-nowrap">
-                    <p className="col-xs-8">
+                    <p
+                      className="col-md-8"
+                      style={{
+                        margnLeft: "0px",
+                        width: "100%",
+                        maxWidth: "100%",
+                      }}
+                    >
                       Today, the Beths Computing Society hosted the Trivia
                       Contest, a nail-biting contest between the best computer
                       scientists at Beths, who fought tooth-and-nail to be
@@ -62,7 +70,7 @@ function Home(props) {
                       }}
                       src={triviaContest}
                       alt={"totally the Beths Trivia Contest"}
-                      className="col-xs-4"
+                      className="col-md-4"
                     />
                   </div>
                 </div>

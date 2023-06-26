@@ -87,20 +87,20 @@ function Filter(props) {
     // Creates the auxiliary filters for additional filtering
     //
     const auxFilterData = SUBJECT_AUX_FILTERS[props.subject];
+    let tempFilters = [];
     for (const filterType of Object.keys(auxFilterData)) {
       filterChecks.current[filterType] = {};
       for (const tag of auxFilterData[filterType]) {
         filterChecks.current[filterType][tag] = false;
       }
-      setAuxFilters((auxFilters) => [
-        ...auxFilters,
+      tempFilters.push(
         <AuxFilter
           key={filterType}
           options={auxFilterData[filterType]}
           checks={filterChecks}
           filterType={filterType}
-        />,
-      ]);
+        />
+      );
     }
     //
     // Creates a filter for difficulty, which is common to all subjects
@@ -110,15 +110,15 @@ function Filter(props) {
     for (const difficulty of difficulties) {
       filterChecks.current["Difficulty"][difficulty] = false;
     }
-    setAuxFilters((auxFilters) => [
-      ...auxFilters,
+    tempFilters.push(
       <AuxFilter
         key="difficulties"
         options={difficulties}
         checks={filterChecks}
         filterType={"Difficulty"}
-      />,
-    ]);
+      />
+    );
+    setAuxFilters(tempFilters);
 
     return () => {
       setAuxFilters([]);
@@ -127,10 +127,10 @@ function Filter(props) {
 
   useEffect(() => {
     setCurrentSubject(props.subject);
+    props.setFilterLoaded(true);
   }, [children, auxFilters]);
 
   if (currentSubject == props.subject) {
-    props.setFilterLoaded(true);
     return (
       <div className="filter" ref={height}>
         <button onClick={update} className="btn btn-primary">

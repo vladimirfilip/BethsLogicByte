@@ -15,6 +15,7 @@ import axios from "axios";
 import { getAuthInfo } from "../helpers/authHelper";
 
 function Settings(props) {
+  document.title = "LogicByte | Settings";
   const [passwords, handleChange] = useForm({
     current_password: "",
     new_password: "",
