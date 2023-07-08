@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { getStroke } from "perfect-freehand";
 import "./canvas.css";
 import MultiSelect from "./multiSelect";
-import PropTypes from "prop-types";
 import pen from "./pen.png";
 import eraser from "./eraser.png";
 import undo_img from "./undo.png";
@@ -10,7 +9,7 @@ import clear from "./clear.png";
 import save_icon from "../Components/save.png";
 import exportAsImage from "../helpers/exportAsImage";
 
-function getSvgPathFromStroke(stroke) {
+function getSvgPathFromStroke(stroke: Array<Array<number>>) {
   if (!stroke.length) return "";
 
   const d = stroke.reduce(
@@ -26,12 +25,12 @@ function getSvgPathFromStroke(stroke) {
   return d.join(" ");
 }
 
-var options = {
+const options = {
   size: 9,
   smoothing: 0.5,
   thinning: 0,
   streamline: 0.5,
-  easing: (t) => t,
+  easing: (t: number) => t,
   start: {
     taper: 0,
     cap: true,
@@ -42,7 +41,7 @@ var options = {
   },
 };
 
-function getClassNameForColour(colour) {
+function getClassNameForColour(colour: string) {
   switch (colour) {
     case "Black":
       return "filter-black";
@@ -57,16 +56,35 @@ function getClassNameForColour(colour) {
   }
 }
 
-function pytag(x_1, y_1, x_2, y_2) {
+function pytag(x_1: number, y_1: number, x_2: number, y_2: number) {
   const dx = x_2 - x_1;
   const dy = y_2 - y_1;
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-function CurrentLine(props) {
-  const [points, setPoints] = useState({ points: [] });
+interface iCurrentLine {
+  isDrawing: boolean;
+  colour: string;
+  thickness: string;
+  setStrokes: (strokes: iPoints) => void;
+  debug: boolean;
+  linearInterpolation: boolean;
+}
 
-  function handlePointerDown(e) {
+interface iPoints {
+  points: Array<Array<number>>;
+  thickness: string;
+  colour: string;
+}
+
+function CurrentLine(props: iCurrentLine) {
+  const [points, setPoints] = useState<iPoints>({
+    points: [],
+    thickness: props.thickness,
+    colour: props.colour,
+  });
+
+  function handlePointerDown(e: PointerEvent) {
     if (props.isDrawing) {
       setPoints({
         colour: props.colour,
@@ -76,7 +94,7 @@ function CurrentLine(props) {
     }
   }
 
-  function handlePointerMove(e) {
+  function handlePointerMove(e: PointerEvent) {
     if (e.buttons !== 1 || props.isDrawing == false) return;
     const interpolateDist = 20;
     const dist = pytag(
@@ -117,7 +135,11 @@ function CurrentLine(props) {
   function handlePointerUp() {
     if (props.isDrawing) {
       props.setStrokes(points);
-      setPoints({ points: [] });
+      setPoints({
+        points: [],
+        thickness: props.thickness,
+        colour: props.colour,
+      });
     }
   }
 
@@ -133,20 +155,20 @@ function CurrentLine(props) {
     };
   });
 
-  options.size = points.thickness;
+  options.size = Number(points.thickness);
   const stroke = getStroke(points.points, options);
 
-  let debug = [];
+  let debug: Array<JSX.Element> = [];
   if (props.debug) {
     debug = points.points.map((x, i) => {
       const stroke = getStroke([x], options);
       const pathData = getSvgPathFromStroke(stroke);
-      let colourClassName = getClassNameForColour("Red");
+      const colourClassName = getClassNameForColour("Red");
       return <path d={pathData} key={i} className={colourClassName}></path>;
     });
   }
   const pathData = getSvgPathFromStroke(stroke);
-  let colourClassName = getClassNameForColour(points.colour);
+  const colourClassName = getClassNameForColour(points.colour);
 
   return (
     <>
@@ -156,25 +178,21 @@ function CurrentLine(props) {
   );
 }
 
-CurrentLine.propTypes = {
-  isDrawing: PropTypes.bool,
-  colour: PropTypes.string,
-  thickness: PropTypes.string,
-  setStrokes: PropTypes.func,
-  debug: PropTypes.bool,
-  linearInterpolation: PropTypes.bool,
-};
+interface iCanvas {
+  questionComponent: JSX.Element;
+  setCanvasSvg: React.Dispatch<React.SetStateAction<null>>;
+}
 
-function Canvas(props) {
+function Canvas(props: iCanvas) {
   const colours = ["Black", "Blue", "Green", "Red", "Yellow"];
 
   // Strokes contains all of the lines that the user has drawn
-  const [strokes, setStrokes] = useState([]);
+  const [strokes, setStrokes] = useState<Array<iPoints>>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isErasing, setIsErasing] = useState(false);
   // The slider returns a string, this keeps types consistent
   const [thickness, setThickness] = useState("4");
-  const [colour, setColour] = useState(null);
+  const [colour, setColour] = useState("");
 
   function clearCanvas() {
     setStrokes([]);
@@ -184,34 +202,8 @@ function Canvas(props) {
     setStrokes(strokes.slice(0, strokes.length - 2));
   }
 
-  function handleSetStrokes(points) {
+  function handleSetStrokes(points: iPoints) {
     setStrokes([...strokes, points]);
-  }
-
-  function handlePointerMove(e) {
-    if (isErasing && e.buttons) {
-      for (let i = 0; i < strokes.length; i++) {
-        for (let j = 0; j < strokes[i].points.length; j++) {
-          let dist = pytag(
-            strokes[i].points[j][0],
-            strokes[i].points[j][1],
-            e.clientX + window.scrollX,
-            e.clientY + window.scrollY
-          );
-
-          if (strokes[i].thickness < 4) {
-            // Room for error
-            dist -= 20;
-          }
-          if (dist / 1.5 < strokes[i].thickness) {
-            let newStrokes = [...strokes];
-            newStrokes.splice(i, 1);
-            setStrokes(newStrokes);
-            return;
-          }
-        }
-      }
-    }
   }
 
   if (isDrawing) {
@@ -226,9 +218,37 @@ function Canvas(props) {
   }
 
   useEffect(() => {
+    function handlePointerMove(e: PointerEvent) {
+      if (isErasing && e.buttons) {
+        for (let i = 0; i < strokes.length; i++) {
+          for (let j = 0; j < strokes[i].points.length; j++) {
+            let dist = pytag(
+              strokes[i].points[j][0],
+              strokes[i].points[j][1],
+              e.clientX + window.scrollX,
+              e.clientY + window.scrollY
+            );
+
+            if (Number(strokes[i].thickness) < 4) {
+              // Room for error
+              dist -= 20;
+            }
+            if (dist / 1.5 < Number(strokes[i].thickness)) {
+              const newStrokes = [...strokes];
+              newStrokes.splice(i, 1);
+              setStrokes(newStrokes);
+              return;
+            }
+          }
+        }
+      }
+    }
     if (isErasing) {
       document.onpointermove = handlePointerMove;
     }
+    return () => {
+      document.onpointermove = null;
+    };
     // I don't know why strokes has to be here but it is
   }, [isErasing, strokes]);
 
@@ -244,12 +264,12 @@ function Canvas(props) {
   let i = 0;
   const otherStrokes = strokes.map((x) => {
     i++;
-    options.size = x.thickness;
-    let stroke = getStroke(x.points, options);
+    options.size = Number(x.thickness);
+    const stroke = getStroke(x.points, options);
 
-    let className = getClassNameForColour(x.colour);
+    const className = getClassNameForColour(x.colour);
 
-    let pathData = getSvgPathFromStroke(stroke);
+    const pathData = getSvgPathFromStroke(stroke);
     return <path key={i - 1} d={pathData} className={`${className}`}></path>;
   });
 
@@ -348,10 +368,5 @@ function Canvas(props) {
     </>
   );
 }
-
-Canvas.propTypes = {
-  questionComponent: PropTypes.object,
-  setCanvasSvg: PropTypes.func,
-};
 
 export default Canvas;
