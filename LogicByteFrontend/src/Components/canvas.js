@@ -57,6 +57,12 @@ function getClassNameForColour(colour) {
   }
 }
 
+function pytag(x_1, y_1, x_2, y_2) {
+  const dx = x_2 - x_1;
+  const dy = y_2 - y_1;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
 function CurrentLine(props) {
   const [points, setPoints] = useState({ points: [] });
 
@@ -69,12 +75,42 @@ function CurrentLine(props) {
       });
     }
   }
+
   function handlePointerMove(e) {
     if (e.buttons !== 1 || props.isDrawing == false) return;
+    const interpolateDist = 20;
+    const dist = pytag(
+      points.points[points.points.length - 1][0],
+      points.points[points.points.length - 1][1],
+      e.clientX + window.scrollX,
+      e.clientY + window.scrollY
+    );
+    const interpolatePoints = [];
+    if (dist > interpolateDist && props.linearInterpolation) {
+      const dx =
+        e.clientX + window.scrollX - points.points[points.points.length - 1][0];
+      const dy =
+        e.clientY + window.scrollY - points.points[points.points.length - 1][1];
+
+      for (let i = 0; i < Math.floor(dist / interpolateDist); i++) {
+        interpolatePoints.push([
+          points.points[points.points.length - 1][0] +
+            window.scrollX +
+            (dx / Math.floor(dist / interpolateDist)) * i,
+          points.points[points.points.length - 1][1] +
+            window.scrollY +
+            (dy / Math.floor(dist / interpolateDist)) * i,
+        ]);
+      }
+    }
     setPoints({
       colour: props.colour,
       thickness: props.thickness,
-      points: [...points.points, [e.clientX, e.clientY + window.scrollY]],
+      points: [
+        ...points.points,
+        ...interpolatePoints,
+        [e.clientX + window.scrollX, e.clientY + window.scrollY],
+      ],
     });
   }
 
@@ -100,10 +136,24 @@ function CurrentLine(props) {
   options.size = points.thickness;
   const stroke = getStroke(points.points, options);
 
+  let debug = [];
+  if (props.debug) {
+    debug = points.points.map((x, i) => {
+      const stroke = getStroke([x], options);
+      const pathData = getSvgPathFromStroke(stroke);
+      let colourClassName = getClassNameForColour("Red");
+      return <path d={pathData} key={i} className={colourClassName}></path>;
+    });
+  }
   const pathData = getSvgPathFromStroke(stroke);
   let colourClassName = getClassNameForColour(points.colour);
 
-  return <path d={pathData} className={colourClassName}></path>;
+  return (
+    <>
+      <path d={pathData} className={colourClassName}></path>
+      {debug}
+    </>
+  );
 }
 
 CurrentLine.propTypes = {
@@ -111,6 +161,8 @@ CurrentLine.propTypes = {
   colour: PropTypes.string,
   thickness: PropTypes.string,
   setStrokes: PropTypes.func,
+  debug: PropTypes.bool,
+  linearInterpolation: PropTypes.bool,
 };
 
 function Canvas(props) {
@@ -140,10 +192,13 @@ function Canvas(props) {
     if (isErasing && e.buttons) {
       for (let i = 0; i < strokes.length; i++) {
         for (let j = 0; j < strokes[i].points.length; j++) {
-          let dx = strokes[i].points[j][0] - e.clientX;
-          let dy = strokes[i].points[j][1] - (e.clientY + window.scrollY);
+          let dist = pytag(
+            strokes[i].points[j][0],
+            strokes[i].points[j][1],
+            e.clientX + window.scrollX,
+            e.clientY + window.scrollY
+          );
 
-          let dist = Math.sqrt(dx * dx + dy * dy);
           if (strokes[i].thickness < 4) {
             // Room for error
             dist -= 20;
@@ -284,6 +339,8 @@ function Canvas(props) {
               colour={colour}
               thickness={thickness}
               setStrokes={handleSetStrokes}
+              debug={false}
+              linearInterpolation={true}
             />
           </svg>
         )}
